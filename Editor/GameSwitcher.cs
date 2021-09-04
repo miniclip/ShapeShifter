@@ -5,8 +5,10 @@ using UnityEditor;
 using UnityEngine;
 
 namespace NelsonRodrigues.GameSwitcher {
-    public class GameSwitcher : EditorWindow {
+    public partial class GameSwitcher : EditorWindow {
         private static readonly string ConfigurationResource = "GameSwitcherConfiguration.asset";
+        private static readonly string SkinnedUserData = "{GameSwitcher:skinned}";
+        
         private GameSwitcherConfiguration configuration;
         private Editor configurationEditor;
         private bool showConfiguration = false;
@@ -23,6 +25,10 @@ namespace NelsonRodrigues.GameSwitcher {
                 true, 
                 inspectorWindowType
             );
+        }
+
+        private string GenerateAssetKey(string game, string guid) {
+            return game + ":" + guid;
         }
 
         private void InitialiseConfiguration() {
@@ -52,6 +58,7 @@ namespace NelsonRodrigues.GameSwitcher {
             this.configurationEditor = Editor.CreateEditor(this.configuration);
 
             this.skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
+            this.OnAssetSkinnerEnable();
         }
         
         private void OnGUI() {
@@ -61,6 +68,8 @@ namespace NelsonRodrigues.GameSwitcher {
                 if (this.showConfiguration) {
                     this.configurationEditor.OnInspectorGUI();
                 }
+
+                this.OnAssetSkinnerGUI();
             }
                         
             this.Repaint();
