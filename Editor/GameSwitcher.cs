@@ -69,6 +69,7 @@ namespace NelsonRodrigues.GameSwitcher {
                     this.configurationEditor.OnInspectorGUI();
                 }
 
+                this.OnAssetSwitcherGUI();
                 this.OnAssetSkinnerGUI();
             }
                         
