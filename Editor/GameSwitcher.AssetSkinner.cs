@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
-using UnityEditor.VersionControl;
 using UnityEngine;
+
+using Object = UnityEngine.Object;
 
 namespace NelsonRodrigues.GameSwitcher {
    
@@ -13,11 +15,11 @@ namespace NelsonRodrigues.GameSwitcher {
 
         private HashSet<string> dirtyAssets = new HashSet<string>();
         private Dictionary<string, Texture2D> previewPerAsset = new Dictionary<string, Texture2D>();
-
-        private void DrawAssetSection(Texture2D texture) {
-            EditorGUILayout.InspectorTitlebar(true, texture);
+        
+        private void DrawAssetSection(Object asset) {
+            EditorGUILayout.InspectorTitlebar(true, asset);
             
-            string path = AssetDatabase.GetAssetPath(texture);
+            string path = AssetDatabase.GetAssetPath(asset);
             AssetImporter importer = AssetImporter.GetAtPath(path);
             bool skinned = importer.userData.Contains(GameSwitcher.SkinnedUserData);
 
@@ -66,6 +68,7 @@ namespace NelsonRodrigues.GameSwitcher {
                     string assetPath = Path.Combine(
                         this.skinsFolder.FullName,
                         game,
+                        GameSwitcher.InternalAssetsFolder,
                         guid,
                         Path.GetFileName(importer.assetPath)
                     );
@@ -95,8 +98,30 @@ namespace NelsonRodrigues.GameSwitcher {
             if (this.dirtyAssets.Contains(key) || ! this.previewPerAsset.ContainsKey(key)) {
                 this.dirtyAssets.Remove(key);
 
-                Texture2D texturePreview = new Texture2D(0, 0);
-                texturePreview.LoadImage(File.ReadAllBytes(assetPath));
+                Texture2D texturePreview;
+                
+                if (!File.Exists(assetPath)) {
+                    texturePreview = EditorGUIUtility.FindTexture("console.erroricon");
+                } else {
+                    string extension = Path.GetExtension(assetPath);
+
+                    if (extension == ".prefab") {
+                        texturePreview = EditorGUIUtility.FindTexture("Prefab Icon");
+                    } else if (extension == ".asset") {
+                        // TODO: stop assuming that every asset is a ScriptableObject
+                        // TODO: figure out why FindTexture isn't returning the ScriptableObject icon
+                        //texturePreview = EditorGUIUtility.FindTexture("ScriptableObject Icon");
+                        texturePreview = (Texture2D) EditorGUIUtility.ObjectContent(
+                            null,
+                            typeof(ScriptableObject)
+                        ).image;
+                    } else {
+                        // TODO: stop assuming that everything which is not a prefab or an asset, is a texture
+                        texturePreview = new Texture2D(0, 0);
+                        texturePreview.LoadImage(File.ReadAllBytes(assetPath));
+                    }
+                }
+
                 this.previewPerAsset[key] = texturePreview;
             }
         }
@@ -115,7 +140,7 @@ namespace NelsonRodrigues.GameSwitcher {
         }
         
         private void OnAssetSkinnerGUI() {
-            this.showSkinner = EditorGUILayout.Foldout(this.showSkinner, "Asset skinner");
+            this.showSkinner = EditorGUILayout.Foldout(this.showSkinner, "Asset Skinner");
 
             if (! this.showSkinner) {
                 return;
@@ -124,17 +149,28 @@ namespace NelsonRodrigues.GameSwitcher {
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
 
             using (new GUILayout.VerticalScope(boxStyle)) {
-                GUILayout.Label ("Selected Textures:", EditorStyles.boldLabel);
+                GUILayout.Label ("Selected assets:", EditorStyles.boldLabel);
                     
-                Texture2D[] textures = Selection.GetFiltered<Texture2D>(SelectionMode.Assets);
+                Object[] assets = Selection.GetFiltered<Object>(SelectionMode.Assets);
+                List<Object> supportedAssets = new List<Object>(assets.Length);
+                
+                foreach (Object asset in assets) {
+                    Type assetType = asset.GetType();
                     
-                if (textures.Length == 0) {
+                    foreach (Type supportedType in GameSwitcher.SupportedTypes) {
+                        if (assetType == supportedType || assetType.IsSubclassOf(supportedType)) {
+                            supportedAssets.Add(asset);
+                        }
+                    }
+                }
+                
+                if (supportedAssets.Count == 0) {
                     GUILayout.Label("None.");
                 } else {
                     this.scrollPosition = GUILayout.BeginScrollView(this.scrollPosition);
                         
-                    foreach (Texture2D texture in textures) {
-                        this.DrawAssetSection(texture);
+                    foreach (Object asset in supportedAssets) {
+                        this.DrawAssetSection(asset);
                     }
                 
                     GUILayout.EndScrollView();
@@ -151,8 +187,10 @@ namespace NelsonRodrigues.GameSwitcher {
         }
 
         private void OnFileSystemChanged(object sender, FileSystemEventArgs args) {
-            DirectoryInfo guidDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
-            string key = this.GenerateAssetKey(guidDirectory.Parent.Name , guidDirectory.Name);
+            DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
+            string game = assetDirectory.Parent.Parent.Name;
+            
+            string key = this.GenerateAssetKey(game, assetDirectory.Name);
             this.dirtyAssets.Add(key);
         }
 
@@ -168,7 +206,13 @@ namespace NelsonRodrigues.GameSwitcher {
                 this.dirtyAssets.Remove(key);
                 this.previewPerAsset.Remove(key);
                 
-                string assetFolder = Path.Combine(this.skinsFolder.FullName, game, guid);
+                string assetFolder = Path.Combine(
+                    this.skinsFolder.FullName,
+                    game,
+                    GameSwitcher.InternalAssetsFolder,
+                    guid
+                );
+                
                 Directory.Delete(assetFolder, true);                
             }
 
@@ -180,18 +224,25 @@ namespace NelsonRodrigues.GameSwitcher {
         }
 
         private void SkinAsset(AssetImporter importer) {
+            // make sure any pending changes are saved before generating copies
+            this.SavePendingChanges();
+            
             foreach (string game in this.configuration.GameNames) {
-                string guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
-                string assetFolder = Path.Combine(this.skinsFolder.FullName, game, guid);
+                string origin = importer.assetPath;
+                string guid = AssetDatabase.AssetPathToGUID(origin);
+                string assetFolder = Path.Combine(
+                    this.skinsFolder.FullName,
+                    game, 
+                    GameSwitcher.InternalAssetsFolder,
+                    guid
+                );
 
                 if (!Directory.Exists(assetFolder)) {
                     Directory.CreateDirectory(assetFolder);
                 }
-                        
-                File.Copy(
-                    importer.assetPath,
-                    assetFolder + "/" + Path.GetFileName(importer.assetPath)
-                );
+
+                string target = Path.Combine(assetFolder, Path.GetFileName(origin));
+                File.Copy(origin, target);
             }
                     
             importer.userData += GameSwitcher.SkinnedUserData;

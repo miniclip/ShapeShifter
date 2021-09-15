@@ -7,14 +7,22 @@ using UnityEngine;
 namespace NelsonRodrigues.GameSwitcher {
     public partial class GameSwitcher : EditorWindow {
         private static readonly string ConfigurationResource = "GameSwitcherConfiguration.asset";
+        private static readonly string ExternalAssetsFolder = "external";
+        private static readonly string InternalAssetsFolder = "internal";
         private static readonly string SkinnedUserData = "{GameSwitcher:skinned}";
         
+        private static readonly Type[] SupportedTypes = {
+            typeof(GameObject),
+            typeof(ScriptableObject),
+            typeof(Texture2D)
+        };
+        
         private GameSwitcherConfiguration configuration;
-        private Editor configurationEditor;
+        private Editor defaultConfigurationEditor;
         private bool showConfiguration = false;
         
         private DirectoryInfo skinsFolder;
-        
+
         [MenuItem("Window/Game Switcher", false, (int)'G')]
         public static void ShowNextToInspector() {
             Assembly editorAssembly = typeof(Editor).Assembly;
@@ -55,10 +63,14 @@ namespace NelsonRodrigues.GameSwitcher {
 
         private void OnEnable() {
             this.InitialiseConfiguration();
-            this.configurationEditor = Editor.CreateEditor(this.configuration);
+            this.defaultConfigurationEditor = Editor.CreateEditor(
+                this.configuration,
+                typeof(GameSwitcherConfigurationEditor)
+            );
 
             this.skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
             this.OnAssetSkinnerEnable();
+            this.OnExternalAssetSkinnerEnable();
         }
         
         private void OnGUI() {
@@ -66,14 +78,27 @@ namespace NelsonRodrigues.GameSwitcher {
                 this.showConfiguration = EditorGUILayout.Foldout(this.showConfiguration, "Configuration");
                 
                 if (this.showConfiguration) {
-                    this.configurationEditor.OnInspectorGUI();
+                    this.defaultConfigurationEditor.OnInspectorGUI();
+                    
+                    // TODO: hide this when it's no longer necessary, as direct access to this list may cause issues
+                    this.externalConfigurationEditor.OnInspectorGUI();
                 }
 
                 this.OnAssetSwitcherGUI();
                 this.OnAssetSkinnerGUI();
+                this.OnExternalAssetSkinnerGUI();
+                
+                GUILayout.FlexibleSpace();
             }
-                        
+            
             this.Repaint();
+        }
+
+        private void SavePendingChanges() {
+            AssetDatabase.SaveAssets();
+            
+            // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save
+            EditorApplication.ExecuteMenuItem("File/Save Project");
         }
     }
 }
