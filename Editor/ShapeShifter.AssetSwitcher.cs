@@ -1,13 +1,17 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using UnityEditor;
+using UnityEditor.Scripting.ScriptCompilation;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
-namespace NelsonRodrigues.GameSwitcher {
+namespace NelsonRodrigues.ShapeShifter {
    
-    public partial class GameSwitcher {
+    public partial class ShapeShifter {
 
         private int selectedGame;
         private string lastSwitched;
@@ -27,7 +31,7 @@ namespace NelsonRodrigues.GameSwitcher {
             string searchPattern = Path.GetFileName(target);
             FileInfo origin = directory.GetFiles(searchPattern)[0];
 
-            //Debug.Log($"[Game Switcher] Copying from: {origin.FullName} to {target}");
+            //Debug.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
             origin.CopyTo(target, true);
         }
         
@@ -39,7 +43,7 @@ namespace NelsonRodrigues.GameSwitcher {
             string searchPattern = Path.GetFileName(target);
             FileInfo origin = directory.GetFiles(searchPattern)[0];
                    
-            //Debug.Log($"[Game Switcher] Copying from: {origin.FullName} to {target}");
+            //Debug.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
             origin.CopyTo(target, true);
         }
 
@@ -48,7 +52,7 @@ namespace NelsonRodrigues.GameSwitcher {
             string origin = AssetDatabase.GUIDToAssetPath(guid);
             string target = Path.Combine(directory.FullName, Path.GetFileName(origin));
             
-            //Debug.Log($"[Game Switcher] Copying from: {origin} to {target}");
+            //Debug.Log($"[Shape Shifter] Copying from: {origin} to {target}");
             File.Copy(origin, target, true);
         }
 
@@ -90,7 +94,7 @@ namespace NelsonRodrigues.GameSwitcher {
                 }
             }
         }
-
+        
         private void OverwriteSelectedSkin(int selected) {
             this.SavePendingChanges();
                 
@@ -109,7 +113,7 @@ namespace NelsonRodrigues.GameSwitcher {
                 stringBuilder.Append(" Are you sure?");
                 
                 if (!EditorUtility.DisplayDialog(
-                    "Game Switcher",
+                    "Shape Shifter",
                     stringBuilder.ToString(),
                     "Yeah, I'm sure, go ahead.",
                     "Wait, what? No, stop!"
@@ -133,7 +137,7 @@ namespace NelsonRodrigues.GameSwitcher {
             Action<DirectoryInfo> externalAssetOperation
         ) {
             string game = this.configuration.GameNames[selected];
-            Debug.Log($"[Game Switcher] {description}: {game}");
+            Debug.Log($"[Shape Shifter] {description}: {game}");
 
             string gameFolderPath = Path.Combine(this.skinsFolder.FullName, game);
 
@@ -149,30 +153,30 @@ namespace NelsonRodrigues.GameSwitcher {
                 float progress = 0.0f;
                 float progressBarStep = 1.0f / totalDirectories;
 
-                string internalFolderPath = Path.Combine(gameFolderPath, GameSwitcher.InternalAssetsFolder);
+                string internalFolderPath = Path.Combine(gameFolderPath, ShapeShifter.InternalAssetsFolder);
                 DirectoryInfo internalFolder = new DirectoryInfo(internalFolderPath);
                 
                 foreach (DirectoryInfo directory in internalFolder.GetDirectories()) {
                     internalAssetOperation(directory);
 
                     progress += progressBarStep;
-                    EditorUtility.DisplayProgressBar("Game Switcher", $"{description}...", progress);
+                    EditorUtility.DisplayProgressBar("Shape Shifter", $"{description}...", progress);
                 }
                 
-                string externalFolderPath = Path.Combine(gameFolderPath, GameSwitcher.ExternalAssetsFolder);
+                string externalFolderPath = Path.Combine(gameFolderPath, ShapeShifter.ExternalAssetsFolder);
                 DirectoryInfo externalFolder = new DirectoryInfo(externalFolderPath);
                 
                 foreach (DirectoryInfo directory in externalFolder.GetDirectories()) {
                     externalAssetOperation(directory);
 
                     progress += progressBarStep;
-                    EditorUtility.DisplayProgressBar("Game Switcher", $"{description}...", progress);
+                    EditorUtility.DisplayProgressBar("Shape Shifter", $"{description}...", progress);
                 }
- 
-                AssetDatabase.Refresh();
+
+                this.RefreshAllAssets();
             } else {
                 EditorUtility.DisplayDialog(
-                    "Game Switcher",
+                    "Shape Shifter",
                     $"Could not {description.ToLower()}: {game}. Skins folder does not exist!",
                     "Fine, I'll take a look."
                 );
@@ -184,7 +188,24 @@ namespace NelsonRodrigues.GameSwitcher {
 
             EditorUtility.ClearProgressBar();
         }
-        
+
+        private void RefreshAllAssets() {
+            // Force Unity to lose and regain focus, so it resolves any new changes on the packages
+            // TODO: Replace this in Unity 2020 with PackageManager.Client.Resolve
+            Process process = new Process {
+                StartInfo = new ProcessStartInfo {
+                    FileName = "osascript",
+                    Arguments = "-e 'tell application \"Finder\" to activate' -e 'tell application \"Unity\" to activate'",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            
+            process.Start();
+            
+            AssetDatabase.Refresh();
+        }
+
         private void SwitchToGame(int selected) {
             this.lastSwitched = this.configuration.GameNames[selected];
             this.PerformCopiesWithTracking(

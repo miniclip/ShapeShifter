@@ -7,9 +7,9 @@ using UnityEngine;
 
 using Debug = UnityEngine.Debug;
 
-namespace NelsonRodrigues.GameSwitcher {
+namespace NelsonRodrigues.ShapeShifter {
 
-    public partial class GameSwitcher {
+    public partial class ShapeShifter {
 
         private Editor externalConfigurationEditor;
         private int selectedExternalAsset;
@@ -31,7 +31,7 @@ namespace NelsonRodrigues.GameSwitcher {
             process.WaitForExit();
 
             if (string.IsNullOrEmpty(repositoryRoot) || ! repositoryRoot.Contains(".git")) {
-                Debug.LogWarning("[GameSwitcher] Git repository not found. Is there supposed to be one?");
+                Debug.LogWarning("[ShapeShifter] Git repository not found. Is there supposed to be one?");
 
                 //start a bit outside of the project, but not too far away, we're trying to stay within
                 //the boundaries of assets related to this project, but without a repository this is
@@ -52,7 +52,7 @@ namespace NelsonRodrigues.GameSwitcher {
                     string assetPath = Path.Combine(
                         this.skinsFolder.FullName,
                         game,
-                        GameSwitcher.ExternalAssetsFolder,
+                        ShapeShifter.ExternalAssetsFolder,
                         key,
                         Path.GetFileName(relativePath)
                     );
@@ -94,7 +94,7 @@ namespace NelsonRodrigues.GameSwitcher {
         private void OnExternalAssetSkinnerEnable() {
             this.externalConfigurationEditor = Editor.CreateEditor(
                 this.configuration,
-                typeof(GameSwitcherExternalConfigurationEditor)
+                typeof(ShapeShifterExternalConfigurationEditor)
             );
         }
         
@@ -112,7 +112,9 @@ namespace NelsonRodrigues.GameSwitcher {
             GUIStyle buttonStyle = GUI.skin.GetStyle("Button");
 
             using (new GUILayout.VerticalScope(boxStyle)) {
-                if (this.configuration.SkinnedExternalAssetPaths.Count > 0) {
+                int count = this.configuration.SkinnedExternalAssetPaths.Count;
+                
+                if (count > 0) {
                     this.selectedExternalAsset = GUILayout.SelectionGrid(
                         this.selectedExternalAsset,
                         this.configuration.SkinnedExternalAssetPaths.ToArray(),
@@ -120,8 +122,10 @@ namespace NelsonRodrigues.GameSwitcher {
                         buttonStyle
                     );
 
-                    string relativePath = this.configuration.SkinnedExternalAssetPaths[this.selectedExternalAsset];
-                    this.DrawSkinnedExternalAssetSection(relativePath);
+                    if (this.selectedExternalAsset >= 0 && this.selectedExternalAsset < count) {
+                        string relativePath = this.configuration.SkinnedExternalAssetPaths[this.selectedExternalAsset];
+                        this.DrawSkinnedExternalAssetSection(relativePath);
+                    }
                 }
 
                 if (GUILayout.Button("Skin external file")) {
@@ -142,7 +146,7 @@ namespace NelsonRodrigues.GameSwitcher {
             }
             
             if (! assetPath.Contains(recommendedPath) && ! EditorUtility.DisplayDialog (
-                "Game Switcher",
+                "Shape Shifter",
                 $"The chosen asset is outside of the recommended path ({recommendedPath}). Are you sure?",
                 "Yeah, go for it!",
                 "Hmm... not sure, let me check!"
@@ -163,7 +167,7 @@ namespace NelsonRodrigues.GameSwitcher {
                 string assetFolder = Path.Combine(
                     this.skinsFolder.FullName,
                     game,
-                    GameSwitcher.ExternalAssetsFolder,
+                    ShapeShifter.ExternalAssetsFolder,
                     key
                 );
             
@@ -185,7 +189,7 @@ namespace NelsonRodrigues.GameSwitcher {
             
             if (this.configuration.SkinnedExternalAssetPaths.Contains(relativeAssetPath)) {
                 EditorUtility.DisplayDialog(
-                    "Game Switcher",
+                    "Shape Shifter",
                     $"Could not skin: {relativeAssetPath}. It was already skinned.",
                     "Oops!"
                 );
@@ -206,7 +210,7 @@ namespace NelsonRodrigues.GameSwitcher {
                 string assetFolder = Path.Combine(
                     this.skinsFolder.FullName,
                     game, 
-                    GameSwitcher.ExternalAssetsFolder,
+                    ShapeShifter.ExternalAssetsFolder,
                     key
                 );
                 

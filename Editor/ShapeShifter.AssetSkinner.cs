@@ -6,9 +6,9 @@ using UnityEngine;
 
 using Object = UnityEngine.Object;
 
-namespace NelsonRodrigues.GameSwitcher {
+namespace NelsonRodrigues.ShapeShifter {
    
-    public partial class GameSwitcher {
+    public partial class ShapeShifter {
         private Vector2 scrollPosition;
         private bool showSkinner = true;
         private FileSystemWatcher watcher;
@@ -21,7 +21,7 @@ namespace NelsonRodrigues.GameSwitcher {
             
             string path = AssetDatabase.GetAssetPath(asset);
             AssetImporter importer = AssetImporter.GetAtPath(path);
-            bool skinned = importer.userData.Contains(GameSwitcher.SkinnedUserData);
+            bool skinned = importer.userData.Contains(ShapeShifter.SkinnedUserData);
 
             Color oldColor = GUI.backgroundColor;
             
@@ -68,7 +68,7 @@ namespace NelsonRodrigues.GameSwitcher {
                     string assetPath = Path.Combine(
                         this.skinsFolder.FullName,
                         game,
-                        GameSwitcher.InternalAssetsFolder,
+                        ShapeShifter.InternalAssetsFolder,
                         guid,
                         Path.GetFileName(importer.assetPath)
                     );
@@ -157,7 +157,7 @@ namespace NelsonRodrigues.GameSwitcher {
                 foreach (Object asset in assets) {
                     Type assetType = asset.GetType();
                     
-                    foreach (Type supportedType in GameSwitcher.SupportedTypes) {
+                    foreach (Type supportedType in ShapeShifter.SupportedTypes) {
                         if (assetType == supportedType || assetType.IsSubclassOf(supportedType)) {
                             supportedAssets.Add(asset);
                         }
@@ -209,7 +209,7 @@ namespace NelsonRodrigues.GameSwitcher {
                 string assetFolder = Path.Combine(
                     this.skinsFolder.FullName,
                     game,
-                    GameSwitcher.InternalAssetsFolder,
+                    ShapeShifter.InternalAssetsFolder,
                     guid
                 );
                 
@@ -217,7 +217,7 @@ namespace NelsonRodrigues.GameSwitcher {
             }
 
             importer.userData = importer.userData.Replace(
-                GameSwitcher.SkinnedUserData,
+                ShapeShifter.SkinnedUserData,
                 string.Empty
             );
             importer.SaveAndReimport();
@@ -233,7 +233,7 @@ namespace NelsonRodrigues.GameSwitcher {
                 string assetFolder = Path.Combine(
                     this.skinsFolder.FullName,
                     game, 
-                    GameSwitcher.InternalAssetsFolder,
+                    ShapeShifter.InternalAssetsFolder,
                     guid
                 );
 
@@ -245,7 +245,7 @@ namespace NelsonRodrigues.GameSwitcher {
                 File.Copy(origin, target);
             }
                     
-            importer.userData += GameSwitcher.SkinnedUserData;
+            importer.userData += ShapeShifter.SkinnedUserData;
             importer.SaveAndReimport();
         }
     }

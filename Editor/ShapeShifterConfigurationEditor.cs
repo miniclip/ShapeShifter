@@ -2,15 +2,15 @@
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace NelsonRodrigues.GameSwitcher {
+namespace NelsonRodrigues.ShapeShifter {
     
-    [CustomEditor(typeof(GameSwitcherConfiguration))]
-    public class GameSwitcherExternalConfigurationEditor : Editor {
-        private SerializedProperty externalAssetsProperty;
-        private ReorderableList externalAssetsList;
+    [CustomEditor(typeof(ShapeShifterConfiguration))]
+    public class ShapeShifterConfigurationEditor : Editor {
+        private SerializedProperty gameNamesProperty;
+        private ReorderableList gameNamesList;
     
         private void DrawGameNamesElement(Rect rect, int index, bool isActive, bool isFocused) {        
-            SerializedProperty element = this.externalAssetsList.serializedProperty.GetArrayElementAtIndex(index);
+            SerializedProperty element = this.gameNamesList.serializedProperty.GetArrayElementAtIndex(index);
             element.stringValue = EditorGUI.TextField(
                 new Rect(
                     rect.x, 
@@ -23,29 +23,28 @@ namespace NelsonRodrigues.GameSwitcher {
         }
 
         private void DrawGameNamesHeader(Rect rect) {
-            EditorGUI.LabelField(rect, "Skinned external assets:");
+            EditorGUI.LabelField(rect, "Game names:");
         }
         
         private void OnEnable() {
-            this.externalAssetsProperty = this.serializedObject.FindProperty("skinnedExternalAssetPaths");
+            this.gameNamesProperty = this.serializedObject.FindProperty("gameNames");
 
-            this.externalAssetsList = new ReorderableList(
+            this.gameNamesList = new ReorderableList(
                 this.serializedObject,
-                this.externalAssetsProperty, 
+                this.gameNamesProperty, 
                 true, 
                 true, 
                 true, 
                 true
             );
 
-            this.externalAssetsList.drawElementCallback = this.DrawGameNamesElement;
-            this.externalAssetsList.drawHeaderCallback = this.DrawGameNamesHeader;
+            this.gameNamesList.drawElementCallback = this.DrawGameNamesElement;
+            this.gameNamesList.drawHeaderCallback = this.DrawGameNamesHeader;
         }
 
         public override void OnInspectorGUI() {
             this.serializedObject.Update();
-            
-            this.externalAssetsList.DoLayoutList();
+            this.gameNamesList.DoLayoutList();
             this.serializedObject.ApplyModifiedProperties();
         }
     }

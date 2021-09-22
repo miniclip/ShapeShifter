@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace NelsonRodrigues.GameSwitcher {
-    public class GameSwitcherConfiguration : ScriptableObject {
+namespace NelsonRodrigues.ShapeShifter {
+    public class ShapeShifterConfiguration : ScriptableObject {
         //TODO: turn these lists into serializable HashSets 
         
         [SerializeField]

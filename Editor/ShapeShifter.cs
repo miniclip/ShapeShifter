@@ -4,12 +4,12 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
-namespace NelsonRodrigues.GameSwitcher {
-    public partial class GameSwitcher : EditorWindow {
-        private static readonly string ConfigurationResource = "GameSwitcherConfiguration.asset";
+namespace NelsonRodrigues.ShapeShifter {
+    public partial class ShapeShifter : EditorWindow {
+        private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         private static readonly string ExternalAssetsFolder = "external";
         private static readonly string InternalAssetsFolder = "internal";
-        private static readonly string SkinnedUserData = "{GameSwitcher:skinned}";
+        private static readonly string SkinnedUserData = "{ShapeShifter:skinned}";
         
         private static readonly Type[] SupportedTypes = {
             typeof(GameObject),
@@ -17,19 +17,19 @@ namespace NelsonRodrigues.GameSwitcher {
             typeof(Texture2D)
         };
         
-        private GameSwitcherConfiguration configuration;
+        private ShapeShifterConfiguration configuration;
         private Editor defaultConfigurationEditor;
         private bool showConfiguration = false;
         
         private DirectoryInfo skinsFolder;
 
-        [MenuItem("Window/Game Switcher", false, (int)'G')]
+        [MenuItem("Window/Shape Shifter", false, (int)'G')]
         public static void ShowNextToInspector() {
             Assembly editorAssembly = typeof(Editor).Assembly;
             Type inspectorWindowType = editorAssembly.GetType("UnityEditor.InspectorWindow");
             
-            GameSwitcher switcher = EditorWindow.GetWindow<GameSwitcher>(
-                "Game Switcher", 
+            EditorWindow.GetWindow<ShapeShifter>(
+                "Shape Shifter", 
                 true, 
                 inspectorWindowType
             );
@@ -44,16 +44,16 @@ namespace NelsonRodrigues.GameSwitcher {
                 return;
             }
 
-            this.configuration = (GameSwitcherConfiguration)EditorGUIUtility.Load(
-                GameSwitcher.ConfigurationResource
+            this.configuration = (ShapeShifterConfiguration)EditorGUIUtility.Load(
+                ShapeShifter.ConfigurationResource
             );
 
             if (this.configuration == null) {
-                this.configuration = ScriptableObject.CreateInstance<GameSwitcherConfiguration>();
+                this.configuration = ScriptableObject.CreateInstance<ShapeShifterConfiguration>();
                 
                 AssetDatabase.CreateAsset(
                     this.configuration,
-                    "Assets/Editor Default Resources/" + GameSwitcher.ConfigurationResource
+                    "Assets/Editor Default Resources/" + ShapeShifter.ConfigurationResource
                 );
                 
                 AssetDatabase.SaveAssets();
@@ -65,7 +65,7 @@ namespace NelsonRodrigues.GameSwitcher {
             this.InitialiseConfiguration();
             this.defaultConfigurationEditor = Editor.CreateEditor(
                 this.configuration,
-                typeof(GameSwitcherConfigurationEditor)
+                typeof(ShapeShifterConfigurationEditor)
             );
 
             this.skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");

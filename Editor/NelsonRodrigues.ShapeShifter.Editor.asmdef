@@ -1,5 +1,5 @@
 {
-    "name": "NelsonRodrigues.GameSwitcher.Editor",
+    "name": "NelsonRodrigues.ShapeShifter.Editor",
     "references": [],
     "includePlatforms": [
         "Editor"
