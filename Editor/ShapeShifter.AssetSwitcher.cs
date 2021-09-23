@@ -2,10 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using UnityEditor;
-using UnityEditor.Scripting.ScriptCompilation;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -195,7 +193,7 @@ namespace NelsonRodrigues.ShapeShifter {
             Process process = new Process {
                 StartInfo = new ProcessStartInfo {
                     FileName = "osascript",
-                    Arguments = "-e 'tell application \"Finder\" to activate' -e 'tell application \"Unity\" to activate'",
+                    Arguments = "-e 'tell application \"Finder\" to activate' -e 'delay 0.5' -e 'tell application \"Unity\" to activate'",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 }
