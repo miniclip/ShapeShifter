@@ -16,10 +16,26 @@ namespace NelsonRodrigues.ShapeShifter {
         private HashSet<string> dirtyAssets = new HashSet<string>();
         private Dictionary<string, Texture2D> previewPerAsset = new Dictionary<string, Texture2D>();
         
+        private static readonly string defaultIcon = "WelcomeScreen.AssetStoreLogo";
+        private static readonly string errorIcon = "console.erroricon";
+        private static readonly Dictionary<string, string> iconPerExtension = new Dictionary<string, string>() {
+            {".anim", "AnimationClip Icon"},
+            {".asset", "ScriptableObject Icon"},
+            {".controller", "AnimatorController Icon"},
+            {".cs", "cs Script Icon"},
+            {".gradle", "TextAsset Icon"},
+            {".json", "TextAsset Icon"},
+            {".prefab", "Prefab Icon"},
+            {".txt", "TextAsset Icon"},
+            {".unity", "SceneAsset Icon"},
+            {".xml", "TextAsset Icon"},
+        };
+
         private void DrawAssetSection(Object asset) {
             EditorGUILayout.InspectorTitlebar(true, asset);
             
             string path = AssetDatabase.GetAssetPath(asset);
+            Debug.Log(path);
             AssetImporter importer = AssetImporter.GetAtPath(path);
             bool skinned = importer.userData.Contains(ShapeShifter.SkinnedUserData);
 
@@ -101,24 +117,21 @@ namespace NelsonRodrigues.ShapeShifter {
                 Texture2D texturePreview;
                 
                 if (!File.Exists(assetPath)) {
-                    texturePreview = EditorGUIUtility.FindTexture("console.erroricon");
+                    texturePreview = EditorGUIUtility.FindTexture(ShapeShifter.errorIcon);
                 } else {
                     string extension = Path.GetExtension(assetPath);
 
-                    if (extension == ".prefab") {
-                        texturePreview = EditorGUIUtility.FindTexture("Prefab Icon");
-                    } else if (extension == ".asset") {
-                        // TODO: stop assuming that every asset is a ScriptableObject
-                        // TODO: figure out why FindTexture isn't returning the ScriptableObject icon
-                        //texturePreview = EditorGUIUtility.FindTexture("ScriptableObject Icon");
-                        texturePreview = (Texture2D) EditorGUIUtility.ObjectContent(
-                            null,
-                            typeof(ScriptableObject)
-                        ).image;
-                    } else {
-                        // TODO: stop assuming that everything which is not a prefab or an asset, is a texture
+                    if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp") {
                         texturePreview = new Texture2D(0, 0);
                         texturePreview.LoadImage(File.ReadAllBytes(assetPath));
+                    } else {
+                        string icon = ShapeShifter.defaultIcon;
+
+                        if (ShapeShifter.iconPerExtension.ContainsKey(extension)) {
+                            icon = ShapeShifter.iconPerExtension[extension];
+                        }
+
+                        texturePreview = (Texture2D)EditorGUIUtility.IconContent(icon).image;
                     }
                 }
 

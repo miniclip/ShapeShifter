@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using UnityEditor;
+using UnityEditor.Animations;
 using UnityEngine;
 
 namespace NelsonRodrigues.ShapeShifter {
@@ -12,7 +13,11 @@ namespace NelsonRodrigues.ShapeShifter {
         private static readonly string SkinnedUserData = "{ShapeShifter:skinned}";
         
         private static readonly Type[] SupportedTypes = {
+            typeof(AnimationClip),
+            typeof(AnimatorController),
             typeof(GameObject),
+            typeof(MonoScript),
+            typeof(SceneAsset),
             typeof(ScriptableObject),
             typeof(Texture2D)
         };
