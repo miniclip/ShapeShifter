@@ -255,7 +255,7 @@ namespace NelsonRodrigues.ShapeShifter {
                 }
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
-                File.Copy(origin, target);
+                File.Copy(origin, target, true);
             }
                     
             importer.userData += ShapeShifter.SkinnedUserData;
