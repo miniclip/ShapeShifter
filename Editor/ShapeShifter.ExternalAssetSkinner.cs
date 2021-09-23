@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -181,6 +182,10 @@ namespace NelsonRodrigues.ShapeShifter {
             string recommendedPath = this.DetermineRecommendedPath();
             string absoluteAssetPath = this.PickFile(recommendedPath);
 
+            this.SkinExternalFile(absoluteAssetPath);
+        }
+
+        private void SkinExternalFile(string absoluteAssetPath, Dictionary<string, string> overridesPerGame = null) {
             if (absoluteAssetPath == null) {
                 return;
             }
@@ -219,6 +224,11 @@ namespace NelsonRodrigues.ShapeShifter {
                 }
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
+
+                if (overridesPerGame != null && overridesPerGame.ContainsKey(game)) {
+                    origin = overridesPerGame[game];
+                }
+                
                 File.Copy(origin, target);
             }
         }
