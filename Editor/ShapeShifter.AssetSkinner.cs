@@ -236,10 +236,12 @@ namespace NelsonRodrigues.ShapeShifter {
             importer.SaveAndReimport();
         }
 
-        private void SkinAsset(AssetImporter importer) {
-            // make sure any pending changes are saved before generating copies
-            this.SavePendingChanges();
-            
+        private void SkinAsset(AssetImporter importer, bool saveFirst = true) {
+            if (saveFirst) {
+                // make sure any pending changes are saved before generating copies
+                this.SavePendingChanges();
+            }
+
             foreach (string game in this.configuration.GameNames) {
                 string origin = importer.assetPath;
                 string guid = AssetDatabase.AssetPathToGUID(origin);
