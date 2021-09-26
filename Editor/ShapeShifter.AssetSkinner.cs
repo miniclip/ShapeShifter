@@ -35,7 +35,7 @@ namespace NelsonRodrigues.ShapeShifter {
             EditorGUILayout.InspectorTitlebar(true, asset);
             
             string path = AssetDatabase.GetAssetPath(asset);
-            Debug.Log(path);
+
             AssetImporter importer = AssetImporter.GetAtPath(path);
             bool skinned = importer.userData.Contains(ShapeShifter.SkinnedUserData);
 

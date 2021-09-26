@@ -74,6 +74,7 @@ namespace NelsonRodrigues.ShapeShifter {
             );
 
             this.skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
+            Directory.CreateDirectory(this.skinsFolder.FullName);
             this.OnAssetSkinnerEnable();
             this.OnExternalAssetSkinnerEnable();
         }
