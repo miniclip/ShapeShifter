@@ -151,25 +151,23 @@ namespace NelsonRodrigues.ShapeShifter {
                 float progress = 0.0f;
                 float progressBarStep = 1.0f / totalDirectories;
 
-                string internalFolderPath = Path.Combine(gameFolderPath, ShapeShifter.InternalAssetsFolder);
-                DirectoryInfo internalFolder = new DirectoryInfo(internalFolderPath);
-                
-                foreach (DirectoryInfo directory in internalFolder.GetDirectories()) {
-                    internalAssetOperation(directory);
-
-                    progress += progressBarStep;
-                    EditorUtility.DisplayProgressBar("Shape Shifter", $"{description}...", progress);
-                }
-                
-                string externalFolderPath = Path.Combine(gameFolderPath, ShapeShifter.ExternalAssetsFolder);
-                DirectoryInfo externalFolder = new DirectoryInfo(externalFolderPath);
-                
-                foreach (DirectoryInfo directory in externalFolder.GetDirectories()) {
-                    externalAssetOperation(directory);
-
-                    progress += progressBarStep;
-                    EditorUtility.DisplayProgressBar("Shape Shifter", $"{description}...", progress);
-                }
+                this.PerformOperationOnPath(
+                    gameFolderPath, 
+                    ShapeShifter.InternalAssetsFolder,
+                    internalAssetOperation,
+                    description,
+                    progressBarStep,
+                    ref progress
+                );
+ 
+                this.PerformOperationOnPath(
+                    gameFolderPath, 
+                    ShapeShifter.ExternalAssetsFolder,
+                    externalAssetOperation,
+                    description,
+                    progressBarStep,
+                    ref progress
+                );
 
                 this.RefreshAllAssets();
             } else {
@@ -185,6 +183,28 @@ namespace NelsonRodrigues.ShapeShifter {
             }
 
             EditorUtility.ClearProgressBar();
+        }
+
+        private void PerformOperationOnPath(
+            string gameFolderPath,
+            string assetFolder,
+            Action<DirectoryInfo> operation,
+            string description,
+            float progressBarStep,
+            ref float progress
+        ) {
+            string assetFolderPath = Path.Combine(gameFolderPath, assetFolder);
+
+            if (Directory.Exists(assetFolderPath)) {
+                DirectoryInfo internalFolder = new DirectoryInfo(assetFolderPath);
+
+                foreach (DirectoryInfo directory in internalFolder.GetDirectories()) {
+                    operation(directory);
+
+                    progress += progressBarStep;
+                    EditorUtility.DisplayProgressBar("Shape Shifter", $"{description}...", progress);
+                }
+            }
         }
 
         private void RefreshAllAssets() {
