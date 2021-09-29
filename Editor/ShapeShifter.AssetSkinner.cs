@@ -11,7 +11,7 @@ namespace NelsonRodrigues.ShapeShifter {
     public partial class ShapeShifter {
         private Vector2 scrollPosition;
         private bool showSkinner = true;
-        private FileSystemWatcher watcher;
+        //private FileSystemWatcher watcher;
 
         private HashSet<string> dirtyAssets = new HashSet<string>();
         private Dictionary<string, Texture2D> previewPerAsset = new Dictionary<string, Texture2D>();
@@ -140,6 +140,7 @@ namespace NelsonRodrigues.ShapeShifter {
         }
         
         private void OnAssetSkinnerEnable() {
+            /*
             if (this.watcher == null) {
                 this.watcher = new FileSystemWatcher();
                 this.watcher.Path = this.skinsFolder.FullName;
@@ -149,7 +150,7 @@ namespace NelsonRodrigues.ShapeShifter {
             // To account for Unity's behaviour of sending consecutive OnEnables without an OnDisable
             this.watcher.Changed -= this.OnFileSystemChanged;
             this.watcher.Changed += this.OnFileSystemChanged;
-            this.watcher.EnableRaisingEvents = true;
+            this.watcher.EnableRaisingEvents = true;*/
         }
         
         private void OnAssetSkinnerGUI() {
@@ -192,8 +193,8 @@ namespace NelsonRodrigues.ShapeShifter {
         }
         
         private void OnDisable() {
-            this.watcher.EnableRaisingEvents = false;
-            this.watcher.Changed -= this.OnFileSystemChanged;
+            //this.watcher.EnableRaisingEvents = false;
+            //this.watcher.Changed -= this.OnFileSystemChanged;
             
             this.dirtyAssets.Clear();
             this.previewPerAsset.Clear();
