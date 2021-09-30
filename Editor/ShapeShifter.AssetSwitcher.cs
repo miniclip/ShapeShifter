@@ -15,6 +15,27 @@ namespace NelsonRodrigues.ShapeShifter {
         private string lastSwitched;
         private bool showSwitcher = true;
 
+        private void CopyFolder(DirectoryInfo source, DirectoryInfo target) {
+            Directory.CreateDirectory(target.FullName);
+            
+            foreach (FileInfo file in target.GetFiles()) {
+                file.Delete();
+            }
+
+            foreach (DirectoryInfo directory in target.GetDirectories()) {
+                directory.Delete(true);
+            }
+
+            foreach (FileInfo file in source.GetFiles()) {
+                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
+            }
+
+            foreach (DirectoryInfo nextSource in source.GetDirectories()) {
+                DirectoryInfo nextTarget = target.CreateSubdirectory(nextSource.Name);
+                this.CopyFolder(nextSource, nextTarget);
+            }
+        }
+        
         private void CopyFromOriginToSkinnedExternal(DirectoryInfo directory) {
             string relativePath = this.GenerateRelativePathFromKey(directory.Name);
             string origin = Path.Combine(Application.dataPath, relativePath);
@@ -39,10 +60,26 @@ namespace NelsonRodrigues.ShapeShifter {
             // Ensure it has the same name, so we don't end up copying .DS_Store
             string target = AssetDatabase.GUIDToAssetPath(guid);
             string searchPattern = Path.GetFileName(target);
-            FileInfo origin = directory.GetFiles(searchPattern)[0];
-                   
-            //Debug.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
-            origin.CopyTo(target, true);
+
+            FileInfo[] files = directory.GetFiles(searchPattern);
+
+            if (files.Length > 0) {
+                FileInfo origin = files[0];
+                //Debug.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
+                origin.CopyTo(target, true);
+                return;
+            }
+
+            DirectoryInfo[] directories = directory.GetDirectories();
+
+            if (directories.Length > 0) {
+                target = Path.Combine(
+                    Application.dataPath.Replace("/Assets", string.Empty), 
+                    target
+                );
+                
+                this.CopyFolder(directories[0], new DirectoryInfo(target));
+            }
         }
 
         private void CopyFromUnityToSkins(DirectoryInfo directory) {
@@ -184,7 +221,7 @@ namespace NelsonRodrigues.ShapeShifter {
 
             EditorUtility.ClearProgressBar();
         }
-
+        
         private void PerformOperationOnPath(
             string gameFolderPath,
             string assetFolder,

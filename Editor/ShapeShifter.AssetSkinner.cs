@@ -116,7 +116,9 @@ namespace NelsonRodrigues.ShapeShifter {
 
                 Texture2D texturePreview;
                 
-                if (!File.Exists(assetPath)) {
+                if (Directory.Exists(assetPath)) {
+                    texturePreview = EditorGUIUtility.FindTexture("Folder Icon");
+                } else if (!File.Exists(assetPath)) {
                     texturePreview = EditorGUIUtility.FindTexture(ShapeShifter.errorIcon);
                 } else {
                     string extension = Path.GetExtension(assetPath);
@@ -170,10 +172,18 @@ namespace NelsonRodrigues.ShapeShifter {
                 
                 foreach (Object asset in assets) {
                     Type assetType = asset.GetType();
+
+                    if (assetType == typeof(DefaultAsset)) {
+                        if (AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(asset))) {
+                            supportedAssets.Add(asset);
+                            continue;
+                        }
+                    }
                     
                     foreach (Type supportedType in ShapeShifter.SupportedTypes) {
                         if (assetType == supportedType || assetType.IsSubclassOf(supportedType)) {
                             supportedAssets.Add(asset);
+                            break;
                         }
                     }
                 }
@@ -258,7 +268,13 @@ namespace NelsonRodrigues.ShapeShifter {
                 }
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
-                File.Copy(origin, target, true);
+
+                if (AssetDatabase.IsValidFolder(importer.assetPath)) {
+                    DirectoryInfo targetFolder = Directory.CreateDirectory(target);
+                    this.CopyFolder(new DirectoryInfo(origin), targetFolder);
+                } else {
+                    File.Copy(origin, target, true);
+                }
             }
                     
             importer.userData += ShapeShifter.SkinnedUserData;

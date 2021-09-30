@@ -15,6 +15,7 @@ namespace NelsonRodrigues.ShapeShifter {
         private static readonly Type[] SupportedTypes = {
             typeof(AnimationClip),
             typeof(AnimatorController),
+            typeof(DefaultAsset),
             typeof(GameObject),
             typeof(MonoScript),
             typeof(SceneAsset),
