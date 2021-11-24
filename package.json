@@ -1,11 +1,11 @@
 {
-    "name": "com.nelsonrodrigues.shape-shifter",
-    "displayName": "Shape Shifter",
-    "version": "0.0.1",
-    "unity": "2019.4",
-    "description": "Provides a way to switch between different games in the same project. Supports switching between assets (textures, prefabs, scriptable objects), as well as switching between different packages per game.",
-    "keywords": [
-        "Reskin",
-        "Switch"
-    ]
+  "name": "com.miniclip.unity.shapeshifter",
+  "displayName": "MU Shape Shifter",
+  "version": "0.0.1",
+  "unity": "2019.4",
+  "description": "Provides a way to switch between different games in the same project. \nSupports switching between assets (textures, prefabs, scriptable objects), \nas well as switching between different packages per game.",
+  "keywords": [
+    "Reskin",
+    "Switch"
+  ]
 }
