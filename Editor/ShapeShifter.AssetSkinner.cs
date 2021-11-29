@@ -11,7 +11,7 @@ namespace MUShapeShifter {
     public partial class ShapeShifter {
         private Vector2 scrollPosition;
         private bool showSkinner = true;
-        //private FileSystemWatcher watcher;
+        private FileSystemWatcher watcher;
 
         private HashSet<string> dirtyAssets = new HashSet<string>();
         private Dictionary<string, Texture2D> previewPerAsset = new Dictionary<string, Texture2D>();
@@ -31,6 +31,21 @@ namespace MUShapeShifter {
             {".xml", "TextAsset Icon"},
         };
 
+        private void OnAssetSkinnerEnable()
+        {
+            if (this.watcher == null)
+            {
+                this.watcher = new FileSystemWatcher();
+                this.watcher.Path = this.skinsFolder.FullName;
+                this.watcher.IncludeSubdirectories = true;
+            }
+
+            // To account for Unity's behaviour of sending consecutive OnEnables without an OnDisable
+            this.watcher.Changed -= this.OnFileSystemChanged;
+            this.watcher.Changed += this.OnFileSystemChanged;
+            this.watcher.EnableRaisingEvents = true;
+        }
+        
         private void DrawAssetSection(Object asset) {
             EditorGUILayout.InspectorTitlebar(true, asset);
             
@@ -110,6 +125,7 @@ namespace MUShapeShifter {
             }
         }
 
+        //TODO: this will be called too many times if lots of file changes
         private void GenerateAssetPreview(string key, string assetPath) {
             if (this.dirtyAssets.Contains(key) || ! this.previewPerAsset.ContainsKey(key)) {
                 this.dirtyAssets.Remove(key);
@@ -141,19 +157,6 @@ namespace MUShapeShifter {
             }
         }
         
-        private void OnAssetSkinnerEnable() {
-            /*
-            if (this.watcher == null) {
-                this.watcher = new FileSystemWatcher();
-                this.watcher.Path = this.skinsFolder.FullName;
-                this.watcher.IncludeSubdirectories = true;
-            }
-            
-            // To account for Unity's behaviour of sending consecutive OnEnables without an OnDisable
-            this.watcher.Changed -= this.OnFileSystemChanged;
-            this.watcher.Changed += this.OnFileSystemChanged;
-            this.watcher.EnableRaisingEvents = true;*/
-        }
         
         private void OnAssetSkinnerGUI() {
             this.showSkinner = EditorGUILayout.Foldout(this.showSkinner, "Asset Skinner");
@@ -202,15 +205,9 @@ namespace MUShapeShifter {
             }
         }
         
-        private void OnDisable() {
-            //this.watcher.EnableRaisingEvents = false;
-            //this.watcher.Changed -= this.OnFileSystemChanged;
-            
-            this.dirtyAssets.Clear();
-            this.previewPerAsset.Clear();
-        }
-
         private void OnFileSystemChanged(object sender, FileSystemEventArgs args) {
+            // Debug.Log($"Name: {args.Name} Path: {args.FullPath} \n {args.ChangeType}");
+            //TODO: check if this opens a file handle INVESTIGATE
             DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
             string game = assetDirectory.Parent.Parent.Name;
             
@@ -279,6 +276,14 @@ namespace MUShapeShifter {
                     
             importer.userData += ShapeShifter.SkinnedUserData;
             importer.SaveAndReimport();
+        }
+        
+        private void OnDisable() {
+            this.watcher.EnableRaisingEvents = false;
+            this.watcher.Changed -= this.OnFileSystemChanged;
+            
+            this.dirtyAssets.Clear();
+            this.previewPerAsset.Clear();
         }
     }
 }
