@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace NelsonRodrigues.ShapeShifter {
+namespace MUShapeShifter {
    
     public partial class ShapeShifter {
 

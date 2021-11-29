@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace NelsonRodrigues.ShapeShifter {
+namespace MUShapeShifter {
     public class ShapeShifterConfiguration : ScriptableObject {
         //TODO: turn these lists into serializable HashSets 
         

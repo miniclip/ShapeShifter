@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
 
-namespace NelsonRodrigues.ShapeShifter {
+namespace MUShapeShifter {
     public partial class ShapeShifter : EditorWindow {
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         private static readonly string ExternalAssetsFolder = "external";

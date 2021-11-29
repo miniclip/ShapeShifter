@@ -2,7 +2,7 @@
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace NelsonRodrigues.ShapeShifter {
+namespace MUShapeShifter {
     
     [CustomEditor(typeof(ShapeShifterConfiguration))]
     public class ShapeShifterConfigurationEditor : Editor {

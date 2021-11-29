@@ -6,7 +6,7 @@ using UnityEngine;
 
 using Object = UnityEngine.Object;
 
-namespace NelsonRodrigues.ShapeShifter {
+namespace MUShapeShifter {
    
     public partial class ShapeShifter {
         private Vector2 scrollPosition;
