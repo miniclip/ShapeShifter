@@ -46,6 +46,7 @@ namespace MUShapeShifter {
             this.serializedObject.Update();
             this.gameNamesList.DoLayoutList();
             this.serializedObject.ApplyModifiedProperties();
+            DrawDefaultInspector ();
         }
     }
 }

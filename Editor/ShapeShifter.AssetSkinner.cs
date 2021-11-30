@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using NUnit.Framework.Internal.Commands;
 using UnityEditor;
 using UnityEngine;
 
@@ -45,21 +46,44 @@ namespace MUShapeShifter {
             this.watcher.Changed += this.OnFileSystemChanged;
             this.watcher.EnableRaisingEvents = true;
         }
+
+        private bool IsSkinned(string assetPath)
+        {
+            foreach (var game in configuration.GameNames)
+            {
+                if (IsSkinned(assetPath, game))
+                    return true;
+            }
+
+            return false;
+        }
+        
+        private bool IsSkinned(string assetPath, string game)
+        {
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+            string assetFolder = Path.Combine(
+                this.skinsFolder.FullName,
+                game, 
+                ShapeShifter.InternalAssetsFolder,
+                guid
+            );
+
+            return Directory.Exists(assetFolder);
+        }
         
         private void DrawAssetSection(Object asset) {
             EditorGUILayout.InspectorTitlebar(true, asset);
             
             string path = AssetDatabase.GetAssetPath(asset);
 
-            AssetImporter importer = AssetImporter.GetAtPath(path);
-            bool skinned = importer.userData.Contains(ShapeShifter.SkinnedUserData);
+            bool skinned = IsSkinned(path);
 
             Color oldColor = GUI.backgroundColor;
             
             if (skinned) {
-                this.DrawSkinnedAssetSection(importer);
+                this.DrawSkinnedAssetSection(path);
             } else {
-                this.DrawUnskinnedAssetSection(importer);
+                this.DrawUnskinnedAssetSection(path);
             }
             
             GUI.backgroundColor = oldColor;
@@ -90,38 +114,38 @@ namespace MUShapeShifter {
             }
         }
 
-        private void DrawSkinnedAssetSection(AssetImporter importer) {
+        private void DrawSkinnedAssetSection(string assetPath) {
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
             
             using (new GUILayout.HorizontalScope(boxStyle)) {
                 foreach (string game in this.configuration.GameNames) {
-                    string guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
-                    string assetPath = Path.Combine(
+                    string guid = AssetDatabase.AssetPathToGUID(assetPath);
+                    string skinnedPath = Path.Combine(
                         this.skinsFolder.FullName,
                         game,
                         ShapeShifter.InternalAssetsFolder,
                         guid,
-                        Path.GetFileName(importer.assetPath)
+                        Path.GetFileName(assetPath)
                     );
 
                     string key = this.GenerateAssetKey(game, guid);
-                    this.GenerateAssetPreview(key, assetPath);
-                    this.DrawAssetPreview(key, game, assetPath);
+                    this.GenerateAssetPreview(key, skinnedPath);
+                    this.DrawAssetPreview(key, game, skinnedPath);
                 }
             }
 
             GUI.backgroundColor = Color.red;
                 
             if (GUILayout.Button("Remove skins")) {
-                this.RemoveSkins(importer);
+                this.RemoveSkins(assetPath);
             }        
         }
 
-        private void DrawUnskinnedAssetSection(AssetImporter importer) {
+        private void DrawUnskinnedAssetSection(string assetPath) {
             GUI.backgroundColor = Color.green;
                 
             if (GUILayout.Button("Skin it!")) {
-                this.SkinAsset(importer);
+                this.SkinAsset(assetPath);
             }
         }
 
@@ -130,8 +154,8 @@ namespace MUShapeShifter {
             if (this.dirtyAssets.Contains(key) || ! this.previewPerAsset.ContainsKey(key)) {
                 this.dirtyAssets.Remove(key);
 
-                Texture2D texturePreview;
-                
+                Texture2D texturePreview = EditorGUIUtility.FindTexture(ShapeShifter.errorIcon);
+                goto Skip;
                 if (Directory.Exists(assetPath)) {
                     texturePreview = EditorGUIUtility.FindTexture("Folder Icon");
                 } else if (!File.Exists(assetPath)) {
@@ -152,7 +176,7 @@ namespace MUShapeShifter {
                         texturePreview = (Texture2D)EditorGUIUtility.IconContent(icon).image;
                     }
                 }
-
+                Skip:
                 this.previewPerAsset[key] = texturePreview;
             }
         }
@@ -207,6 +231,10 @@ namespace MUShapeShifter {
         
         private void OnFileSystemChanged(object sender, FileSystemEventArgs args) {
             // Debug.Log($"Name: {args.Name} Path: {args.FullPath} \n {args.ChangeType}");
+            
+            if (!configuration.UseFileSystemWatcher)
+                return;
+            
             //TODO: check if this opens a file handle INVESTIGATE
             DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
             string game = assetDirectory.Parent.Parent.Name;
@@ -220,9 +248,9 @@ namespace MUShapeShifter {
             this.previewPerAsset.Clear();
         }
 
-        private void RemoveSkins(AssetImporter importer) {
+        private void RemoveSkins(string assetPath) {
             foreach (string game in this.configuration.GameNames) {
-                string guid = AssetDatabase.AssetPathToGUID(importer.assetPath);
+                string guid = AssetDatabase.AssetPathToGUID(assetPath);
                 string key = this.GenerateAssetKey(game, guid);
                 this.dirtyAssets.Remove(key);
                 this.previewPerAsset.Remove(key);
@@ -236,22 +264,18 @@ namespace MUShapeShifter {
                 
                 Directory.Delete(assetFolder, true);                
             }
-
-            importer.userData = importer.userData.Replace(
-                ShapeShifter.SkinnedUserData,
-                string.Empty
-            );
-            importer.SaveAndReimport();
+            
         }
 
-        private void SkinAsset(AssetImporter importer, bool saveFirst = true) {
+        private void SkinAsset(string assetPath, bool saveFirst = true) {
+      
             if (saveFirst) {
                 // make sure any pending changes are saved before generating copies
                 this.SavePendingChanges();
             }
 
             foreach (string game in this.configuration.GameNames) {
-                string origin = importer.assetPath;
+                string origin = assetPath;
                 string guid = AssetDatabase.AssetPathToGUID(origin);
                 string assetFolder = Path.Combine(
                     this.skinsFolder.FullName,
@@ -265,17 +289,22 @@ namespace MUShapeShifter {
                 }
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
-
-                if (AssetDatabase.IsValidFolder(importer.assetPath)) {
+                
+                if (AssetDatabase.IsValidFolder(assetPath)) {
                     DirectoryInfo targetFolder = Directory.CreateDirectory(target);
-                    this.CopyFolder(new DirectoryInfo(origin), targetFolder);
+                    // this.CopyFolder(new DirectoryInfo(origin), targetFolder);
                 } else {
-                    File.Copy(origin, target, true);
+                    using (FileStream source = File.Open(origin, FileMode.Open))
+                    {
+                        FileStream destination = new FileStream(target, FileMode.OpenOrCreate, FileAccess.Write);
+                        source.CopyTo(destination);
+                        source.Close();
+                        destination.Flush();
+                        destination.Close();
+                    }
                 }
             }
-                    
-            importer.userData += ShapeShifter.SkinnedUserData;
-            importer.SaveAndReimport();
+
         }
         
         private void OnDisable() {

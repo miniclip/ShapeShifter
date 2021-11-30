@@ -12,5 +12,16 @@ namespace MUShapeShifter {
         [SerializeField]
         private List<string> skinnedExternalAssetPaths;
         public List<string> SkinnedExternalAssetPaths => this.skinnedExternalAssetPaths;
+
+        [SerializeField]
+        private List<Sprite> sprites;
+        
+        public List<Sprite> Sprites => sprites;
+        
+        [SerializeField]
+        private bool useFileSystemWatcher;
+        
+        public bool UseFileSystemWatcher => useFileSystemWatcher;
+        
     }
 }

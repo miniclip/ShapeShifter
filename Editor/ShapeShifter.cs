@@ -10,7 +10,7 @@ namespace MUShapeShifter {
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         private static readonly string ExternalAssetsFolder = "external";
         private static readonly string InternalAssetsFolder = "internal";
-        private static readonly string SkinnedUserData = "{ShapeShifter:skinned}";
+        // private static readonly string SkinnedUserData = "{ShapeShifter:skinned}";
         
         private static readonly Type[] SupportedTypes = {
             typeof(AnimationClip),
@@ -95,6 +95,18 @@ namespace MUShapeShifter {
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
                 
+                if(GUILayout.Button("Skin 100 sprites test"))
+                {
+                    this.SavePendingChanges();
+
+                    for (int index = 0; index < configuration.Sprites.Count; index++)
+                    {
+                        Sprite sprite = configuration.Sprites[index];
+                        string path = AssetDatabase.GetAssetPath(sprite);
+                        SkinAsset(path, false);
+                    }
+                }
+                
                 GUILayout.FlexibleSpace();
             }
             
@@ -102,10 +114,12 @@ namespace MUShapeShifter {
         }
 
         private void SavePendingChanges() {
+            Debug.Log("Save Pending Changes");
             AssetDatabase.SaveAssets();
             
             // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save
             EditorApplication.ExecuteMenuItem("File/Save Project");
         }
+        
     }
 }
