@@ -94,8 +94,18 @@ namespace MUShapeShifter {
                 this.OnAssetSwitcherGUI();
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
-                
-                if(GUILayout.Button("Skin 100 sprites test"))
+                if(GUILayout.Button("Skin 20 sprites test"))
+                {
+                    this.SavePendingChanges();
+
+                    for (int index = 0; index < 20; index++)
+                    {
+                        Sprite sprite = configuration.Sprites[index];
+                        string path = AssetDatabase.GetAssetPath(sprite);
+                        SkinAsset(path, false);
+                    }
+                }
+                if(GUILayout.Button("Skin All sprites test"))
                 {
                     this.SavePendingChanges();
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using NUnit.Framework.Internal.Commands;
 using UnityEditor;
 using UnityEngine;
@@ -267,7 +268,7 @@ namespace MUShapeShifter {
             
         }
 
-        private void SkinAsset(string assetPath, bool saveFirst = true) {
+        private async Task SkinAsset(string assetPath, bool saveFirst = true) {
       
             if (saveFirst) {
                 // make sure any pending changes are saved before generating copies
@@ -294,17 +295,46 @@ namespace MUShapeShifter {
                     DirectoryInfo targetFolder = Directory.CreateDirectory(target);
                     // this.CopyFolder(new DirectoryInfo(origin), targetFolder);
                 } else {
+                    /** /
                     using (FileStream source = File.Open(origin, FileMode.Open))
                     {
-                        FileStream destination = new FileStream(target, FileMode.OpenOrCreate, FileAccess.Write);
-                        source.CopyTo(destination);
-                        source.Close();
-                        destination.Flush();
-                        destination.Close();
+                        using (FileStream destination = new FileStream(target, FileMode.OpenOrCreate, FileAccess.Write))
+                        {
+                            source.CopyTo(destination);
+                        }
                     }
+                    /**/
+                    MemoryStream memoryStream = new MemoryStream();
+                    using (FileStream source = File.OpenRead(origin))
+                    {
+                        source.CopyTo(memoryStream);
+                        source.Close();
+                    }
+                    memoryStream.Position = 0;
+                    // using (FileStream destination = new FileStream(target, FileMode.OpenOrCreate, FileAccess.Write))
+                    // {
+                    //     memoryStream.CopyTo(destination);
+                    //     destination.Close();
+                    // }
+                    
+                    memoryStream.Dispose();
+                    /** /
+                    await CopyAsset(origin, target);
+                    /**/
                 }
             }
 
+        }
+
+        private async Task CopyAsset(string source, string destination)
+        {
+            using (FileStream SourceStream = File.Open(source, FileMode.Open))
+            {
+                using (FileStream DestinationStream = File.Create(destination))
+                {
+                    await SourceStream.CopyToAsync(DestinationStream);
+                }
+            }
         }
         
         private void OnDisable() {
