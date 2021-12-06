@@ -6,7 +6,7 @@ namespace Miniclip.MUShapeShifter {
         //TODO: turn these lists into serializable HashSets 
         
         [SerializeField]
-        private List<string> gameNames;
+        private List<string> gameNames = new List<string>();
         public List<string> GameNames => this.gameNames;
 
         [SerializeField]
