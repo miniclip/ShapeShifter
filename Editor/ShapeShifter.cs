@@ -55,14 +55,22 @@ namespace Miniclip.MUShapeShifter {
                 ConfigurationResource
             );
 
-            if (this.configuration == null) {
+            if (this.configuration == null)
+            {
                 this.configuration = CreateInstance<ShapeShifterConfiguration>();
-                
+
+                string folderPath = "Assets/Editor Default Resources/";
+
+                if (!AssetDatabase.IsValidFolder(folderPath))
+                {
+                    AssetDatabase.CreateFolder("Assets", "Editor Default Resources");
+                }
+
                 AssetDatabase.CreateAsset(
                     this.configuration,
-                    "Assets/Editor Default Resources/" + ConfigurationResource
+                    folderPath + ConfigurationResource
                 );
-                
+
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
