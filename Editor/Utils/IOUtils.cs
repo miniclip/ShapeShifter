@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace Miniclip.ShapeShifter.Utils
 {
@@ -45,21 +46,8 @@ namespace Miniclip.ShapeShifter.Utils
             GC.Collect();
             
             GC.WaitForPendingFinalizers();
-            // using (var sourceFile = File.OpenRead(source))
-            // using (var targetFile = File.Create(destination))
-            // {
-            //     byte[] buffer = new byte[sourceFile.Length];
-            //     int bytesRead = sourceFile.Read(buffer, 0, buffer.Length);
-            //     if (bytesRead == 0)
-            //     {
-            //         Debug.LogWarning($"Did not copy {source}");
-            //         return;
-            //     }
-            //
-            //     targetFile.Write(buffer, 0, bytesRead);
-            //     Debug.Log($"Copied {source}");
-            // }
         }
 
+        public static bool IsFolderEmpty(string path) => Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
     }
 }

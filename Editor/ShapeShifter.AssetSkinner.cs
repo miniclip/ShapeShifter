@@ -67,7 +67,9 @@ namespace Miniclip.MUShapeShifter {
                 guid
             );
 
-            return Directory.Exists(assetFolder);
+            bool folderExists = Directory.Exists(assetFolder);
+            bool isFolderEmpty = IOUtils.IsFolderEmpty(assetFolder);
+            return folderExists && !isFolderEmpty;
         }
         
         private void DrawAssetSection(Object asset) {
@@ -310,6 +312,15 @@ namespace Miniclip.MUShapeShifter {
                     guid
                 );
 
+                if (IsSkinned(origin, game))
+                {
+                    continue;
+                }
+                else
+                {
+                    Debug.Log($"Skinning {game} : {origin}");
+                }
+                
                 IOUtils.TryCreateDirectory(assetFolder);
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
