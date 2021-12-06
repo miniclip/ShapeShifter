@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
-
 using Debug = UnityEngine.Debug;
 
-namespace MUShapeShifter {
+namespace Miniclip.MUShapeShifter {
 
     public partial class ShapeShifter {
 
@@ -53,7 +53,7 @@ namespace MUShapeShifter {
                     string assetPath = Path.Combine(
                         this.skinsFolder.FullName,
                         game,
-                        ShapeShifter.ExternalAssetsFolder,
+                        ExternalAssetsFolder,
                         key,
                         Path.GetFileName(relativePath)
                     );
@@ -168,7 +168,7 @@ namespace MUShapeShifter {
                 string assetFolder = Path.Combine(
                     this.skinsFolder.FullName,
                     game,
-                    ShapeShifter.ExternalAssetsFolder,
+                    ExternalAssetsFolder,
                     key
                 );
             
@@ -215,7 +215,7 @@ namespace MUShapeShifter {
                 string assetFolder = Path.Combine(
                     this.skinsFolder.FullName,
                     game, 
-                    ShapeShifter.ExternalAssetsFolder,
+                    ExternalAssetsFolder,
                     key
                 );
                 
@@ -229,7 +229,7 @@ namespace MUShapeShifter {
                     origin = overridesPerGame[game];
                 }
                 
-                File.Copy(origin, target);
+                IOUtils.CopyFile(origin, target, false);
             }
         }
     }

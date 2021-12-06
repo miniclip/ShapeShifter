@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace MUShapeShifter {
+namespace Miniclip.MUShapeShifter {
     public class ShapeShifterConfiguration : ScriptableObject {
         //TODO: turn these lists into serializable HashSets 
         

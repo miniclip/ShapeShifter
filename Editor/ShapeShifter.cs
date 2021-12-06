@@ -4,8 +4,9 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
-namespace MUShapeShifter {
+namespace Miniclip.MUShapeShifter {
     public partial class ShapeShifter : EditorWindow {
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         private static readonly string ExternalAssetsFolder = "external";
@@ -34,7 +35,7 @@ namespace MUShapeShifter {
             Assembly editorAssembly = typeof(Editor).Assembly;
             Type inspectorWindowType = editorAssembly.GetType("UnityEditor.InspectorWindow");
             
-            EditorWindow.GetWindow<ShapeShifter>(
+            GetWindow<ShapeShifter>(
                 "Shape Shifter", 
                 true, 
                 inspectorWindowType
@@ -51,15 +52,15 @@ namespace MUShapeShifter {
             }
 
             this.configuration = (ShapeShifterConfiguration)EditorGUIUtility.Load(
-                ShapeShifter.ConfigurationResource
+                ConfigurationResource
             );
 
             if (this.configuration == null) {
-                this.configuration = ScriptableObject.CreateInstance<ShapeShifterConfiguration>();
+                this.configuration = CreateInstance<ShapeShifterConfiguration>();
                 
                 AssetDatabase.CreateAsset(
                     this.configuration,
-                    "Assets/Editor Default Resources/" + ShapeShifter.ConfigurationResource
+                    "Assets/Editor Default Resources/" + ConfigurationResource
                 );
                 
                 AssetDatabase.SaveAssets();
@@ -94,29 +95,22 @@ namespace MUShapeShifter {
                 this.OnAssetSwitcherGUI();
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
-                if(GUILayout.Button("Skin 20 sprites test"))
-                {
-                    this.SavePendingChanges();
-
-                    for (int index = 0; index < 20; index++)
-                    {
-                        Sprite sprite = configuration.Sprites[index];
-                        string path = AssetDatabase.GetAssetPath(sprite);
-                        SkinAsset(path, false);
-                    }
-                }
+                
                 if(GUILayout.Button("Skin All sprites test"))
                 {
-                    this.SavePendingChanges();
-
                     for (int index = 0; index < configuration.Sprites.Count; index++)
                     {
-                        Sprite sprite = configuration.Sprites[index];
+                        Object sprite = configuration.Sprites[index];
                         string path = AssetDatabase.GetAssetPath(sprite);
                         SkinAsset(path, false);
                     }
                 }
                 
+                if(GUILayout.Button("Skin All sprites test"))
+                {
+                    SkinAssets(configuration.Sprites.ToArray());
+                }
+
                 GUILayout.FlexibleSpace();
             }
             
@@ -124,7 +118,6 @@ namespace MUShapeShifter {
         }
 
         private void SavePendingChanges() {
-            Debug.Log("Save Pending Changes");
             AssetDatabase.SaveAssets();
             
             // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save

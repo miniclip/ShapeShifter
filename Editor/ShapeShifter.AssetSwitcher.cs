@@ -3,11 +3,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace MUShapeShifter {
+namespace Miniclip.MUShapeShifter {
    
     public partial class ShapeShifter {
 
@@ -15,33 +16,12 @@ namespace MUShapeShifter {
         private string lastSwitched;
         private bool showSwitcher = true;
 
-        private void CopyFolder(DirectoryInfo source, DirectoryInfo target) {
-            Directory.CreateDirectory(target.FullName);
-            
-            foreach (FileInfo file in target.GetFiles()) {
-                file.Delete();
-            }
-
-            foreach (DirectoryInfo directory in target.GetDirectories()) {
-                directory.Delete(true);
-            }
-
-            foreach (FileInfo file in source.GetFiles()) {
-                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
-            }
-
-            foreach (DirectoryInfo nextSource in source.GetDirectories()) {
-                DirectoryInfo nextTarget = target.CreateSubdirectory(nextSource.Name);
-                this.CopyFolder(nextSource, nextTarget);
-            }
-        }
         
         private void CopyFromOriginToSkinnedExternal(DirectoryInfo directory) {
             string relativePath = this.GenerateRelativePathFromKey(directory.Name);
             string origin = Path.Combine(Application.dataPath, relativePath);
             string target = Path.Combine(directory.FullName, Path.GetFileName(origin));
-
-            File.Copy(origin, target, true);
+            IOUtils.CopyFile(origin, target);
         }
         
         private void CopyFromSkinnedExternalToOrigin(DirectoryInfo directory) {
@@ -49,8 +29,6 @@ namespace MUShapeShifter {
             string target = Path.Combine(Application.dataPath, relativePath);
             string searchPattern = Path.GetFileName(target);
             FileInfo origin = directory.GetFiles(searchPattern)[0];
-
-            //Debug.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
             origin.CopyTo(target, true);
         }
         
@@ -78,7 +56,7 @@ namespace MUShapeShifter {
                     target
                 );
                 
-                this.CopyFolder(directories[0], new DirectoryInfo(target));
+                IOUtils.CopyFolder(directories[0], new DirectoryInfo(target));
             }
         }
 
@@ -88,7 +66,7 @@ namespace MUShapeShifter {
             string target = Path.Combine(directory.FullName, Path.GetFileName(origin));
             
             //Debug.Log($"[Shape Shifter] Copying from: {origin} to {target}");
-            File.Copy(origin, target, true);
+            IOUtils.CopyFile(origin, target);
         }
 
         private void OnAssetSwitcherGUI() {
@@ -190,7 +168,7 @@ namespace MUShapeShifter {
 
                 this.PerformOperationOnPath(
                     gameFolderPath, 
-                    ShapeShifter.InternalAssetsFolder,
+                    InternalAssetsFolder,
                     internalAssetOperation,
                     description,
                     progressBarStep,
@@ -199,7 +177,7 @@ namespace MUShapeShifter {
  
                 this.PerformOperationOnPath(
                     gameFolderPath, 
-                    ShapeShifter.ExternalAssetsFolder,
+                    ExternalAssetsFolder,
                     externalAssetOperation,
                     description,
                     progressBarStep,

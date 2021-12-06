@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
-using NUnit.Framework.Internal.Commands;
+using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
-
 using Object = UnityEngine.Object;
 
-namespace MUShapeShifter {
+namespace Miniclip.MUShapeShifter {
    
     public partial class ShapeShifter {
         private Vector2 scrollPosition;
@@ -65,7 +63,7 @@ namespace MUShapeShifter {
             string assetFolder = Path.Combine(
                 this.skinsFolder.FullName,
                 game, 
-                ShapeShifter.InternalAssetsFolder,
+                InternalAssetsFolder,
                 guid
             );
 
@@ -124,7 +122,7 @@ namespace MUShapeShifter {
                     string skinnedPath = Path.Combine(
                         this.skinsFolder.FullName,
                         game,
-                        ShapeShifter.InternalAssetsFolder,
+                        InternalAssetsFolder,
                         guid,
                         Path.GetFileName(assetPath)
                     );
@@ -150,17 +148,15 @@ namespace MUShapeShifter {
             }
         }
 
-        //TODO: this will be called too many times if lots of file changes
         private void GenerateAssetPreview(string key, string assetPath) {
             if (this.dirtyAssets.Contains(key) || ! this.previewPerAsset.ContainsKey(key)) {
                 this.dirtyAssets.Remove(key);
 
-                Texture2D texturePreview = EditorGUIUtility.FindTexture(ShapeShifter.errorIcon);
-                goto Skip;
+                Texture2D texturePreview = EditorGUIUtility.FindTexture(errorIcon);
                 if (Directory.Exists(assetPath)) {
                     texturePreview = EditorGUIUtility.FindTexture("Folder Icon");
                 } else if (!File.Exists(assetPath)) {
-                    texturePreview = EditorGUIUtility.FindTexture(ShapeShifter.errorIcon);
+                    texturePreview = EditorGUIUtility.FindTexture(errorIcon);
                 } else {
                     string extension = Path.GetExtension(assetPath);
 
@@ -168,16 +164,15 @@ namespace MUShapeShifter {
                         texturePreview = new Texture2D(0, 0);
                         texturePreview.LoadImage(File.ReadAllBytes(assetPath));
                     } else {
-                        string icon = ShapeShifter.defaultIcon;
+                        string icon = defaultIcon;
 
-                        if (ShapeShifter.iconPerExtension.ContainsKey(extension)) {
-                            icon = ShapeShifter.iconPerExtension[extension];
+                        if (iconPerExtension.ContainsKey(extension)) {
+                            icon = iconPerExtension[extension];
                         }
 
                         texturePreview = (Texture2D)EditorGUIUtility.IconContent(icon).image;
                     }
                 }
-                Skip:
                 this.previewPerAsset[key] = texturePreview;
             }
         }
@@ -208,7 +203,7 @@ namespace MUShapeShifter {
                         }
                     }
                     
-                    foreach (Type supportedType in ShapeShifter.SupportedTypes) {
+                    foreach (Type supportedType in SupportedTypes) {
                         if (assetType == supportedType || assetType.IsSubclassOf(supportedType)) {
                             supportedAssets.Add(asset);
                             break;
@@ -231,7 +226,6 @@ namespace MUShapeShifter {
         }
         
         private void OnFileSystemChanged(object sender, FileSystemEventArgs args) {
-            // Debug.Log($"Name: {args.Name} Path: {args.FullPath} \n {args.ChangeType}");
             
             if (!configuration.UseFileSystemWatcher)
                 return;
@@ -259,7 +253,7 @@ namespace MUShapeShifter {
                 string assetFolder = Path.Combine(
                     this.skinsFolder.FullName,
                     game,
-                    ShapeShifter.InternalAssetsFolder,
+                    InternalAssetsFolder,
                     guid
                 );
                 
@@ -268,7 +262,38 @@ namespace MUShapeShifter {
             
         }
 
-        private async Task SkinAsset(string assetPath, bool saveFirst = true) {
+        private void SkinAssets(Object[] assets, bool saveFirst = true)
+        {
+            if (saveFirst)
+            {
+                this.SavePendingChanges();
+            }
+
+            List<string> paths = new List<String>();
+            
+            for (int index = 0; index < assets.Length; index++)
+            {
+                Object asset = assets[index];
+                string path = AssetDatabase.GetAssetPath(asset);
+               
+                SkinAsset(path);
+            }
+        }
+        
+        private void SkinAssets(string[] assetPaths, bool saveFirst = true)
+        {
+            if (saveFirst)
+            {
+                this.SavePendingChanges();
+            }
+            
+            foreach (string assetPath in assetPaths)
+            {
+                SkinAsset(assetPath, false);
+            }
+        }
+        
+        private void SkinAsset(string assetPath, bool saveFirst = true) {
       
             if (saveFirst) {
                 // make sure any pending changes are saved before generating copies
@@ -281,60 +306,22 @@ namespace MUShapeShifter {
                 string assetFolder = Path.Combine(
                     this.skinsFolder.FullName,
                     game, 
-                    ShapeShifter.InternalAssetsFolder,
+                    InternalAssetsFolder,
                     guid
                 );
 
-                if (!Directory.Exists(assetFolder)) {
-                    Directory.CreateDirectory(assetFolder);
-                }
+                IOUtils.TryCreateDirectory(assetFolder);
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
                 
                 if (AssetDatabase.IsValidFolder(assetPath)) {
                     DirectoryInfo targetFolder = Directory.CreateDirectory(target);
-                    // this.CopyFolder(new DirectoryInfo(origin), targetFolder);
+                    IOUtils.CopyFolder(new DirectoryInfo(origin), targetFolder);
                 } else {
-                    /** /
-                    using (FileStream source = File.Open(origin, FileMode.Open))
-                    {
-                        using (FileStream destination = new FileStream(target, FileMode.OpenOrCreate, FileAccess.Write))
-                        {
-                            source.CopyTo(destination);
-                        }
-                    }
-                    /**/
-                    MemoryStream memoryStream = new MemoryStream();
-                    using (FileStream source = File.OpenRead(origin))
-                    {
-                        source.CopyTo(memoryStream);
-                        source.Close();
-                    }
-                    memoryStream.Position = 0;
-                    // using (FileStream destination = new FileStream(target, FileMode.OpenOrCreate, FileAccess.Write))
-                    // {
-                    //     memoryStream.CopyTo(destination);
-                    //     destination.Close();
-                    // }
-                    
-                    memoryStream.Dispose();
-                    /** /
-                    await CopyAsset(origin, target);
-                    /**/
+                    IOUtils.CopyFile(origin, target);
                 }
             }
 
-        }
-
-        private async Task CopyAsset(string source, string destination)
-        {
-            using (FileStream SourceStream = File.Open(source, FileMode.Open))
-            {
-                using (FileStream DestinationStream = File.Create(destination))
-                {
-                    await SourceStream.CopyToAsync(DestinationStream);
-                }
-            }
         }
         
         private void OnDisable() {
