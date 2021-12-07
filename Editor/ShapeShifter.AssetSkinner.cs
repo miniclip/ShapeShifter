@@ -314,11 +314,12 @@ namespace Miniclip.MUShapeShifter {
 
                 if (IsSkinned(origin, game))
                 {
+                    Debug.Log($"SKIP {game} : {origin}");
                     continue;
                 }
                 else
                 {
-                    Debug.Log($"Skinning {game} : {origin}");
+                    Debug.Log($"SKIN {game} : {origin}");
                 }
                 
                 IOUtils.TryCreateDirectory(assetFolder);

@@ -44,7 +44,6 @@ namespace Miniclip.ShapeShifter.Utils
         {
             File.Copy(source, destination, overwrite);
             GC.Collect();
-            
             GC.WaitForPendingFinalizers();
         }
 
