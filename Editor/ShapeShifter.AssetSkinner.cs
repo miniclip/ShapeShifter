@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Miniclip.ShapeShifter.Utils;
+using Unity.EditorCoroutines.Editor;
+
+// using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -264,8 +268,29 @@ namespace Miniclip.MUShapeShifter {
             
         }
 
-        private void SkinAssets(Object[] assets, bool saveFirst = true)
+        private IEnumerator SkinMultipleAssetsEnumerator(Object[] assets, bool saveFirst = true)
         {
+            EditorUtility.DisplayProgressBar("Skinning", "", 0);
+            for (int index = 0; index < assets.Length; index++)
+            {
+                EditorUtility.DisplayProgressBar("Skinning", "", (float)index/assets.Length);
+                Object asset = assets[index];
+                string path = AssetDatabase.GetAssetPath(asset);
+                yield return SkinAsset(path);
+            }
+            EditorUtility.DisplayProgressBar("Skinning", "", 1);
+            EditorUtility.ClearProgressBar();
+            yield return null;
+        }
+
+        private void SkinAssets(Object[] assets, bool saveFirst = true, bool useAsync = false)
+        {
+            if (useAsync)
+            {
+                EditorCoroutineUtility.StartCoroutine(SkinMultipleAssetsEnumerator(assets, saveFirst), this);
+                return;
+            }
+            
             if (saveFirst)
             {
                 this.SavePendingChanges();
@@ -294,20 +319,22 @@ namespace Miniclip.MUShapeShifter {
                 SkinAsset(assetPath, false);
             }
         }
-        
-        private void SkinAsset(string assetPath, bool saveFirst = true) {
-      
-            if (saveFirst) {
+
+        private IEnumerator SkinAsset(string assetPath, bool saveFirst = true)
+        {
+            if (saveFirst)
+            {
                 // make sure any pending changes are saved before generating copies
                 this.SavePendingChanges();
             }
 
-            foreach (string game in this.configuration.GameNames) {
+            foreach (string game in this.configuration.GameNames)
+            {
                 string origin = assetPath;
                 string guid = AssetDatabase.AssetPathToGUID(origin);
                 string assetFolder = Path.Combine(
                     this.skinsFolder.FullName,
-                    game, 
+                    game,
                     InternalAssetsFolder,
                     guid
                 );
@@ -321,19 +348,23 @@ namespace Miniclip.MUShapeShifter {
                 {
                     Debug.Log($"SKIN {game} : {origin}");
                 }
-                
+
                 IOUtils.TryCreateDirectory(assetFolder);
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
-                
-                if (AssetDatabase.IsValidFolder(assetPath)) {
+
+                if (AssetDatabase.IsValidFolder(assetPath))
+                {
                     DirectoryInfo targetFolder = Directory.CreateDirectory(target);
-                    IOUtils.CopyFolder(new DirectoryInfo(origin), targetFolder);
-                } else {
-                    IOUtils.CopyFile(origin, target);
+                    yield return IOUtils.CopyFolder(new DirectoryInfo(origin), targetFolder);
+                }
+                else
+                {
+                    yield return IOUtils.CopyFile(origin, target);
                 }
             }
 
+            yield return null;
         }
         
         private void OnDisable() {

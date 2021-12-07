@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
+using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Utils
 {
@@ -14,7 +16,7 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
-        public static void CopyFolder(DirectoryInfo source, DirectoryInfo target)
+        public static IEnumerator CopyFolder(DirectoryInfo source, DirectoryInfo target)
         {
             Directory.CreateDirectory(target.FullName);
 
@@ -38,13 +40,15 @@ namespace Miniclip.ShapeShifter.Utils
                 DirectoryInfo nextTarget = target.CreateSubdirectory(nextSource.Name);
                 CopyFolder(nextSource, nextTarget);
             }
+            yield return new WaitForSeconds(1);
         }
 
-        public static void CopyFile(string source, string destination, bool overwrite = true)
+        public static IEnumerator CopyFile(string source, string destination, bool overwrite = true)
         {
             File.Copy(source, destination, overwrite);
             GC.Collect();
             GC.WaitForPendingFinalizers();
+            yield return new WaitForSeconds(1);
         }
 
         public static bool IsFolderEmpty(string path) => Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();

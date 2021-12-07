@@ -104,21 +104,16 @@ namespace Miniclip.MUShapeShifter {
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
                 
-                if(GUILayout.Button("Skin All sprites test"))
-                {
-                    for (int index = 0; index < configuration.Sprites.Count; index++)
-                    {
-                        Object sprite = configuration.Sprites[index];
-                        string path = AssetDatabase.GetAssetPath(sprite);
-                        SkinAsset(path, false);
-                    }
-                }
-                
-                if(GUILayout.Button("Skin All sprites test"))
+                if(GUILayout.Button("Skin Sync"))
                 {
                     SkinAssets(configuration.Sprites.ToArray());
                 }
 
+                if(GUILayout.Button("Skin Coroutine"))
+                {
+                    SkinAssets(configuration.Sprites.ToArray(), useAsync:true);
+                }
+                
                 GUILayout.FlexibleSpace();
             }
             

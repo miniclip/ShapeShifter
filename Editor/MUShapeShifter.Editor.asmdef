@@ -1,6 +1,8 @@
 {
     "name": "MUShapeShifter.Editor",
-    "references": [],
+    "references": [
+        "Unity.EditorCoroutines.Editor"
+    ],
     "includePlatforms": [
         "Editor"
     ],
