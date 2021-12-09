@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Utils;
-using Unity.EditorCoroutines.Editor;
-
-// using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
+using Object = UnityEngine.Object; // using Unity.EditorCoroutines.Editor;
 
 namespace Miniclip.MUShapeShifter {
    
