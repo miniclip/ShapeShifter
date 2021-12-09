@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.Animations;
@@ -104,6 +105,8 @@ namespace Miniclip.MUShapeShifter {
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
                 
+                GUILayout.Label("Test Buttons");
+                
                 if(GUILayout.Button("Skin Sync"))
                 {
                     SkinAssets(configuration.Sprites.ToArray());
@@ -112,6 +115,14 @@ namespace Miniclip.MUShapeShifter {
                 if(GUILayout.Button("Skin Coroutine"))
                 {
                     SkinAssets(configuration.Sprites.ToArray(), useAsync:true);
+                }
+
+                if (GUILayout.Button("Print skinnable assets"))
+                {
+                    Debug.Log(
+                        $"Total: {configuration.Sprites.Count}. "
+                        + $"Eligible to skin: {GetEligibleAssetPaths(configuration.Sprites.ToArray()).Count()}"
+                    );
                 }
                 
                 GUILayout.FlexibleSpace();

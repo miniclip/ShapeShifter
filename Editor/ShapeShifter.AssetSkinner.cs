@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using Unity.EditorCoroutines.Editor;
 
@@ -268,14 +269,13 @@ namespace Miniclip.MUShapeShifter {
             
         }
 
-        private IEnumerator SkinMultipleAssetsEnumerator(Object[] assets, bool saveFirst = true)
+        private IEnumerator SkinMultipleAssetsEnumerator(string[] assetPaths, bool saveFirst = true)
         {
             EditorUtility.DisplayProgressBar("Skinning", "", 0);
-            for (int index = 0; index < assets.Length; index++)
+            for (int index = 0; index < assetPaths.Length; index++)
             {
-                EditorUtility.DisplayProgressBar("Skinning", "", (float)index/assets.Length);
-                Object asset = assets[index];
-                string path = AssetDatabase.GetAssetPath(asset);
+                EditorUtility.DisplayProgressBar("Skinning", "", (float)index/assetPaths.Length);
+                string path = assetPaths[index];
                 yield return SkinAsset(path);
             }
             EditorUtility.DisplayProgressBar("Skinning", "", 1);
@@ -285,41 +285,55 @@ namespace Miniclip.MUShapeShifter {
 
         private void SkinAssets(Object[] assets, bool saveFirst = true, bool useAsync = false)
         {
+            if (saveFirst)
+            {
+                this.SavePendingChanges();
+            }
+
+            IEnumerable<string> assetPaths = GetEligibleAssetPaths(assets);
+            
+
             if (useAsync)
             {
-                EditorCoroutineUtility.StartCoroutine(SkinMultipleAssetsEnumerator(assets, saveFirst), this);
-                return;
+                EditorCoroutineUtility.StartCoroutine(
+                    SkinMultipleAssetsEnumerator(assetPaths.ToArray(), saveFirst),
+                    this
+                );
             }
-            
-            if (saveFirst)
+            else
             {
-                this.SavePendingChanges();
+                foreach (string assetPath in assetPaths)
+                {
+                    SkinAsset(assetPath);
+                }
             }
+        }
 
-            List<string> paths = new List<String>();
-            
-            for (int index = 0; index < assets.Length; index++)
-            {
-                Object asset = assets[index];
-                string path = AssetDatabase.GetAssetPath(asset);
-               
-                SkinAsset(path);
-            }
+        private IEnumerable<string> GetEligibleAssetPaths(Object[] assets)
+        {
+            IEnumerable<string> assetPaths =
+                assets.Select(AssetDatabase.GetAssetPath);
+            RemoveEmptyAssetPaths(ref assetPaths);
+            RemoveDuplicatedAssetPaths(ref assetPaths);
+            RemoveAlreadySkinnedAssets(ref assetPaths);
+            return assetPaths;
+        }
+
+        private void RemoveEmptyAssetPaths(ref IEnumerable<string> assetPaths)
+        {
+            assetPaths = assetPaths.Where(assetPath => !string.IsNullOrEmpty(assetPath));
+        }
+
+        private void RemoveDuplicatedAssetPaths(ref IEnumerable<string> assetPaths)
+        {
+            assetPaths = assetPaths.Distinct();
         }
         
-        private void SkinAssets(string[] assetPaths, bool saveFirst = true)
+        private void RemoveAlreadySkinnedAssets(ref IEnumerable<string> assetPaths)
         {
-            if (saveFirst)
-            {
-                this.SavePendingChanges();
-            }
-            
-            foreach (string assetPath in assetPaths)
-            {
-                SkinAsset(assetPath, false);
-            }
+           assetPaths = assetPaths.Where(assetPath => !IsSkinned(assetPath));
         }
-
+        
         private IEnumerator SkinAsset(string assetPath, bool saveFirst = true)
         {
             if (saveFirst)
