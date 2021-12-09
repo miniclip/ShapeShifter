@@ -13,7 +13,6 @@ namespace Miniclip.MUShapeShifter {
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         private static readonly string ExternalAssetsFolder = "external";
         private static readonly string InternalAssetsFolder = "internal";
-        // private static readonly string SkinnedUserData = "{ShapeShifter:skinned}";
         
         private static readonly Type[] SupportedTypes = {
             typeof(AnimationClip),

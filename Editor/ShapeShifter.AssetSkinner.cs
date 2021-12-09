@@ -5,7 +5,7 @@ using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object; // using Unity.EditorCoroutines.Editor;
+using Object = UnityEngine.Object;
 
 namespace Miniclip.MUShapeShifter {
    
@@ -242,19 +242,6 @@ namespace Miniclip.MUShapeShifter {
             }
         }
         
-        // private void OnFileSystemChanged(object sender, FileSystemEventArgs args) {
-        //     
-        //     if (!configuration.UseFileSystemWatcher)
-        //         return;
-        //     
-        //     //TODO: check if this opens a file handle INVESTIGATE
-        //     DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
-        //     string game = assetDirectory.Parent.Parent.Name;
-        //     
-        //     string key = this.GenerateAssetKey(game, assetDirectory.Name);
-        //     this.dirtyAssets.Add(key);
-        // }
-
         private void OnSelectionChange() {
             this.dirtyAssets.Clear();
             this.previewPerAsset.Clear();
