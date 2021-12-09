@@ -90,11 +90,24 @@ namespace Miniclip.MUShapeShifter {
                 float buttonWidth = EditorGUIUtility.currentViewWidth * (1.0f / this.configuration.GameNames.Count);
                 buttonWidth -= 20; // to account for a possible scrollbar or some extra padding 
 
-                bool clicked = GUILayout.Button(
-                    this.previewPerAsset[key],
-                    GUILayout.Width(buttonWidth),
-                    GUILayout.MaxHeight(buttonWidth)
-                );
+                bool clicked = false;
+                if (previewPerAsset.TryGetValue(key, out Texture2D previewImage))
+                {
+                    clicked = GUILayout.Button(
+                        previewImage,
+                        GUILayout.Width(buttonWidth),
+                        GUILayout.MaxHeight(buttonWidth)
+                    );
+                }
+                else
+                {
+                    clicked = GUILayout.Button(
+                        "Missing Preview Image",
+                        GUILayout.Width(buttonWidth),
+                        GUILayout.MaxHeight(buttonWidth)
+                    );
+                }
+                
                 
                 if (clicked) {
                     EditorUtility.RevealInFinder(path);
