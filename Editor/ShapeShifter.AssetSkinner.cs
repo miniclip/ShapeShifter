@@ -152,36 +152,49 @@ namespace Miniclip.MUShapeShifter {
             }
         }
 
-        private void GenerateAssetPreview(string key, string assetPath) {
-            // if (this.dirtyAssets.Contains(key) || ! this.previewPerAsset.ContainsKey(key)) {
-            //     this.dirtyAssets.Remove(key);
-            //
-            //     Texture2D texturePreview = EditorGUIUtility.FindTexture(errorIcon);
-            //     if (Directory.Exists(assetPath)) {
-            //         texturePreview = EditorGUIUtility.FindTexture("Folder Icon");
-            //     } else if (!File.Exists(assetPath)) {
-            //         texturePreview = EditorGUIUtility.FindTexture(errorIcon);
-            //     } else {
-            //         string extension = Path.GetExtension(assetPath);
-            //
-            //         if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp") {
-            //             texturePreview = new Texture2D(0, 0);
-            //             texturePreview.LoadImage(File.ReadAllBytes(assetPath));
-            //         } else {
-            //             string icon = defaultIcon;
-            //
-            //             if (iconPerExtension.ContainsKey(extension)) {
-            //                 icon = iconPerExtension[extension];
-            //             }
-            //
-            //             texturePreview = (Texture2D)EditorGUIUtility.IconContent(icon).image;
-            //         }
-            //     }
-            //     this.previewPerAsset[key] = texturePreview;
-            // }
+        private void GenerateAssetPreview(string key, string assetPath)
+        {
+            if (this.dirtyAssets.Contains(key) || !this.previewPerAsset.ContainsKey(key))
+            {
+                this.dirtyAssets.Remove(key);
+
+                Texture2D texturePreview = EditorGUIUtility.FindTexture(errorIcon);
+                if (Directory.Exists(assetPath))
+                {
+                    texturePreview = EditorGUIUtility.FindTexture("Folder Icon");
+                }
+                else if (!File.Exists(assetPath))
+                {
+                    texturePreview = EditorGUIUtility.FindTexture(errorIcon);
+                }
+                else
+                {
+                    string extension = Path.GetExtension(assetPath);
+
+                    if (IsValidImageFormat(extension))
+                    {
+                        texturePreview = new Texture2D(0, 0);
+                        texturePreview.LoadImage(File.ReadAllBytes(assetPath));
+                    }
+                    else
+                    {
+                        string icon = defaultIcon;
+
+                        if (iconPerExtension.ContainsKey(extension))
+                        {
+                            icon = iconPerExtension[extension];
+                        }
+
+                        texturePreview = (Texture2D) EditorGUIUtility.IconContent(icon).image;
+                    }
+                }
+
+                this.previewPerAsset[key] = texturePreview;
+            }
         }
-        
-        
+
+        private static bool IsValidImageFormat(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp";
+
         private void OnAssetSkinnerGUI() {
             this.showSkinner = EditorGUILayout.Foldout(this.showSkinner, "Asset Skinner");
 
