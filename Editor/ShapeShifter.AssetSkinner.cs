@@ -16,7 +16,6 @@ namespace Miniclip.MUShapeShifter {
     public partial class ShapeShifter {
         private Vector2 scrollPosition;
         private bool showSkinner = true;
-        private FileSystemWatcher watcher;
 
         private HashSet<string> dirtyAssets = new HashSet<string>();
         private Dictionary<string, Texture2D> previewPerAsset = new Dictionary<string, Texture2D>();
@@ -38,17 +37,6 @@ namespace Miniclip.MUShapeShifter {
 
         private void OnAssetSkinnerEnable()
         {
-            if (this.watcher == null)
-            {
-                this.watcher = new FileSystemWatcher();
-                this.watcher.Path = this.skinsFolder.FullName;
-                this.watcher.IncludeSubdirectories = true;
-            }
-
-            // To account for Unity's behaviour of sending consecutive OnEnables without an OnDisable
-            this.watcher.Changed -= this.OnFileSystemChanged;
-            this.watcher.Changed += this.OnFileSystemChanged;
-            this.watcher.EnableRaisingEvents = true;
         }
 
         private bool IsSkinned(string assetPath)
@@ -58,7 +46,7 @@ namespace Miniclip.MUShapeShifter {
                 if (IsSkinned(assetPath, game))
                     return true;
             }
-
+            
             return false;
         }
         
@@ -156,32 +144,32 @@ namespace Miniclip.MUShapeShifter {
         }
 
         private void GenerateAssetPreview(string key, string assetPath) {
-            if (this.dirtyAssets.Contains(key) || ! this.previewPerAsset.ContainsKey(key)) {
-                this.dirtyAssets.Remove(key);
-
-                Texture2D texturePreview = EditorGUIUtility.FindTexture(errorIcon);
-                if (Directory.Exists(assetPath)) {
-                    texturePreview = EditorGUIUtility.FindTexture("Folder Icon");
-                } else if (!File.Exists(assetPath)) {
-                    texturePreview = EditorGUIUtility.FindTexture(errorIcon);
-                } else {
-                    string extension = Path.GetExtension(assetPath);
-
-                    if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp") {
-                        texturePreview = new Texture2D(0, 0);
-                        texturePreview.LoadImage(File.ReadAllBytes(assetPath));
-                    } else {
-                        string icon = defaultIcon;
-
-                        if (iconPerExtension.ContainsKey(extension)) {
-                            icon = iconPerExtension[extension];
-                        }
-
-                        texturePreview = (Texture2D)EditorGUIUtility.IconContent(icon).image;
-                    }
-                }
-                this.previewPerAsset[key] = texturePreview;
-            }
+            // if (this.dirtyAssets.Contains(key) || ! this.previewPerAsset.ContainsKey(key)) {
+            //     this.dirtyAssets.Remove(key);
+            //
+            //     Texture2D texturePreview = EditorGUIUtility.FindTexture(errorIcon);
+            //     if (Directory.Exists(assetPath)) {
+            //         texturePreview = EditorGUIUtility.FindTexture("Folder Icon");
+            //     } else if (!File.Exists(assetPath)) {
+            //         texturePreview = EditorGUIUtility.FindTexture(errorIcon);
+            //     } else {
+            //         string extension = Path.GetExtension(assetPath);
+            //
+            //         if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp") {
+            //             texturePreview = new Texture2D(0, 0);
+            //             texturePreview.LoadImage(File.ReadAllBytes(assetPath));
+            //         } else {
+            //             string icon = defaultIcon;
+            //
+            //             if (iconPerExtension.ContainsKey(extension)) {
+            //                 icon = iconPerExtension[extension];
+            //             }
+            //
+            //             texturePreview = (Texture2D)EditorGUIUtility.IconContent(icon).image;
+            //         }
+            //     }
+            //     this.previewPerAsset[key] = texturePreview;
+            // }
         }
         
         
@@ -232,18 +220,18 @@ namespace Miniclip.MUShapeShifter {
             }
         }
         
-        private void OnFileSystemChanged(object sender, FileSystemEventArgs args) {
-            
-            if (!configuration.UseFileSystemWatcher)
-                return;
-            
-            //TODO: check if this opens a file handle INVESTIGATE
-            DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
-            string game = assetDirectory.Parent.Parent.Name;
-            
-            string key = this.GenerateAssetKey(game, assetDirectory.Name);
-            this.dirtyAssets.Add(key);
-        }
+        // private void OnFileSystemChanged(object sender, FileSystemEventArgs args) {
+        //     
+        //     if (!configuration.UseFileSystemWatcher)
+        //         return;
+        //     
+        //     //TODO: check if this opens a file handle INVESTIGATE
+        //     DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
+        //     string game = assetDirectory.Parent.Parent.Name;
+        //     
+        //     string key = this.GenerateAssetKey(game, assetDirectory.Name);
+        //     this.dirtyAssets.Add(key);
+        // }
 
         private void OnSelectionChange() {
             this.dirtyAssets.Clear();
@@ -269,21 +257,20 @@ namespace Miniclip.MUShapeShifter {
             
         }
 
-        private IEnumerator SkinMultipleAssetsEnumerator(string[] assetPaths, bool saveFirst = true)
+        private void SkinAssets(string[] assetPaths, bool saveFirst = true)
         {
-            EditorUtility.DisplayProgressBar("Skinning", "", 0);
-            for (int index = 0; index < assetPaths.Length; index++)
+            if (saveFirst)
             {
-                EditorUtility.DisplayProgressBar("Skinning", "", (float)index/assetPaths.Length);
-                string path = assetPaths[index];
-                yield return SkinAsset(path);
+                this.SavePendingChanges();
             }
-            EditorUtility.DisplayProgressBar("Skinning", "", 1);
-            EditorUtility.ClearProgressBar();
-            yield return null;
+
+            foreach (string assetPath in assetPaths)
+            {
+                SkinAsset(assetPath);
+            }
         }
 
-        private void SkinAssets(Object[] assets, bool saveFirst = true, bool useAsync = false)
+        private void SkinAssets(Object[] assets, bool saveFirst = true)
         {
             if (saveFirst)
             {
@@ -291,21 +278,10 @@ namespace Miniclip.MUShapeShifter {
             }
 
             IEnumerable<string> assetPaths = GetEligibleAssetPaths(assets);
-            
 
-            if (useAsync)
+            foreach (string assetPath in assetPaths)
             {
-                EditorCoroutineUtility.StartCoroutine(
-                    SkinMultipleAssetsEnumerator(assetPaths.ToArray(), saveFirst),
-                    this
-                );
-            }
-            else
-            {
-                foreach (string assetPath in assetPaths)
-                {
-                    SkinAsset(assetPath);
-                }
+                SkinAsset(assetPath);
             }
         }
 
@@ -334,7 +310,7 @@ namespace Miniclip.MUShapeShifter {
            assetPaths = assetPaths.Where(assetPath => !IsSkinned(assetPath));
         }
         
-        private IEnumerator SkinAsset(string assetPath, bool saveFirst = true)
+        private void SkinAsset(string assetPath, bool saveFirst = true)
         {
             if (saveFirst)
             {
@@ -370,21 +346,16 @@ namespace Miniclip.MUShapeShifter {
                 if (AssetDatabase.IsValidFolder(assetPath))
                 {
                     DirectoryInfo targetFolder = Directory.CreateDirectory(target);
-                    yield return IOUtils.CopyFolder(new DirectoryInfo(origin), targetFolder);
+                    IOUtils.CopyFolder(new DirectoryInfo(origin), targetFolder);
                 }
                 else
                 {
-                    yield return IOUtils.CopyFile(origin, target);
+                    IOUtils.CopyFile(origin, target);
                 }
             }
-
-            yield return null;
         }
         
         private void OnDisable() {
-            this.watcher.EnableRaisingEvents = false;
-            this.watcher.Changed -= this.OnFileSystemChanged;
-            
             this.dirtyAssets.Clear();
             this.previewPerAsset.Clear();
         }

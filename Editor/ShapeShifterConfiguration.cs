@@ -18,10 +18,5 @@ namespace Miniclip.MUShapeShifter {
         
         public List<Sprite> Sprites => sprites;
         
-        [SerializeField]
-        private bool useFileSystemWatcher;
-        
-        public bool UseFileSystemWatcher => useFileSystemWatcher;
-        
     }
 }

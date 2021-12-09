@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -112,11 +113,6 @@ namespace Miniclip.MUShapeShifter {
                     SkinAssets(configuration.Sprites.ToArray());
                 }
 
-                if(GUILayout.Button("Skin Coroutine"))
-                {
-                    SkinAssets(configuration.Sprites.ToArray(), useAsync:true);
-                }
-
                 if (GUILayout.Button("Print skinnable assets"))
                 {
                     Debug.Log(
@@ -124,7 +120,7 @@ namespace Miniclip.MUShapeShifter {
                         + $"Eligible to skin: {GetEligibleAssetPaths(configuration.Sprites.ToArray()).Count()}"
                     );
                 }
-                
+
                 GUILayout.FlexibleSpace();
             }
             

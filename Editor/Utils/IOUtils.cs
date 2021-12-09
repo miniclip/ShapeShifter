@@ -43,12 +43,9 @@ namespace Miniclip.ShapeShifter.Utils
             yield return new WaitForSeconds(1);
         }
 
-        public static IEnumerator CopyFile(string source, string destination, bool overwrite = true)
+        public static void CopyFile(string source, string destination, bool overwrite = true)
         {
             File.Copy(source, destination, overwrite);
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            yield return new WaitForSeconds(1);
         }
 
         public static bool IsFolderEmpty(string path) => Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
