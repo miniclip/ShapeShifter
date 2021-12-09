@@ -12,11 +12,6 @@ namespace Miniclip.MUShapeShifter {
         [SerializeField]
         private List<string> skinnedExternalAssetPaths;
         public List<string> SkinnedExternalAssetPaths => this.skinnedExternalAssetPaths;
-
-        [SerializeField]
-        private List<Sprite> sprites;
-        
-        public List<Sprite> Sprites => sprites;
         
     }
 }

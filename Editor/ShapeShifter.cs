@@ -105,21 +105,6 @@ namespace Miniclip.MUShapeShifter {
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
                 
-                GUILayout.Label("Test Buttons");
-                
-                if(GUILayout.Button("Skin Sync"))
-                {
-                    SkinAssets(configuration.Sprites.ToArray());
-                }
-
-                if (GUILayout.Button("Print skinnable assets"))
-                {
-                    Debug.Log(
-                        $"Total: {configuration.Sprites.Count}. "
-                        + $"Eligible to skin: {GetEligibleAssetPaths(configuration.Sprites.ToArray()).Count()}"
-                    );
-                }
-
                 GUILayout.FlexibleSpace();
             }
             
