@@ -35,30 +35,53 @@ namespace Miniclip.MUShapeShifter {
         {
         }
 
-        private bool IsSkinned(string assetPath)
-        {
-            foreach (var game in configuration.GameNames)
-            {
-                if (IsSkinned(assetPath, game))
-                    return true;
-            }
-            
-            return false;
-        }
+#region GUI
         
-        private bool IsSkinned(string assetPath, string game)
-        {
-            string guid = AssetDatabase.AssetPathToGUID(assetPath);
-            string assetFolder = Path.Combine(
-                this.skinsFolder.FullName,
-                game, 
-                InternalAssetsFolder,
-                guid
-            );
+        private void OnAssetSkinnerGUI() {
+            this.showSkinner = EditorGUILayout.Foldout(this.showSkinner, "Asset Skinner");
 
-            bool folderExists = Directory.Exists(assetFolder);
-            bool isFolderEmpty = IOUtils.IsFolderEmpty(assetFolder);
-            return folderExists && !isFolderEmpty;
+            if (! this.showSkinner) {
+                return;
+            }
+
+            GUIStyle boxStyle = GUI.skin.GetStyle("Box");
+
+            using (new GUILayout.VerticalScope(boxStyle)) {
+                GUILayout.Label ("Selected assets:", EditorStyles.boldLabel);
+                    
+                Object[] assets = Selection.GetFiltered<Object>(SelectionMode.Assets);
+                List<Object> supportedAssets = new List<Object>(assets.Length);
+                
+                foreach (Object asset in assets) {
+                    Type assetType = asset.GetType();
+
+                    if (assetType == typeof(DefaultAsset)) {
+                        if (AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(asset))) {
+                            supportedAssets.Add(asset);
+                            continue;
+                        }
+                    }
+                    
+                    foreach (Type supportedType in SupportedTypes) {
+                        if (assetType == supportedType || assetType.IsSubclassOf(supportedType)) {
+                            supportedAssets.Add(asset);
+                            break;
+                        }
+                    }
+                }
+                
+                if (supportedAssets.Count == 0) {
+                    GUILayout.Label("None.");
+                } else {
+                    this.scrollPosition = GUILayout.BeginScrollView(this.scrollPosition);
+                        
+                    foreach (Object asset in supportedAssets) {
+                        this.DrawAssetSection(asset);
+                    }
+                
+                    GUILayout.EndScrollView();
+                }
+            }
         }
         
         private void DrawAssetSection(Object asset) {
@@ -151,7 +174,7 @@ namespace Miniclip.MUShapeShifter {
                 this.SkinAsset(assetPath);
             }
         }
-
+        
         private void GenerateAssetPreview(string key, string assetPath)
         {
             if (this.dirtyAssets.Contains(key) || !this.previewPerAsset.ContainsKey(key))
@@ -192,55 +215,10 @@ namespace Miniclip.MUShapeShifter {
                 this.previewPerAsset[key] = texturePreview;
             }
         }
+        
+#endregion
 
-        private static bool IsValidImageFormat(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp";
-
-        private void OnAssetSkinnerGUI() {
-            this.showSkinner = EditorGUILayout.Foldout(this.showSkinner, "Asset Skinner");
-
-            if (! this.showSkinner) {
-                return;
-            }
-
-            GUIStyle boxStyle = GUI.skin.GetStyle("Box");
-
-            using (new GUILayout.VerticalScope(boxStyle)) {
-                GUILayout.Label ("Selected assets:", EditorStyles.boldLabel);
-                    
-                Object[] assets = Selection.GetFiltered<Object>(SelectionMode.Assets);
-                List<Object> supportedAssets = new List<Object>(assets.Length);
-                
-                foreach (Object asset in assets) {
-                    Type assetType = asset.GetType();
-
-                    if (assetType == typeof(DefaultAsset)) {
-                        if (AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(asset))) {
-                            supportedAssets.Add(asset);
-                            continue;
-                        }
-                    }
-                    
-                    foreach (Type supportedType in SupportedTypes) {
-                        if (assetType == supportedType || assetType.IsSubclassOf(supportedType)) {
-                            supportedAssets.Add(asset);
-                            break;
-                        }
-                    }
-                }
-                
-                if (supportedAssets.Count == 0) {
-                    GUILayout.Label("None.");
-                } else {
-                    this.scrollPosition = GUILayout.BeginScrollView(this.scrollPosition);
-                        
-                    foreach (Object asset in supportedAssets) {
-                        this.DrawAssetSection(asset);
-                    }
-                
-                    GUILayout.EndScrollView();
-                }
-            }
-        }
+        
         
         private void OnSelectionChange() {
             this.dirtyAssets.Clear();
@@ -279,21 +257,6 @@ namespace Miniclip.MUShapeShifter {
             }
         }
 
-        private void SkinAssets(Object[] assets, bool saveFirst = true)
-        {
-            if (saveFirst)
-            {
-                this.SavePendingChanges();
-            }
-
-            IEnumerable<string> assetPaths = GetEligibleAssetPaths(assets);
-
-            foreach (string assetPath in assetPaths)
-            {
-                SkinAsset(assetPath);
-            }
-        }
-
         private IEnumerable<string> GetEligibleAssetPaths(Object[] assets)
         {
             IEnumerable<string> assetPaths =
@@ -304,21 +267,12 @@ namespace Miniclip.MUShapeShifter {
             return assetPaths;
         }
 
-        private void RemoveEmptyAssetPaths(ref IEnumerable<string> assetPaths)
-        {
-            assetPaths = assetPaths.Where(assetPath => !string.IsNullOrEmpty(assetPath));
-        }
+        private void RemoveEmptyAssetPaths(ref IEnumerable<string> assetPaths) => assetPaths = assetPaths.Where(assetPath => !string.IsNullOrEmpty(assetPath));
 
-        private void RemoveDuplicatedAssetPaths(ref IEnumerable<string> assetPaths)
-        {
-            assetPaths = assetPaths.Distinct();
-        }
-        
-        private void RemoveAlreadySkinnedAssets(ref IEnumerable<string> assetPaths)
-        {
-           assetPaths = assetPaths.Where(assetPath => !IsSkinned(assetPath));
-        }
-        
+        private void RemoveDuplicatedAssetPaths(ref IEnumerable<string> assetPaths) => assetPaths = assetPaths.Distinct();
+
+        private void RemoveAlreadySkinnedAssets(ref IEnumerable<string> assetPaths) => assetPaths = assetPaths.Where(assetPath => !IsSkinned(assetPath));
+
         private void SkinAsset(string assetPath, bool saveFirst = true)
         {
             if (saveFirst)
@@ -362,6 +316,25 @@ namespace Miniclip.MUShapeShifter {
                     IOUtils.CopyFile(origin, target);
                 }
             }
+        }
+        
+        private static bool IsValidImageFormat(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp";
+
+        private bool IsSkinned(string assetPath) => configuration.GameNames.Any(game => IsSkinned(assetPath, game));
+
+        private bool IsSkinned(string assetPath, string game)
+        {
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+            string assetFolder = Path.Combine(
+                this.skinsFolder.FullName,
+                game, 
+                InternalAssetsFolder,
+                guid
+            );
+
+            bool folderExists = Directory.Exists(assetFolder);
+            bool isFolderEmpty = IOUtils.IsFolderEmpty(assetFolder);
+            return folderExists && !isFolderEmpty;
         }
         
         private void OnDisable() {

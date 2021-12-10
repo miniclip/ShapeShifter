@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
+using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Miniclip.MUShapeShifter {
     public partial class ShapeShifter : EditorWindow {
@@ -43,8 +41,50 @@ namespace Miniclip.MUShapeShifter {
             );
         }
 
-        private string GenerateAssetKey(string game, string guid) {
-            return game + ":" + guid;
+        private string GenerateAssetKey(string game, string guid) => game + ":" + guid;
+
+        private void OnEnable() {
+            this.InitialiseConfiguration();
+            this.defaultConfigurationEditor = Editor.CreateEditor(
+                this.configuration,
+                typeof(ShapeShifterConfigurationEditor)
+            );
+            
+            this.skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
+            IOUtils.TryCreateDirectory(skinsFolder.FullName);
+            
+            this.OnAssetSkinnerEnable();
+            this.OnExternalAssetSkinnerEnable();
+            this.InitializeFileWatcher();
+        }
+
+        private FileSystemWatcher fileWatcher;
+        private void InitializeFileWatcher()
+        {
+            if (this.fileWatcher == null) {
+                Debug.Log($"Initializing FSW at {skinsFolder.FullName}");
+                this.fileWatcher = new FileSystemWatcher();
+                string skinsFolderFullName = this.skinsFolder.FullName+"FSWTEST/";
+                IOUtils.TryCreateDirectory(skinsFolderFullName);
+                this.fileWatcher.Path = skinsFolderFullName;
+                this.fileWatcher.IncludeSubdirectories = true;
+                this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
+            }
+            fileWatcher.Dispose();
+            // To account for Unity's behaviour of sending consecutive OnEnables without an OnDisable
+            this.fileWatcher.Changed -= this.OnFileSystemChanged;
+            this.fileWatcher.Changed += this.OnFileSystemChanged;
+            this.fileWatcher.EnableRaisingEvents = true;
+            
+        }
+
+        private void OnFileSystemChanged(object sender, FileSystemEventArgs args)
+        {
+            DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
+            string game = assetDirectory.Parent.Parent.Name;
+            string key = this.GenerateAssetKey(game, assetDirectory.Name);
+            this.dirtyAssets.Add(key);
+            Debug.Log($"FSW event: {args.Name}\n{args.ChangeType.ToString()}");
         }
 
         private void InitialiseConfiguration() {
@@ -76,19 +116,6 @@ namespace Miniclip.MUShapeShifter {
                 AssetDatabase.Refresh();
             }
         }
-
-        private void OnEnable() {
-            this.InitialiseConfiguration();
-            this.defaultConfigurationEditor = Editor.CreateEditor(
-                this.configuration,
-                typeof(ShapeShifterConfigurationEditor)
-            );
-
-            this.skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
-            Directory.CreateDirectory(this.skinsFolder.FullName);
-            this.OnAssetSkinnerEnable();
-            this.OnExternalAssetSkinnerEnable();
-        }
         
         private void OnGUI() {
             using (new GUILayout.VerticalScope()) {
@@ -104,6 +131,11 @@ namespace Miniclip.MUShapeShifter {
                 this.OnAssetSwitcherGUI();
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
+
+                if (GUILayout.Button("GC"))
+                {
+                    GC.Collect();
+                }
                 
                 GUILayout.FlexibleSpace();
             }
