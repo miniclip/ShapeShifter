@@ -2,7 +2,7 @@
 using UnityEditorInternal;
 using UnityEngine;
 
-namespace Miniclip.MUShapeShifter {
+namespace Miniclip.ShapeShifter {
     
     [CustomEditor(typeof(ShapeShifterConfiguration))]
     public class ShapeShifterConfigurationEditor : Editor {

@@ -8,8 +8,8 @@ using UnityEditor;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-namespace Miniclip.MUShapeShifter {
-   
+namespace Miniclip.ShapeShifter {
+    
     public partial class ShapeShifter {
 
         private int selectedGame;

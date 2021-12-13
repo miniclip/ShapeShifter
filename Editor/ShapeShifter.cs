@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
 
-namespace Miniclip.MUShapeShifter {
+namespace Miniclip.ShapeShifter {
     public partial class ShapeShifter : EditorWindow {
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         private static readonly string ExternalAssetsFolder = "external";

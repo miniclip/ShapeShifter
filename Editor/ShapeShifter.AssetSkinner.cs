@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Miniclip.MUShapeShifter {
+namespace Miniclip.ShapeShifter {
    
     public partial class ShapeShifter {
         private Vector2 scrollPosition;
