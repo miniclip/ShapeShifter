@@ -16,7 +16,7 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
-        public static IEnumerator CopyFolder(DirectoryInfo source, DirectoryInfo target)
+        public static void CopyFolder(DirectoryInfo source, DirectoryInfo target)
         {
             Directory.CreateDirectory(target.FullName);
 
@@ -40,7 +40,6 @@ namespace Miniclip.ShapeShifter.Utils
                 DirectoryInfo nextTarget = target.CreateSubdirectory(nextSource.Name);
                 CopyFolder(nextSource, nextTarget);
             }
-            yield return new WaitForSeconds(1);
         }
 
         public static void CopyFile(string source, string destination, bool overwrite = true)
