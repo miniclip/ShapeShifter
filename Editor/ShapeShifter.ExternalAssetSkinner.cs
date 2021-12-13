@@ -82,7 +82,7 @@ namespace Miniclip.ShapeShifter {
         }
 
         // since Path.GetRelativePath doesn't seem to be available
-        private string GetRelativePath(string absolutePath, string relativeTo) {
+        private string GetRelativeURIPath(string absolutePath, string relativeTo) {
             if (! relativeTo.EndsWith("/")) {
                 relativeTo += "/";  
             }
@@ -190,7 +190,7 @@ namespace Miniclip.ShapeShifter {
                 return;
             }
 
-            string relativeAssetPath = this.GetRelativePath(absoluteAssetPath, Application.dataPath);
+            string relativeAssetPath = this.GetRelativeURIPath(absoluteAssetPath, Application.dataPath);
             
             if (this.configuration.SkinnedExternalAssetPaths.Contains(relativeAssetPath)) {
                 EditorUtility.DisplayDialog(

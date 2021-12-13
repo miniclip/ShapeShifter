@@ -320,11 +320,15 @@ namespace Miniclip.ShapeShifter {
         
         private static bool IsValidImageFormat(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp";
 
-        private bool IsSkinned(string assetPath) => configuration.GameNames.Any(game => IsSkinned(assetPath, game));
+        public bool IsSkinned(string assetPath) => configuration.GameNames.Any(game => IsSkinned(assetPath, game));
 
         private bool IsSkinned(string assetPath, string game)
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
+            
+            if (string.IsNullOrEmpty(guid))
+                return false;
+            
             string assetFolder = Path.Combine(
                 this.skinsFolder.FullName,
                 game, 

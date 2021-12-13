@@ -15,7 +15,6 @@ namespace Miniclip.ShapeShifter {
         private int selectedGame;
         private string lastSwitched;
         private bool showSwitcher = true;
-
         
         private void CopyFromOriginToSkinnedExternal(DirectoryInfo directory) {
             string relativePath = this.GenerateRelativePathFromKey(directory.Name);
@@ -240,6 +239,19 @@ namespace Miniclip.ShapeShifter {
         }
 
         private void SwitchToGame(int selected) {
+
+            if (configuration.ModifiedAssetPaths.Count > 0)
+            {
+                bool abortSwitch = EditorUtility.DisplayDialog(
+                    "Shape Shifter",
+                    $"There are unsaved changes in your skinned assets. You should make sure to save them into your Active Game folder",
+                    "OK",
+                    "Cancel"
+                );
+                
+                Debug.Log(abortSwitch.ToString());
+            }
+            
             this.lastSwitched = this.configuration.GameNames[selected];
             this.PerformCopiesWithTracking(
                 selected,

@@ -14,6 +14,10 @@ namespace Miniclip.ShapeShifter
         [SerializeField]
         private List<string> skinnedExternalAssetPaths;
         public List<string> SkinnedExternalAssetPaths => this.skinnedExternalAssetPaths;
-        
+
+        [SerializeField]
+        private List<string> modifiedAssetPaths = new List<string>();
+
+        public List<string> ModifiedAssetPaths => modifiedAssetPaths;
     }
 }

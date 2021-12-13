@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Miniclip.ShapeShifter.Utils;
@@ -12,6 +13,19 @@ namespace Miniclip.ShapeShifter {
         private static readonly string ExternalAssetsFolder = "external";
         private static readonly string InternalAssetsFolder = "internal";
         
+        private static ShapeShifter instance;
+        public static ShapeShifter Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = ShowNextToInspector();
+                }
+                return instance;
+            }
+        }
+
         private static readonly Type[] SupportedTypes = {
             typeof(AnimationClip),
             typeof(AnimatorController),
@@ -29,12 +43,13 @@ namespace Miniclip.ShapeShifter {
         
         private DirectoryInfo skinsFolder;
 
+
         [MenuItem("Window/Shape Shifter", false, (int)'G')]
-        public static void ShowNextToInspector() {
+        public static ShapeShifter ShowNextToInspector() {
             Assembly editorAssembly = typeof(Editor).Assembly;
             Type inspectorWindowType = editorAssembly.GetType("UnityEditor.InspectorWindow");
             
-            GetWindow<ShapeShifter>(
+            return GetWindow<ShapeShifter>(
                 "Shape Shifter", 
                 true, 
                 inspectorWindowType
@@ -61,20 +76,20 @@ namespace Miniclip.ShapeShifter {
         private FileSystemWatcher fileWatcher;
         private void InitializeFileWatcher()
         {
-            if (this.fileWatcher == null) {
-                Debug.Log($"Initializing FSW at {skinsFolder.FullName}");
-                this.fileWatcher = new FileSystemWatcher();
-                string skinsFolderFullName = this.skinsFolder.FullName+"FSWTEST/";
-                IOUtils.TryCreateDirectory(skinsFolderFullName);
-                this.fileWatcher.Path = skinsFolderFullName;
-                this.fileWatcher.IncludeSubdirectories = true;
-                this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
-            }
-            fileWatcher.Dispose();
-            // To account for Unity's behaviour of sending consecutive OnEnables without an OnDisable
-            this.fileWatcher.Changed -= this.OnFileSystemChanged;
-            this.fileWatcher.Changed += this.OnFileSystemChanged;
-            this.fileWatcher.EnableRaisingEvents = true;
+            // if (this.fileWatcher == null) {
+            //     Debug.Log($"Initializing FSW at {skinsFolder.FullName}");
+            //     this.fileWatcher = new FileSystemWatcher();
+            //     string skinsFolderFullName = this.skinsFolder.FullName+"FSWTEST/";
+            //     IOUtils.TryCreateDirectory(skinsFolderFullName);
+            //     this.fileWatcher.Path = skinsFolderFullName;
+            //     this.fileWatcher.IncludeSubdirectories = true;
+            //     this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
+            // }
+            // fileWatcher.Dispose();
+            // // To account for Unity's behaviour of sending consecutive OnEnables without an OnDisable
+            // this.fileWatcher.Changed -= this.OnFileSystemChanged;
+            // this.fileWatcher.Changed += this.OnFileSystemChanged;
+            // this.fileWatcher.EnableRaisingEvents = true;
             
         }
 
@@ -149,6 +164,41 @@ namespace Miniclip.ShapeShifter {
             // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save
             EditorApplication.ExecuteMenuItem("File/Save Project");
         }
-        
+
+        public void RegisterModifiedAsset(string modifiedAssetPath)
+        {
+            if (!IsSkinned(modifiedAssetPath))
+                return;
+            
+            if (configuration.ModifiedAssetPaths.Contains(modifiedAssetPath))
+                return;
+            
+            configuration.ModifiedAssetPaths.Add(modifiedAssetPath);
+        }
+
+        public bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)
+        {
+            if (assetPath == "Assets/")
+            {
+                skinnedParentFolderPath = null;
+                return false;
+            }
+
+            string[] parentFolders = assetPath.Split('/');
+
+            for (int index = parentFolders.Length - 1; index >= 0; index--)
+            {
+                string parentFolder = string.Join("/", parentFolders, 0, index);
+
+                if (IsSkinned(parentFolder))
+                {
+                    skinnedParentFolderPath = parentFolder;
+                    return true;
+                }
+            }
+            skinnedParentFolderPath = null;
+            return false;
+    
+        }
     }
 }
