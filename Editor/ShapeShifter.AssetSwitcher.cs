@@ -279,7 +279,7 @@ namespace Miniclip.ShapeShifter {
                     return;
                 }
                 
-                // OverwriteSelectedSkin();
+                OverwriteSelectedSkin(activeGame);
             }
             
             this.lastSwitched = this.configuration.GameNames[selected];
@@ -290,6 +290,7 @@ namespace Miniclip.ShapeShifter {
                 this.CopyFromSkinnedExternalToOrigin
             );
             activeGame = selected;
+            configuration.ModifiedAssetPaths.Clear();
         }
     }
 }

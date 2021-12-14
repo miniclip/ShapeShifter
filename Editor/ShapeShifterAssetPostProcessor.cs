@@ -23,17 +23,8 @@ namespace Miniclip.ShapeShifter
                     
                     return;
                 }
-                
-                
-                
                 ShapeShifter.Instance.RegisterModifiedAsset(assetPath);
             }
-
-            foreach (string str in deletedAssets)
-                Debug.Log("Deleted Asset: " + str);
-
-            for (int i = 0; i < movedAssets.Length; i++)
-                Debug.Log("Moved Asset: " + movedAssets[i] + " from: " + movedFromAssetPaths[i]);
         }
     }
 }
