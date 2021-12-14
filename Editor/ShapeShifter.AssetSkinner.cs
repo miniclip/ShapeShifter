@@ -257,22 +257,6 @@ namespace Miniclip.ShapeShifter {
             }
         }
 
-        private IEnumerable<string> GetEligibleAssetPaths(Object[] assets)
-        {
-            IEnumerable<string> assetPaths =
-                assets.Select(AssetDatabase.GetAssetPath);
-            RemoveEmptyAssetPaths(ref assetPaths);
-            RemoveDuplicatedAssetPaths(ref assetPaths);
-            RemoveAlreadySkinnedAssets(ref assetPaths);
-            return assetPaths;
-        }
-
-        private void RemoveEmptyAssetPaths(ref IEnumerable<string> assetPaths) => assetPaths = assetPaths.Where(assetPath => !string.IsNullOrEmpty(assetPath));
-
-        private void RemoveDuplicatedAssetPaths(ref IEnumerable<string> assetPaths) => assetPaths = assetPaths.Distinct();
-
-        private void RemoveAlreadySkinnedAssets(ref IEnumerable<string> assetPaths) => assetPaths = assetPaths.Where(assetPath => !IsSkinned(assetPath));
-
         private void SkinAsset(string assetPath, bool saveFirst = true)
         {
             if (saveFirst)
@@ -318,8 +302,6 @@ namespace Miniclip.ShapeShifter {
             }
         }
         
-        private static bool IsValidImageFormat(string extension) => extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp";
-
         public bool IsSkinned(string assetPath) => configuration.GameNames.Any(game => IsSkinned(assetPath, game));
 
         private bool IsSkinned(string assetPath, string game)
@@ -345,5 +327,28 @@ namespace Miniclip.ShapeShifter {
             this.dirtyAssets.Clear();
             this.previewPerAsset.Clear();
         }
+        
+        
+        private IEnumerable<string> GetEligibleAssetPaths(Object[] assets)
+        {
+            IEnumerable<string> assetPaths =
+                assets.Select(AssetDatabase.GetAssetPath);
+            RemoveEmptyAssetPaths(ref assetPaths);
+            RemoveDuplicatedAssetPaths(ref assetPaths);
+            RemoveAlreadySkinnedAssets(ref assetPaths);
+            return assetPaths;
+        }
+
+        private static bool IsValidImageFormat(string extension) =>
+            extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp";
+
+        private void RemoveEmptyAssetPaths(ref IEnumerable<string> assetPaths) =>
+            assetPaths = assetPaths.Where(assetPath => !string.IsNullOrEmpty(assetPath));
+
+        private void RemoveDuplicatedAssetPaths(ref IEnumerable<string> assetPaths) =>
+            assetPaths = assetPaths.Distinct();
+
+        private void RemoveAlreadySkinnedAssets(ref IEnumerable<string> assetPaths) =>
+            assetPaths = assetPaths.Where(assetPath => !IsSkinned(assetPath));
     }
 }
