@@ -11,20 +11,7 @@ namespace Miniclip.ShapeShifter
         {
             foreach (string importedAsset in importedAssets)
             {
-                Debug.Log(importedAsset);
-                string assetPath = importedAsset;
-
-                if (!ShapeShifter.Instance.IsSkinned(importedAsset))
-                {
-                    if (ShapeShifter.Instance.TryGetParentSkinnedFolder(importedAsset, out string skinnedFolderPath))
-                    {
-                        ShapeShifter.Instance.RegisterModifiedAsset(skinnedFolderPath);
-                    }
-
-                    return;
-                }
-
-                ShapeShifter.Instance.RegisterModifiedAsset(assetPath);
+                ShapeShifter.Instance.RegisterModifiedAssetInUnity(importedAsset);
             }
         }
     }

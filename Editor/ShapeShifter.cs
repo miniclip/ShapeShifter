@@ -146,11 +146,6 @@ namespace Miniclip.ShapeShifter {
                 this.OnAssetSwitcherGUI();
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
-
-                if (GUILayout.Button("GC"))
-                {
-                    GC.Collect();
-                }
                 
                 GUILayout.FlexibleSpace();
             }
@@ -164,41 +159,6 @@ namespace Miniclip.ShapeShifter {
             // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save
             EditorApplication.ExecuteMenuItem("File/Save Project");
         }
-
-        public void RegisterModifiedAsset(string modifiedAssetPath)
-        {
-            if (!IsSkinned(modifiedAssetPath))
-                return;
-            
-            if (configuration.ModifiedAssetPaths.Contains(modifiedAssetPath))
-                return;
-            
-            configuration.ModifiedAssetPaths.Add(modifiedAssetPath);
-        }
-
-        public bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)
-        {
-            if (assetPath == "Assets/")
-            {
-                skinnedParentFolderPath = null;
-                return false;
-            }
-
-            string[] parentFolders = assetPath.Split('/');
-
-            for (int index = parentFolders.Length - 1; index >= 0; index--)
-            {
-                string parentFolder = string.Join("/", parentFolders, 0, index);
-
-                if (IsSkinned(parentFolder))
-                {
-                    skinnedParentFolderPath = parentFolder;
-                    return true;
-                }
-            }
-            skinnedParentFolderPath = null;
-            return false;
-    
-        }
+        
     }
 }
