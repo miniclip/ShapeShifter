@@ -76,6 +76,7 @@ namespace Miniclip.ShapeShifter {
         private FileSystemWatcher fileWatcher;
         private void InitializeFileWatcher()
         {
+            //TODO Add FSW to selected assets only
             // if (this.fileWatcher == null) {
             //     Debug.Log($"Initializing FSW at {skinsFolder.FullName}");
             //     this.fileWatcher = new FileSystemWatcher();
@@ -90,7 +91,6 @@ namespace Miniclip.ShapeShifter {
             // this.fileWatcher.Changed -= this.OnFileSystemChanged;
             // this.fileWatcher.Changed += this.OnFileSystemChanged;
             // this.fileWatcher.EnableRaisingEvents = true;
-            
         }
 
         private void OnFileSystemChanged(object sender, FileSystemEventArgs args)
