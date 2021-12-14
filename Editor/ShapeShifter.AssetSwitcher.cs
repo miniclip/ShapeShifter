@@ -62,12 +62,19 @@ namespace Miniclip.ShapeShifter {
             }
         }
 
-        private void CopyFromUnityToSkins(DirectoryInfo directory) {
-            string guid = directory.Name;
-            string origin = AssetDatabase.GUIDToAssetPath(guid);
-            string target = Path.Combine(directory.FullName, Path.GetFileName(origin));
+        private void CopyFromUnityToSkins(DirectoryInfo skinDirectory) {
             
-            //Debug.Log($"[Shape Shifter] Copying from: {origin} to {target}");
+            if (IOUtils.IsFolderEmpty(skinDirectory))
+            {
+                //There shouldn't be an empty skin folder, most likely it was removed outside of ShapeShifter. E.g. discarding changes in a git client.
+                skinDirectory.Delete();
+                return;
+            }
+
+            string guid = skinDirectory.Name;
+            string origin = AssetDatabase.GUIDToAssetPath(guid);
+            string target = Path.Combine(skinDirectory.FullName, Path.GetFileName(origin));
+            
             IOUtils.CopyFile(origin, target);
         }
 
