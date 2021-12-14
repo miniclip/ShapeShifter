@@ -12,9 +12,12 @@ namespace Miniclip.ShapeShifter {
     
     public partial class ShapeShifter {
 
-        private int selectedGame;
+        private int activeGame;
+        private int highlightedGame;
         private string lastSwitched;
         private bool showSwitcher = true;
+
+        private string ActiveGameName => configuration.GameNames[activeGame];
         
         private void CopyFromOriginToSkinnedExternal(DirectoryInfo directory) {
             string relativePath = this.GenerateRelativePathFromKey(directory.Name);
@@ -83,26 +86,36 @@ namespace Miniclip.ShapeShifter {
                 GUIStyle titleStyle = new GUIStyle (labelStyle){
                     alignment = TextAnchor.MiddleCenter
                 };
-                
+
                 string currentGame = string.IsNullOrEmpty(this.lastSwitched) ? "Unknown" : this.lastSwitched;
-                
+
                 GUILayout.Box($"Current game: {currentGame}", titleStyle);
 
-                this.selectedGame = GUILayout.SelectionGrid (
-                    this.selectedGame, 
-                    this.configuration.GameNames.ToArray(), 
+                this.highlightedGame = GUILayout.SelectionGrid(
+                    this.highlightedGame,
+                    this.configuration.GameNames.ToArray(),
                     2,
                     buttonStyle
                 );
-                
+
                 GUILayout.Space(10.0f);
 
-                if (GUILayout.Button("Switch!", buttonStyle)) {
-                    this.SwitchToGame(this.selectedGame);
+                if (GUILayout.Button("Switch!", buttonStyle))
+                {
+                    this.SwitchToGame(this.highlightedGame);
                 }
-                
-                if (GUILayout.Button("Overwrite selected skin", buttonStyle)) {
-                    this.OverwriteSelectedSkin(this.selectedGame);
+
+                if (GUILayout.Button($"Overwrite {configuration.GameNames[highlightedGame]} skin", buttonStyle))
+                {
+                    if (EditorUtility.DisplayDialog(
+                        "ShapeShifter",
+                        $"This will overwrite you current {configuration.GameNames[highlightedGame]} assets with the assets currently inside unity. Are you sure?",
+                        "Yes, overwrite it.",
+                        "Nevermind"
+                    ))
+                    {
+                        this.OverwriteSelectedSkin(this.highlightedGame);
+                    }
                 }
             }
         }
@@ -111,32 +124,37 @@ namespace Miniclip.ShapeShifter {
             this.SavePendingChanges();
                 
             string game = this.configuration.GameNames[selected];
-            
-            if (this.lastSwitched != game) {
+
+            if (this.lastSwitched != game)
+            {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.Append($"This will overwrite the {game} skins with the current assets. ");
-                
-                if (string.IsNullOrEmpty(this.lastSwitched)) {
+
+                if (string.IsNullOrEmpty(this.lastSwitched))
+                {
                     stringBuilder.Append("You haven't switched games this session.");
-                } else {
+                }
+                else
+                {
                     stringBuilder.Append($"The last asset switch was to {this.lastSwitched}");
                 }
 
                 stringBuilder.Append(" Are you sure?");
-                
+
                 if (!EditorUtility.DisplayDialog(
                     "Shape Shifter",
                     stringBuilder.ToString(),
                     "Yeah, I'm sure, go ahead.",
                     "Wait, what? No, stop!"
-                )) {
+                ))
+                {
                     return;
                 }
             }
             
             this.PerformCopiesWithTracking(
-                selected,
-                "Overwrite selected skin",
+                selected: selected,
+                description: "Overwrite selected skin",
                 this.CopyFromUnityToSkins,
                 this.CopyFromOriginToSkinnedExternal
             );
@@ -191,7 +209,7 @@ namespace Miniclip.ShapeShifter {
                     "Fine, I'll take a look."
                 );
 
-                this.selectedGame = 0;
+                this.activeGame = 0;
                 // TODO: ^this shouldn't just be assigned to 0, the operations should be atomic.
                 // If they fail, nothing should change.
             }
@@ -242,14 +260,19 @@ namespace Miniclip.ShapeShifter {
 
             if (configuration.ModifiedAssetPaths.Count > 0)
             {
-                bool abortSwitch = EditorUtility.DisplayDialog(
+                bool continueSwitch = EditorUtility.DisplayDialog(
                     "Shape Shifter",
                     $"There are unsaved changes in your skinned assets. You should make sure to save them into your Active Game folder",
                     "OK",
-                    "Cancel"
+                    "Cancel Switch"
                 );
+
+                if (!continueSwitch)
+                {
+                    return;
+                }
                 
-                Debug.Log(abortSwitch.ToString());
+                // OverwriteSelectedSkin();
             }
             
             this.lastSwitched = this.configuration.GameNames[selected];
@@ -259,6 +282,7 @@ namespace Miniclip.ShapeShifter {
                 this.CopyFromSkinsToUnity,
                 this.CopyFromSkinnedExternalToOrigin
             );
+            activeGame = selected;
         }
     }
 }

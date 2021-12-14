@@ -46,7 +46,8 @@ namespace Miniclip.ShapeShifter.Utils
         {
             File.Copy(source, destination, overwrite);
         }
-
+        
         public static bool IsFolderEmpty(string path) => Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
+        public static bool IsFolderEmpty(DirectoryInfo directoryInfo) => IsFolderEmpty(directoryInfo.FullName);
     }
 }
