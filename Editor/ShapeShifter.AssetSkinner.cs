@@ -227,21 +227,7 @@ namespace Miniclip.ShapeShifter {
             this.previewPerAsset.Clear();
             ClearAllWatchedPaths();
         }
-        
-        private string GetInternalAssetSkinFolder(string assetPath, string game)
-        {
-            string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-            string assetFolder = Path.Combine(
-                this.skinsFolder.FullName,
-                game,
-                InternalAssetsFolder,
-                guid
-            );
-
-            return assetFolder;
-        }
-        
         private void RemoveSkins(string assetPath) {
             foreach (string game in this.configuration.GameNames) {
                 string guid = AssetDatabase.AssetPathToGUID(assetPath);
