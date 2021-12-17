@@ -122,15 +122,28 @@ namespace Miniclip.ShapeShifter {
                 {
                     Debug.Log(GitUtils.CurrentBranch);
                     Debug.Log(GitUtils.RepositoryPath);
-
+                    Debug.Log(System.IO.Directory.GetCurrentDirectory());
+                    Debug.Log(Directory.GetParent(Application.dataPath).FullName);
+                    Debug.Log(Directory.GetParent(Application.dataPath).Name);
                     UnityEngine.Object[] objects = Selection.GetFiltered<UnityEngine.Object>(SelectionMode.Assets);
                     if (objects.Length > 0)
                     {
                         var path = AssetDatabase.GetAssetPath(objects[0]);
+                        Debug.Log(path);
                         Debug.Log($"Is Tracked: {GitUtils.IsFileTracked(path).ToString()}");
                     }
                 }
                 
+                if (GUILayout.Button("Git Untrack File"))
+                {
+                    UnityEngine.Object[] objects = Selection.GetFiltered<UnityEngine.Object>(SelectionMode.Assets);
+                    if (objects.Length > 0)
+                    {
+                        var path = AssetDatabase.GetAssetPath(objects[0]);
+                        GitUtils.UntrackFile(path, true);
+                    }
+                }
+
                 GUILayout.FlexibleSpace();
             }
             
