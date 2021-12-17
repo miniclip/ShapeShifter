@@ -6,6 +6,7 @@ using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
+using Object = System.Object;
 
 namespace Miniclip.ShapeShifter {
     public partial class ShapeShifter : EditorWindow {
@@ -121,6 +122,13 @@ namespace Miniclip.ShapeShifter {
                 {
                     Debug.Log(GitUtils.CurrentBranch);
                     Debug.Log(GitUtils.RepositoryPath);
+
+                    UnityEngine.Object[] objects = Selection.GetFiltered<UnityEngine.Object>(SelectionMode.Assets);
+                    if (objects.Length > 0)
+                    {
+                        var path = AssetDatabase.GetAssetPath(objects[0]);
+                        Debug.Log($"Is Tracked: {GitUtils.IsFileTracked(path).ToString()}");
+                    }
                 }
                 
                 GUILayout.FlexibleSpace();
