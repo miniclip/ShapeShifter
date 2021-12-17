@@ -198,6 +198,8 @@ namespace Miniclip.ShapeShifter {
                     {
                         texturePreview = new Texture2D(0, 0);
                         texturePreview.LoadImage(File.ReadAllBytes(assetPath));
+                        string skinFolder = Directory.GetParent(assetPath).FullName;
+                        StartWatchingFolder(skinFolder);
                     }
                     else
                     {
@@ -223,8 +225,23 @@ namespace Miniclip.ShapeShifter {
         private void OnSelectionChange() {
             this.dirtyAssets.Clear();
             this.previewPerAsset.Clear();
+            ClearAllWatchedPaths();
         }
+        
+        private string GetInternalAssetSkinFolder(string assetPath, string game)
+        {
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
+            string assetFolder = Path.Combine(
+                this.skinsFolder.FullName,
+                game,
+                InternalAssetsFolder,
+                guid
+            );
+
+            return assetFolder;
+        }
+        
         private void RemoveSkins(string assetPath) {
             foreach (string game in this.configuration.GameNames) {
                 string guid = AssetDatabase.AssetPathToGUID(assetPath);
@@ -238,8 +255,9 @@ namespace Miniclip.ShapeShifter {
                     InternalAssetsFolder,
                     guid
                 );
-                
-                Directory.Delete(assetFolder, true);                
+
+                StopWatchingFolder(assetFolder);
+                Directory.Delete(assetFolder, true);
             }
             
         }
