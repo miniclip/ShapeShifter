@@ -16,30 +16,20 @@ namespace Miniclip.ShapeShifter {
         private int selectedExternalAsset;
         private bool showExternalSkinner = true;
 
-        private string DetermineRecommendedPath() {
-            Process process = new Process {
-                StartInfo = new ProcessStartInfo {
-                    FileName = "git",
-                    Arguments = "rev-parse --git-dir",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                }
-            };
+        private string DetermineRecommendedPath()
+        {
+            string repositoryRoot = GitUtils.RepositoryPath;
 
-            process.Start();
-            string repositoryRoot = process.StandardOutput.ReadToEnd();
-            process.WaitForExit();
-
-            if (string.IsNullOrEmpty(repositoryRoot) || ! repositoryRoot.Contains(".git")) {
+            if (string.IsNullOrEmpty(repositoryRoot) || !repositoryRoot.Contains(".git"))
+            {
                 Debug.LogWarning("[ShapeShifter] Git repository not found. Is there supposed to be one?");
 
                 //start a bit outside of the project, but not too far away, we're trying to stay within
                 //the boundaries of assets related to this project, but without a repository this is
                 //just guesswork
                 return Application.dataPath + "/../../../";
-            } 
-              
+            }
+
             //string.Replace won't work here as sometimes there's line breaks at the end of the standard output stream 
             return repositoryRoot.Remove(repositoryRoot.IndexOf(".git", StringComparison.Ordinal));
         }
