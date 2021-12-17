@@ -70,38 +70,8 @@ namespace Miniclip.ShapeShifter {
             
             this.OnAssetSkinnerEnable();
             this.OnExternalAssetSkinnerEnable();
-            this.InitializeFileWatcher();
         }
-
-        private FileSystemWatcher fileWatcher;
-        private void InitializeFileWatcher()
-        {
-            //TODO Add FSW to selected assets only
-            // if (this.fileWatcher == null) {
-            //     Debug.Log($"Initializing FSW at {skinsFolder.FullName}");
-            //     this.fileWatcher = new FileSystemWatcher();
-            //     string skinsFolderFullName = this.skinsFolder.FullName+"FSWTEST/";
-            //     IOUtils.TryCreateDirectory(skinsFolderFullName);
-            //     this.fileWatcher.Path = skinsFolderFullName;
-            //     this.fileWatcher.IncludeSubdirectories = true;
-            //     this.fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
-            // }
-            // fileWatcher.Dispose();
-            // // To account for Unity's behaviour of sending consecutive OnEnables without an OnDisable
-            // this.fileWatcher.Changed -= this.OnFileSystemChanged;
-            // this.fileWatcher.Changed += this.OnFileSystemChanged;
-            // this.fileWatcher.EnableRaisingEvents = true;
-        }
-
-        private void OnFileSystemChanged(object sender, FileSystemEventArgs args)
-        {
-            DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
-            string game = assetDirectory.Parent.Parent.Name;
-            string key = this.GenerateAssetKey(game, assetDirectory.Name);
-            this.dirtyAssets.Add(key);
-            Debug.Log($"FSW event: {args.Name}\n{args.ChangeType.ToString()}");
-        }
-
+        
         private void InitialiseConfiguration() {
             if (this.configuration != null) {
                 return;
