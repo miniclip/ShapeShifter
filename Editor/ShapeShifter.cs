@@ -116,6 +116,12 @@ namespace Miniclip.ShapeShifter {
                 this.OnAssetSwitcherGUI();
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
+
+                if (GUILayout.Button("Git Test"))
+                {
+                    Debug.Log(GitUtils.CurrentBranch);
+                    Debug.Log(GitUtils.RepositoryPath);
+                }
                 
                 GUILayout.FlexibleSpace();
             }
