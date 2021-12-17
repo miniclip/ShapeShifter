@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using Miniclip.ShapeShifter.Extensions;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
@@ -8,21 +9,27 @@ namespace Miniclip.ShapeShifter.Utils
 {
     public class GitUtils
     {
-        public static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
+        internal static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
+        internal static string RepositoryPath => RunGitCommand("rev-parse --git-dir");
 
-        public static string RepositoryPath = RunGitCommand("rev-parse --git-dir");
+        internal static bool IsFileTracked(string filePath)
+        {
+            using (Process process = new Process())
+            {
+                string fullPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, filePath);
+
+                string arguments = $"ls-files --error-unmatch {fullPath}";
+                int exitCode = RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
+
+                return exitCode != 1;
+            }
+        }
 
         private static string RunGitCommand(string arguments)
         {
             using (Process process = new Process())
             {
-                int exitCode = process.Run(
-                    application: "git",
-                    arguments: arguments,
-                    workingDirectory: Application.dataPath,
-                    output: out string output,
-                    errors: out string errorOutput
-                );
+                int exitCode = RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
 
                 if (exitCode == 0)
                 {
@@ -35,5 +42,15 @@ namespace Miniclip.ShapeShifter.Utils
                 }
             }
         }
+
+        private static int RunProcessAndGetExitCode(string arguments, Process process, out string output,
+            out string errorOutput) =>
+            process.Run(
+                application: "git",
+                arguments: arguments,
+                workingDirectory: Application.dataPath,
+                out output,
+                out errorOutput
+            );
     }
 }
