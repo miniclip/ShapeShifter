@@ -120,17 +120,14 @@ namespace Miniclip.ShapeShifter {
 
                 if (GUILayout.Button("Git Test"))
                 {
-                    Debug.Log(GitUtils.CurrentBranch);
-                    Debug.Log(GitUtils.RepositoryPath);
-                    Debug.Log(System.IO.Directory.GetCurrentDirectory());
-                    Debug.Log(Directory.GetParent(Application.dataPath).FullName);
-                    Debug.Log(Directory.GetParent(Application.dataPath).Name);
+                    string folder = Directory.GetParent(Application.dataPath).Name;
+                    Debug.Log(folder);
                     UnityEngine.Object[] objects = Selection.GetFiltered<UnityEngine.Object>(SelectionMode.Assets);
                     if (objects.Length > 0)
                     {
                         var path = AssetDatabase.GetAssetPath(objects[0]);
                         Debug.Log(path);
-                        Debug.Log($"Is Tracked: {GitUtils.IsFileTracked(path).ToString()}");
+                        Debug.Log(Path.Combine(folder, path));
                     }
                 }
                 
@@ -140,7 +137,7 @@ namespace Miniclip.ShapeShifter {
                     if (objects.Length > 0)
                     {
                         var path = AssetDatabase.GetAssetPath(objects[0]);
-                        GitUtils.UntrackFile(path, true);
+                        GitUtils.Untrack(path, true);
                     }
                 }
 

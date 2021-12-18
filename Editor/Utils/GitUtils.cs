@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,9 +11,9 @@ namespace Miniclip.ShapeShifter.Utils
 {
     public class GitUtils
     {
+        private static readonly string GIT_IGNORE_BEGIN_LABEL = "# Begin ShapeShifter";
+        private static readonly string GIT_IGNORE_END_LABEL = "# End ShapeShifter";
 
-        private static string ShapeShifterGitIgnoreLabel = "# ShapeShifter";
-        
         internal static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
         internal static string RepositoryPath => RunGitCommand("rev-parse --git-dir");
 
@@ -29,19 +30,22 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
-        internal static void UntrackFile(string filePath, bool addFileToGitIgnore = false)
+        internal static void Untrack(string path, bool addToGitIgnore = false)
         {
-            string fullPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, filePath);
+            //TODO Needs to work with folders 
+            string fullFilePath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, path);
 
-            RunGitCommand($"rm --cached {fullPath}");
-
-            if (addFileToGitIgnore)
+            if (IsFileTracked(fullFilePath))
             {
-                AddToGitIgnore(fullPath);
+                RunGitCommand($"rm --cached {fullFilePath}");
             }
-            
+
+            if (addToGitIgnore)
+            {
+                AddToGitIgnore(path);
+            }
         }
-        
+
         private static string RunGitCommand(string arguments)
         {
             using (Process process = new Process())
@@ -73,7 +77,7 @@ namespace Miniclip.ShapeShifter.Utils
         private static void AddToGitIgnore(string fileToIgnore)
         {
             var repositoryPath = RepositoryPath;
-            repositoryPath =  repositoryPath.Remove(repositoryPath.IndexOf(".git", StringComparison.Ordinal));
+            repositoryPath = repositoryPath.Remove(repositoryPath.IndexOf(".git", StringComparison.Ordinal));
 
             var gitIgnorePath = Path.Combine(repositoryPath, ".gitignore");
 
@@ -83,15 +87,26 @@ namespace Miniclip.ShapeShifter.Utils
                 return;
             }
 
-            var gitIgnoreContent = File.ReadAllLines(gitIgnorePath).ToList();
-
-            if (!gitIgnoreContent.Contains(ShapeShifterGitIgnoreLabel))
+            List<string> gitIgnoreContent = File.ReadAllLines(gitIgnorePath).ToList();
+            int start = gitIgnoreContent.IndexOf(GIT_IGNORE_BEGIN_LABEL);
+            int end = gitIgnoreContent.IndexOf(GIT_IGNORE_END_LABEL);
+            if (start == -1)
             {
-                gitIgnoreContent.Add(ShapeShifterGitIgnoreLabel);
+                gitIgnoreContent.Add(GIT_IGNORE_BEGIN_LABEL);
+                start = gitIgnoreContent.IndexOf(GIT_IGNORE_BEGIN_LABEL);
             }
+
+            if (end == -1)
+            {
+                gitIgnoreContent.Add(GIT_IGNORE_END_LABEL);
+                end = gitIgnoreContent.IndexOf(GIT_IGNORE_END_LABEL);
+            }
+
+            string folderName = Directory.GetParent(Application.dataPath).Name;
+            string fileRelativePath = Path.Combine(folderName, fileToIgnore);
             
-            
-            
+            gitIgnoreContent.Insert(end, fileRelativePath);
+            File.WriteAllLines(gitIgnorePath, gitIgnoreContent);
         }
     }
 }

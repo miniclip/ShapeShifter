@@ -304,6 +304,8 @@ namespace Miniclip.ShapeShifter {
                     IOUtils.CopyFile(origin, target);
                 }
             }
+            
+            GitUtils.Untrack(assetPath, true);
         }
         
         public bool IsSkinned(string assetPath) => configuration.GameNames.Any(game => IsSkinned(assetPath, game));
