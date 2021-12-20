@@ -18,11 +18,18 @@ namespace Miniclip.ShapeShifter.Utils
         internal static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
         internal static string RepositoryPath => RunGitCommand("rev-parse --git-dir");
 
-        private static bool IsTracked(string filePath)
+        internal static void Stage(string assetPath)
+        {
+            string fullPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, assetPath);
+
+            RunGitCommand($"add {fullPath}");
+        }
+        
+        private static bool IsTracked(string assetPath)
         {
             using (Process process = new Process())
             {
-                string fullPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, filePath);
+                string fullPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, assetPath);
 
                 string arguments = $"ls-files --error-unmatch {fullPath}";
                 int exitCode = RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
@@ -42,6 +49,10 @@ namespace Miniclip.ShapeShifter.Utils
             if (IsIgnored(assetPath))
             {
                 RemoveFromGitIgnore(assetPath);
+             
+                string fullPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, assetPath);
+
+                Stage(fullPath);
                 return;
             }
             
@@ -106,8 +117,9 @@ namespace Miniclip.ShapeShifter.Utils
             }
             
             gitIgnoreContent.RemoveRange(lineToRemove, 2);
-            ShapeShifterLogger.Log($"Removing {lineToRemove} from .gitignore");
+            ShapeShifterLogger.Log($"Removing {pathToAcknowledge} from .gitignore");
             SetGitIgnoreContent(gitIgnoreContent);
+            Stage(pathToAcknowledge);
         }
 
         private static bool TryGetGitIgnoreContent(out List<string> gitIgnoreContent)
@@ -136,6 +148,8 @@ namespace Miniclip.ShapeShifter.Utils
             }
 
             File.WriteAllLines(gitIgnorePath, newGitIgnoreContent);
+            
+            Stage(gitIgnorePath);
         }
 
         private static string GetGitIgnorePath()
