@@ -17,7 +17,7 @@ namespace Miniclip.ShapeShifter.Utils
         internal static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
         internal static string RepositoryPath => RunGitCommand("rev-parse --git-dir");
 
-        internal static bool IsFileTracked(string filePath)
+        private static bool IsFileTracked(string filePath)
         {
             using (Process process = new Process())
             {
@@ -30,19 +30,18 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
-        internal static void Untrack(string path, bool addToGitIgnore = false)
+        internal static void Untrack(string assetPath, bool addToGitIgnore = false)
         {
-            //TODO Needs to work with folders 
-            string fullFilePath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, path);
+            string fullFilePath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, assetPath);
 
             if (IsFileTracked(fullFilePath))
             {
-                RunGitCommand($"rm --cached {fullFilePath}");
+                RunGitCommand($"rm -r --cached {fullFilePath}");
             }
 
             if (addToGitIgnore)
             {
-                AddToGitIgnore(path);
+                AddToGitIgnore(assetPath);
             }
         }
 
@@ -104,7 +103,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             string folderName = Directory.GetParent(Application.dataPath).Name;
             string fileRelativePath = Path.Combine(folderName, fileToIgnore);
-            
+
             gitIgnoreContent.Insert(end, fileRelativePath);
             File.WriteAllLines(gitIgnorePath, gitIgnoreContent);
         }
