@@ -22,7 +22,7 @@ namespace Miniclip.ShapeShifter {
 
             if (string.IsNullOrEmpty(repositoryRoot) || !repositoryRoot.Contains(".git"))
             {
-                Debug.LogWarning("[ShapeShifter] Git repository not found. Is there supposed to be one?");
+                ShapeShifterLogger.LogError("Git repository not found. Is there supposed to be one?");
 
                 //start a bit outside of the project, but not too far away, we're trying to stay within
                 //the boundaries of assets related to this project, but without a repository this is

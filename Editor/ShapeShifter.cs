@@ -121,13 +121,13 @@ namespace Miniclip.ShapeShifter {
                 if (GUILayout.Button("Git Test"))
                 {
                     string folder = Directory.GetParent(Application.dataPath).Name;
-                    Debug.Log(folder);
+                    ShapeShifterLogger.Log(folder);
                     UnityEngine.Object[] objects = Selection.GetFiltered<UnityEngine.Object>(SelectionMode.Assets);
                     if (objects.Length > 0)
                     {
                         var path = AssetDatabase.GetAssetPath(objects[0]);
-                        Debug.Log(path);
-                        Debug.Log(Path.Combine(folder, path));
+                        ShapeShifterLogger.Log(path);
+                        ShapeShifterLogger.Log(Path.Combine(folder, path));
                     }
                 }
                 

@@ -45,7 +45,7 @@ namespace Miniclip.ShapeShifter {
 
             if (files.Length > 0) {
                 FileInfo origin = files[0];
-                //Debug.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
+                //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
                 origin.CopyTo(target, true);
                 return;
             }
@@ -183,7 +183,7 @@ namespace Miniclip.ShapeShifter {
             Action<DirectoryInfo> externalAssetOperation
         ) {
             string game = this.configuration.GameNames[selected];
-            Debug.Log($"[Shape Shifter] {description}: {game}");
+            ShapeShifterLogger.Log($"{description}: {game}");
 
             string gameFolderPath = Path.Combine(this.skinsFolder.FullName, game);
 

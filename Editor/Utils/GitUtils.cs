@@ -114,7 +114,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             if (!File.Exists(gitIgnorePath))
             {
-                Debug.LogError($"Could not find .gitignore file at {gitIgnorePath}");
+                ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
                 gitIgnoreContent = null;
                 return false;
             }
@@ -129,7 +129,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             if (!File.Exists(gitIgnorePath))
             {
-                Debug.LogError($"Could not find .gitignore file at {gitIgnorePath}");
+                ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
                 return;
             }
 
@@ -167,7 +167,7 @@ namespace Miniclip.ShapeShifter.Utils
                 }
                 else
                 {
-                    Debug.LogError(errorOutput);
+                    ShapeShifterLogger.LogError(errorOutput);
                     throw new InvalidOperationException($"Failed to run git command: Exit Code: {exitCode.ToString()}");
                 }
             }

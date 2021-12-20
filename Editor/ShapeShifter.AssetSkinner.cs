@@ -283,12 +283,12 @@ namespace Miniclip.ShapeShifter {
 
                 if (IsSkinned(origin, game))
                 {
-                    Debug.Log($"SKIP {game} : {origin}");
+                    ShapeShifterLogger.Log($"SKIP {game} : {origin}");
                     continue;
                 }
                 else
                 {
-                    Debug.Log($"SKIN {game} : {origin}");
+                    ShapeShifterLogger.Log($"SKIN {game} : {origin}");
                 }
 
                 IOUtils.TryCreateDirectory(assetFolder);
