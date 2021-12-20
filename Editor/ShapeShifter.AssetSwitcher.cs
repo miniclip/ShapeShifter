@@ -74,8 +74,17 @@ namespace Miniclip.ShapeShifter {
             string guid = skinDirectory.Name;
             string origin = AssetDatabase.GUIDToAssetPath(guid);
             string target = Path.Combine(skinDirectory.FullName, Path.GetFileName(origin));
-            
-            IOUtils.CopyFile(origin, target);
+
+            if (AssetDatabase.IsValidFolder(origin))
+            {
+                DirectoryInfo originInfo = new DirectoryInfo(origin);
+                DirectoryInfo targetInfo = new DirectoryInfo(target);
+                IOUtils.CopyFolder(originInfo, targetInfo);
+            }
+            else
+            {
+                IOUtils.CopyFile(origin, target);
+            }
         }
 
         private void OnAssetSwitcherGUI() {
