@@ -244,9 +244,8 @@ namespace Miniclip.ShapeShifter {
 
                 StopWatchingFolder(assetFolder);
                 Directory.Delete(assetFolder, true);
-                GitUtils.Track(assetPath);
             }
-            
+            GitUtils.Track(assetPath);
         }
 
         private void SkinAssets(string[] assetPaths, bool saveFirst = true)
