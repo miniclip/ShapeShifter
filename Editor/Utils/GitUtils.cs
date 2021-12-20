@@ -17,7 +17,7 @@ namespace Miniclip.ShapeShifter.Utils
         internal static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
         internal static string RepositoryPath => RunGitCommand("rev-parse --git-dir");
 
-        private static bool IsFileTracked(string filePath)
+        private static bool IsTracked(string filePath)
         {
             using (Process process = new Process())
             {
@@ -29,12 +29,25 @@ namespace Miniclip.ShapeShifter.Utils
                 return exitCode != 1;
             }
         }
+        
+        internal static void Track(string assetPath)
+        {
+            if (IsTracked(assetPath))
+            {
+                return;
+            }
+
+            if (IsIgnored(assetPath))
+            {
+                RemoveFromGitIgnore(assetPath);
+            }
+        }
 
         internal static void Untrack(string assetPath, bool addToGitIgnore = false)
         {
             string fullFilePath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, assetPath);
 
-            if (IsFileTracked(fullFilePath))
+            if (IsTracked(fullFilePath))
             {
                 RunGitCommand($"rm -r --cached {fullFilePath}");
             }
@@ -43,6 +56,103 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 AddToGitIgnore(assetPath);
             }
+        }
+
+        private static void AddToGitIgnore(string pathToIgnore)
+        {
+            if (!TryGetGitIgnoreContent(out List<string> gitIgnoreContent))
+            {
+                return;
+            }
+
+            int start = gitIgnoreContent.IndexOf(GIT_IGNORE_BEGIN_LABEL);
+            int end = gitIgnoreContent.IndexOf(GIT_IGNORE_END_LABEL);
+            if (start == -1)
+            {
+                gitIgnoreContent.Add(GIT_IGNORE_BEGIN_LABEL);
+                start = gitIgnoreContent.IndexOf(GIT_IGNORE_BEGIN_LABEL);
+            }
+
+            if (end == -1)
+            {
+                gitIgnoreContent.Add(GIT_IGNORE_END_LABEL);
+                end = gitIgnoreContent.IndexOf(GIT_IGNORE_END_LABEL);
+            }
+
+            string folderName = Directory.GetParent(Application.dataPath).Name;
+            string fileRelativePath = Path.Combine(folderName, pathToIgnore);
+
+            if (gitIgnoreContent.Contains(fileRelativePath))
+            {
+                //path already in git ignore
+                return;
+            }
+
+            gitIgnoreContent.Insert(end, fileRelativePath);
+
+            SetGitIgnoreContent(gitIgnoreContent);
+        }
+
+        private static void RemoveFromGitIgnore(string pathToAcknowledge)
+        {
+            if (!TryGetGitIgnoreContent(out List<string> gitIgnoreContent))
+            {
+                return;
+            }
+
+            string folderName = Directory.GetParent(Application.dataPath).Name;
+            string fileRelativePath = Path.Combine(folderName, pathToAcknowledge);
+            
+            gitIgnoreContent.Remove(fileRelativePath);
+
+            SetGitIgnoreContent(gitIgnoreContent);
+        }
+
+        private static bool TryGetGitIgnoreContent(out List<string> gitIgnoreContent)
+        {
+            string gitIgnorePath = GetGitIgnorePath();
+
+            if (!File.Exists(gitIgnorePath))
+            {
+                Debug.LogError($"Could not find .gitignore file at {gitIgnorePath}");
+                gitIgnoreContent = null;
+                return false;
+            }
+
+            gitIgnoreContent = File.ReadAllLines(gitIgnorePath).ToList();
+            return true;
+        }
+
+        private static void SetGitIgnoreContent(IEnumerable<string> newGitIgnoreContent)
+        {
+            string gitIgnorePath = GetGitIgnorePath();
+
+            if (!File.Exists(gitIgnorePath))
+            {
+                Debug.LogError($"Could not find .gitignore file at {gitIgnorePath}");
+                return;
+            }
+
+            File.WriteAllLines(gitIgnorePath, newGitIgnoreContent);
+        }
+
+        private static string GetGitIgnorePath()
+        {
+            string repositoryPath = RepositoryPath;
+            repositoryPath = repositoryPath.Remove(repositoryPath.IndexOf(".git", StringComparison.Ordinal));
+
+            return Path.Combine(repositoryPath, ".gitignore");
+        }
+        
+        private static bool IsIgnored(string assetPath)
+        {
+            if (!TryGetGitIgnoreContent(out List<string> gitIgnoreContent))
+                return false;
+
+            string folderName = Directory.GetParent(Application.dataPath).Name;
+            string fileRelativePath = Path.Combine(folderName, assetPath);
+            
+            return gitIgnoreContent.Contains(fileRelativePath);
         }
 
         private static string RunGitCommand(string arguments)
@@ -72,40 +182,5 @@ namespace Miniclip.ShapeShifter.Utils
                 out output,
                 out errorOutput
             );
-
-        private static void AddToGitIgnore(string fileToIgnore)
-        {
-            var repositoryPath = RepositoryPath;
-            repositoryPath = repositoryPath.Remove(repositoryPath.IndexOf(".git", StringComparison.Ordinal));
-
-            var gitIgnorePath = Path.Combine(repositoryPath, ".gitignore");
-
-            if (!File.Exists(gitIgnorePath))
-            {
-                Debug.LogError($"Could not find .gitignore file at {repositoryPath}");
-                return;
-            }
-
-            List<string> gitIgnoreContent = File.ReadAllLines(gitIgnorePath).ToList();
-            int start = gitIgnoreContent.IndexOf(GIT_IGNORE_BEGIN_LABEL);
-            int end = gitIgnoreContent.IndexOf(GIT_IGNORE_END_LABEL);
-            if (start == -1)
-            {
-                gitIgnoreContent.Add(GIT_IGNORE_BEGIN_LABEL);
-                start = gitIgnoreContent.IndexOf(GIT_IGNORE_BEGIN_LABEL);
-            }
-
-            if (end == -1)
-            {
-                gitIgnoreContent.Add(GIT_IGNORE_END_LABEL);
-                end = gitIgnoreContent.IndexOf(GIT_IGNORE_END_LABEL);
-            }
-
-            string folderName = Directory.GetParent(Application.dataPath).Name;
-            string fileRelativePath = Path.Combine(folderName, fileToIgnore);
-
-            gitIgnoreContent.Insert(end, fileRelativePath);
-            File.WriteAllLines(gitIgnorePath, gitIgnoreContent);
-        }
     }
 }

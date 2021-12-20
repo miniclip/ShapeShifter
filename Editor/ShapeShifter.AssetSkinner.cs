@@ -244,6 +244,7 @@ namespace Miniclip.ShapeShifter {
 
                 StopWatchingFolder(assetFolder);
                 Directory.Delete(assetFolder, true);
+                GitUtils.Track(assetPath);
             }
             
         }
