@@ -26,7 +26,8 @@ namespace Miniclip.ShapeShifter {
             EditorGUI.LabelField(rect, "Skinned external assets:");
         }
         
-        private void OnEnable() {
+        private void OnEnable()
+        {
             this.externalAssetsProperty = this.serializedObject.FindProperty("skinnedExternalAssetPaths");
 
             this.externalAssetsList = new ReorderableList(

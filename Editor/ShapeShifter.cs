@@ -45,34 +45,39 @@ namespace Miniclip.ShapeShifter {
         private DirectoryInfo skinsFolder;
 
 
-        [MenuItem("Window/Shape Shifter", false, (int)'G')]
-        public static ShapeShifter ShowNextToInspector() {
+        [MenuItem("Window/Shape Shifter", false, (int) 'G')]
+        public static void OpenShapeShifter()
+        {
+            ShowNextToInspector(focus: true);
+        }
+        internal static ShapeShifter ShowNextToInspector(bool focus = false) {
             Assembly editorAssembly = typeof(Editor).Assembly;
             Type inspectorWindowType = editorAssembly.GetType("UnityEditor.InspectorWindow");
             
             return GetWindow<ShapeShifter>(
                 "Shape Shifter", 
-                true, 
+                focus, 
                 inspectorWindowType
             );
         }
 
         private string GenerateAssetKey(string game, string guid) => game + ":" + guid;
 
-        private void OnEnable() {
+        private void OnEnable()
+        {
+            this.InitialiseFolders();
             this.InitialiseConfiguration();
-            this.defaultConfigurationEditor = Editor.CreateEditor(
-                this.configuration,
-                typeof(ShapeShifterConfigurationEditor)
-            );
-            
-            this.skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
-            IOUtils.TryCreateDirectory(skinsFolder.FullName);
-            
             this.OnAssetSkinnerEnable();
             this.OnExternalAssetSkinnerEnable();
         }
-        
+
+        private void InitialiseFolders()
+        {
+            this.skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
+            IOUtils.TryCreateDirectory(skinsFolder.FullName);
+            
+        }
+
         private void InitialiseConfiguration() {
             if (this.configuration != null) {
                 return;
@@ -97,9 +102,33 @@ namespace Miniclip.ShapeShifter {
                     this.configuration,
                     folderPath + ConfigurationResource
                 );
-
+                
+                EditorUtility.SetDirty(configuration);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
+            }
+
+            this.defaultConfigurationEditor = Editor.CreateEditor(
+                this.configuration,
+                typeof(ShapeShifterConfigurationEditor)
+            );
+            
+            if (this.configuration.GameNames.Count == 0)
+            {
+                ShapeShifterLogger.Log("Shapeshifter has no configured games, creating a default one and making it active");
+                this.configuration.GameNames.Add("Default");
+                SwitchToGame(0);
+                EditorUtility.SetDirty(configuration);
+                AssetDatabase.SaveAssets();
+                AssetDatabase.Refresh();
+            }
+            else
+            {
+                //Get Active game stored in Editor Prefs
+                //Update Highlighted Game
+                highlightedGame = ActiveGame;
+
+                //Check for missing assets in project that exist in skins and copy them to project
             }
         }
         

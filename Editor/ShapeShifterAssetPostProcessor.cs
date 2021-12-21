@@ -11,7 +11,7 @@ namespace Miniclip.ShapeShifter
         {
             foreach (string importedAsset in importedAssets)
             {
-                ShapeShifter.Instance.RegisterModifiedAssetInUnity(importedAsset);
+                // ShapeShifter.Instance.RegisterModifiedAssetInUnity(importedAsset);
             }
         }
     }

@@ -10,15 +10,41 @@ using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter {
     
-    public partial class ShapeShifter {
+    public partial class ShapeShifter
+    {
 
-        private int activeGame;
+        private string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
+        
         private int highlightedGame;
-        private string lastSwitched;
+        // private string lastSwitched;
+        
         private bool showSwitcher = true;
 
-        private string ActiveGameName => configuration.GameNames[activeGame];
+        private string ActiveGameName => configuration.GameNames[ActiveGame];
         
+        public int ActiveGame
+        {
+            get
+            {
+                if (!EditorPrefs.HasKey(ACTIVE_GAME_PLAYER_PREFS_KEY))
+                {
+                    ShapeShifterLogger.Log(
+                        "Could not found any active game on EditorPrefs, setting by default game 0"
+                    );
+                    ActiveGame = 0;
+                }
+                
+                return EditorPrefs.GetInt(ACTIVE_GAME_PLAYER_PREFS_KEY);
+            }
+            set
+            {
+                ShapeShifterLogger.Log(
+                    $"Setting active game on EditorPrefs: {value}"
+                );
+                EditorPrefs.SetInt(ACTIVE_GAME_PLAYER_PREFS_KEY, value);
+            }
+        }
+
         private void CopyFromOriginToSkinnedExternal(DirectoryInfo directory) {
             string relativePath = this.GenerateRelativePathFromKey(directory.Name);
             string origin = Path.Combine(Application.dataPath, relativePath);
@@ -103,7 +129,7 @@ namespace Miniclip.ShapeShifter {
                     alignment = TextAnchor.MiddleCenter
                 };
 
-                string currentGame = string.IsNullOrEmpty(this.lastSwitched) ? "Unknown" : this.lastSwitched;
+                string currentGame = ActiveGameName;
 
                 GUILayout.Box($"Current game: {currentGame}", titleStyle);
 
@@ -141,19 +167,13 @@ namespace Miniclip.ShapeShifter {
                 
             string game = this.configuration.GameNames[selected];
 
-            if (this.lastSwitched != game)
+            if (this.ActiveGameName != game)
             {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.Append($"This will overwrite the {game} skins with the current assets. ");
 
-                if (string.IsNullOrEmpty(this.lastSwitched))
-                {
-                    stringBuilder.Append("You haven't switched games this session.");
-                }
-                else
-                {
-                    stringBuilder.Append($"The last asset switch was to {this.lastSwitched}");
-                }
+                stringBuilder.Append($"The last asset switch was to {this.ActiveGameName}");
+                
 
                 stringBuilder.Append(" Are you sure?");
 
@@ -225,7 +245,7 @@ namespace Miniclip.ShapeShifter {
                     "Fine, I'll take a look."
                 );
 
-                this.activeGame = 0;
+                this.ActiveGame = 0;
                 // TODO: ^this shouldn't just be assigned to 0, the operations should be atomic.
                 // If they fail, nothing should change.
             }
@@ -288,17 +308,16 @@ namespace Miniclip.ShapeShifter {
                     return;
                 }
                 
-                OverwriteSelectedSkin(activeGame);
+                OverwriteSelectedSkin(ActiveGame);
             }
             
-            this.lastSwitched = this.configuration.GameNames[selected];
             this.PerformCopiesWithTracking(
                 selected,
                 "Switch to game",
                 this.CopyFromSkinsToUnity,
                 this.CopyFromSkinnedExternalToOrigin
             );
-            activeGame = selected;
+            ActiveGame = selected;
             configuration.ModifiedAssetPaths.Clear();
         }
     }

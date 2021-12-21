@@ -12,7 +12,7 @@ namespace Miniclip.ShapeShifter
         public List<string> GameNames => this.gameNames;
 
         [SerializeField]
-        private List<string> skinnedExternalAssetPaths;
+        private List<string> skinnedExternalAssetPaths = new List<string>();
         public List<string> SkinnedExternalAssetPaths => this.skinnedExternalAssetPaths;
 
         [SerializeField]

@@ -326,9 +326,7 @@ namespace Miniclip.ShapeShifter {
                 guid
             );
 
-            bool folderExists = Directory.Exists(assetFolder);
-            bool isFolderEmpty = IOUtils.IsFolderEmpty(assetFolder);
-            return folderExists && !isFolderEmpty;
+            return Directory.Exists(assetFolder) && !IOUtils.IsFolderEmpty(assetFolder);
         }
         
         private void OnDisable() {
