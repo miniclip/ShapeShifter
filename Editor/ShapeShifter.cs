@@ -117,30 +117,7 @@ namespace Miniclip.ShapeShifter {
                 this.OnAssetSwitcherGUI();
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
-
-                if (GUILayout.Button("Git Test"))
-                {
-                    string folder = Directory.GetParent(Application.dataPath).Name;
-                    ShapeShifterLogger.Log(folder);
-                    UnityEngine.Object[] objects = Selection.GetFiltered<UnityEngine.Object>(SelectionMode.Assets);
-                    if (objects.Length > 0)
-                    {
-                        var path = AssetDatabase.GetAssetPath(objects[0]);
-                        ShapeShifterLogger.Log(path);
-                        ShapeShifterLogger.Log(Path.Combine(folder, path));
-                    }
-                }
                 
-                if (GUILayout.Button("Git Untrack File"))
-                {
-                    UnityEngine.Object[] objects = Selection.GetFiltered<UnityEngine.Object>(SelectionMode.Assets);
-                    if (objects.Length > 0)
-                    {
-                        var path = AssetDatabase.GetAssetPath(objects[0]);
-                        GitUtils.Untrack(path, true);
-                    }
-                }
-
                 GUILayout.FlexibleSpace();
             }
             

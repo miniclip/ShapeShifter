@@ -10,9 +10,8 @@ using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Utils
 {
-    public class GitUtils
+    class GitUtils
     {
-     
         private static readonly string GIT_IGNORE_SHAPESHIFTER_LABEL = "#ShapeShifter";
 
         internal static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
@@ -20,24 +19,20 @@ namespace Miniclip.ShapeShifter.Utils
 
         internal static void Stage(string assetPath)
         {
-            string fullPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, assetPath);
-
-            RunGitCommand($"add {fullPath}");
+            RunGitCommand($"add {PathUtils.GetFullPath(assetPath)}");
         }
-        
-        private static bool IsTracked(string assetPath)
+
+        internal static bool IsTracked(string assetPath)
         {
             using (Process process = new Process())
             {
-                string fullPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, assetPath);
-
-                string arguments = $"ls-files --error-unmatch {fullPath}";
+                string arguments = $"ls-files --error-unmatch {PathUtils.GetFullPath(assetPath)}";
                 int exitCode = RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
 
                 return exitCode != 1;
             }
         }
-        
+
         internal static void Track(string assetPath)
         {
             if (IsTracked(assetPath))
@@ -49,20 +44,17 @@ namespace Miniclip.ShapeShifter.Utils
             if (IsIgnored(assetPath))
             {
                 RemoveFromGitIgnore(assetPath);
-             
-                string fullPath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, assetPath);
 
-                Stage(fullPath);
+                Stage(PathUtils.GetFullPath(assetPath));
                 return;
             }
-            
-            ShapeShifterLogger.Log($"Could not git track {assetPath}");
 
+            ShapeShifterLogger.Log($"Could not git track {assetPath}");
         }
 
         internal static void Untrack(string assetPath, bool addToGitIgnore = false)
         {
-            string fullFilePath = Path.Combine(Directory.GetParent(Application.dataPath).FullName, assetPath);
+            string fullFilePath = PathUtils.GetFullPath(assetPath);
 
             if (IsTracked(fullFilePath))
             {
@@ -77,25 +69,23 @@ namespace Miniclip.ShapeShifter.Utils
 
         private static string GetAssetIgnoreIdentifier(string assetPath) =>
             $"{GIT_IGNORE_SHAPESHIFTER_LABEL} {AssetDatabase.AssetPathToGUID(assetPath)}";
-        
-        private static void AddToGitIgnore(string pathToIgnore)
+
+        private static void AddToGitIgnore(string assetPath)
         {
             if (!TryGetGitIgnoreContent(out List<string> gitIgnoreContent))
             {
                 return;
             }
-            
-            string folderName = Directory.GetParent(Application.dataPath).Name;
-            string fileRelativePath = Path.Combine(folderName, pathToIgnore);
 
-            
-            if (gitIgnoreContent.Any(line => line.Contains(fileRelativePath)))
+            string pathRelativeToProjectFolder = PathUtils.GetPathRelativeToProjectFolder(assetPath);
+
+            if (gitIgnoreContent.Any(line => line.Contains(pathRelativeToProjectFolder)))
             {
                 return;
             }
 
-            gitIgnoreContent.Add(GetAssetIgnoreIdentifier(pathToIgnore));
-            gitIgnoreContent.Add($"{fileRelativePath}");
+            gitIgnoreContent.Add(GetAssetIgnoreIdentifier(assetPath));
+            gitIgnoreContent.Add($"{pathRelativeToProjectFolder}");
 
             SetGitIgnoreContent(gitIgnoreContent);
         }
@@ -106,16 +96,15 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 return;
             }
-            
-            
+
             int lineToRemove = gitIgnoreContent.IndexOf(GetAssetIgnoreIdentifier(pathToAcknowledge));
-            
+
             if (lineToRemove == -1)
             {
                 ShapeShifterLogger.LogError($"Couldn't find {pathToAcknowledge} on .gitignore");
                 return;
             }
-            
+
             gitIgnoreContent.RemoveRange(lineToRemove, 2);
             ShapeShifterLogger.Log($"Removing {pathToAcknowledge} from .gitignore");
             SetGitIgnoreContent(gitIgnoreContent);
@@ -148,7 +137,7 @@ namespace Miniclip.ShapeShifter.Utils
             }
 
             File.WriteAllLines(gitIgnorePath, newGitIgnoreContent);
-            
+
             Stage(gitIgnorePath);
         }
 
@@ -159,7 +148,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             return Path.Combine(repositoryPath, ".gitignore");
         }
-        
+
         private static bool IsIgnored(string assetPath)
         {
             if (!TryGetGitIgnoreContent(out List<string> gitIgnoreContent))
@@ -170,7 +159,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             return gitIgnoreContent.Any(line => line.Contains(fileRelativePath));
         }
-        
+
         private static string RunGitCommand(string arguments)
         {
             using (Process process = new Process())
@@ -190,13 +179,16 @@ namespace Miniclip.ShapeShifter.Utils
         }
 
         private static int RunProcessAndGetExitCode(string arguments, Process process, out string output,
-            out string errorOutput) =>
-            process.Run(
+            out string errorOutput)
+        {
+            Debug.Log($"Running: git {arguments}");
+            return process.Run(
                 application: "git",
                 arguments: arguments,
                 workingDirectory: Application.dataPath,
                 out output,
                 out errorOutput
             );
+        }
     }
 }
