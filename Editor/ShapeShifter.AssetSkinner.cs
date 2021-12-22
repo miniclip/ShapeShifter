@@ -106,7 +106,7 @@ namespace Miniclip.ShapeShifter {
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
             
             using (new GUILayout.VerticalScope(boxStyle)) {
-                float buttonWidth = EditorGUIUtility.currentViewWidth * (1.0f / this.configuration.GameNames.Count);
+                float buttonWidth = EditorGUIUtility.currentViewWidth * (1.0f / configuration.GameNames.Count);
                 buttonWidth -= 20; // to account for a possible scrollbar or some extra padding 
 
                 bool clicked = false;
@@ -144,10 +144,10 @@ namespace Miniclip.ShapeShifter {
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
             
             using (new GUILayout.HorizontalScope(boxStyle)) {
-                foreach (string game in this.configuration.GameNames) {
+                foreach (string game in configuration.GameNames) {
                     string guid = AssetDatabase.AssetPathToGUID(assetPath);
                     string skinnedPath = Path.Combine(
-                        this.skinsFolder.FullName,
+                        skinsFolder.FullName,
                         game,
                         InternalAssetsFolder,
                         guid,
@@ -229,14 +229,14 @@ namespace Miniclip.ShapeShifter {
         }
 
         private void RemoveSkins(string assetPath) {
-            foreach (string game in this.configuration.GameNames) {
+            foreach (string game in configuration.GameNames) {
                 string guid = AssetDatabase.AssetPathToGUID(assetPath);
                 string key = this.GenerateAssetKey(game, guid);
                 this.dirtyAssets.Remove(key);
                 this.previewPerAsset.Remove(key);
                 
                 string assetFolder = Path.Combine(
-                    this.skinsFolder.FullName,
+                    skinsFolder.FullName,
                     game,
                     InternalAssetsFolder,
                     guid
@@ -253,7 +253,7 @@ namespace Miniclip.ShapeShifter {
         {
             if (saveFirst)
             {
-                this.SavePendingChanges();
+                SavePendingChanges();
             }
 
             foreach (string assetPath in assetPaths)
@@ -267,15 +267,15 @@ namespace Miniclip.ShapeShifter {
             if (saveFirst)
             {
                 // make sure any pending changes are saved before generating copies
-                this.SavePendingChanges();
+                SavePendingChanges();
             }
 
-            foreach (string game in this.configuration.GameNames)
+            foreach (string game in configuration.GameNames)
             {
                 string origin = assetPath;
                 string guid = AssetDatabase.AssetPathToGUID(origin);
                 string assetFolder = Path.Combine(
-                    this.skinsFolder.FullName,
+                    skinsFolder.FullName,
                     game,
                     InternalAssetsFolder,
                     guid
@@ -299,12 +299,15 @@ namespace Miniclip.ShapeShifter {
                 {
                     DirectoryInfo targetFolder = Directory.CreateDirectory(target);
                     IOUtils.CopyFolder(new DirectoryInfo(origin), targetFolder);
+                    IOUtils.CopyFile(origin+".meta", target+".meta");
+
                 }
                 else
                 {
                     IOUtils.CopyFile(origin, target);
+                    IOUtils.CopyFile(origin+".meta", target+".meta");
                 }
-                GitUtils.Stage(target);
+                GitUtils.Stage(assetFolder);
             }
             
             GitUtils.Untrack(assetPath, true);
@@ -320,7 +323,7 @@ namespace Miniclip.ShapeShifter {
                 return false;
             
             string assetFolder = Path.Combine(
-                this.skinsFolder.FullName,
+                skinsFolder.FullName,
                 game, 
                 InternalAssetsFolder,
                 guid

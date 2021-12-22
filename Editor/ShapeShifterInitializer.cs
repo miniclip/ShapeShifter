@@ -12,6 +12,6 @@ public class ShapeShifterInitializer : MonoBehaviour
         if (initialized)
             return;
 
-        ShapeShifter.ShowNextToInspector(true);
+        ShapeShifter.InitializeShapeShifterCore();
     }
 }

@@ -13,16 +13,16 @@ namespace Miniclip.ShapeShifter {
     public partial class ShapeShifter
     {
 
-        private string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
+        private static string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
         
-        private int highlightedGame;
+        private static int highlightedGame;
         // private string lastSwitched;
         
         private bool showSwitcher = true;
 
-        private string ActiveGameName => configuration.GameNames[ActiveGame];
+        private static string ActiveGameName => configuration.GameNames[ActiveGame];
         
-        public int ActiveGame
+        public static int ActiveGame
         {
             get
             {
@@ -45,34 +45,44 @@ namespace Miniclip.ShapeShifter {
             }
         }
 
-        private void CopyFromOriginToSkinnedExternal(DirectoryInfo directory) {
-            string relativePath = this.GenerateRelativePathFromKey(directory.Name);
+        private static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory) {
+            string relativePath = GenerateRelativePathFromKey(directory.Name);
             string origin = Path.Combine(Application.dataPath, relativePath);
             string target = Path.Combine(directory.FullName, Path.GetFileName(origin));
             IOUtils.CopyFile(origin, target);
         }
         
-        private void CopyFromSkinnedExternalToOrigin(DirectoryInfo directory) {
-            string relativePath = this.GenerateRelativePathFromKey(directory.Name);
+        private static void CopyFromSkinnedExternalToOrigin(DirectoryInfo directory) {
+            string relativePath = GenerateRelativePathFromKey(directory.Name);
             string target = Path.Combine(Application.dataPath, relativePath);
             string searchPattern = Path.GetFileName(target);
             FileInfo origin = directory.GetFiles(searchPattern)[0];
             origin.CopyTo(target, true);
         }
         
-        private void CopyFromSkinsToUnity(DirectoryInfo directory) {
+        private static void CopyFromSkinsToUnity(DirectoryInfo directory) {
             string guid = directory.Name;
 
             // Ensure it has the same name, so we don't end up copying .DS_Store
             string target = AssetDatabase.GUIDToAssetPath(guid);
-            string searchPattern = Path.GetFileName(target);
+            string searchPattern = Path.GetFileName(target)+"*";
 
             FileInfo[] files = directory.GetFiles(searchPattern);
 
             if (files.Length > 0) {
-                FileInfo origin = files[0];
-                //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
-                origin.CopyTo(target, true);
+                foreach (FileInfo fileInfo in files)
+                {
+                    //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
+                    if (fileInfo.Extension == ".meta")
+                    {
+                        fileInfo.CopyTo(target + ".meta", true);
+                    }
+                    else
+                    {
+                        fileInfo.CopyTo(target, true);
+                    }
+                }
+               
                 return;
             }
 
@@ -88,7 +98,7 @@ namespace Miniclip.ShapeShifter {
             }
         }
 
-        private void CopyFromUnityToSkins(DirectoryInfo skinDirectory) {
+        private static void CopyFromUnityToSkins(DirectoryInfo skinDirectory) {
             
             if (IOUtils.IsFolderEmpty(skinDirectory))
             {
@@ -116,7 +126,7 @@ namespace Miniclip.ShapeShifter {
         private void OnAssetSwitcherGUI() {
             this.showSwitcher = EditorGUILayout.Foldout(this.showSwitcher, "Asset Switcher");
 
-            if (! this.showSwitcher) {
+            if (! this.showSwitcher || configuration.GameNames.Count == 0) {
                 return;
             }
             
@@ -133,9 +143,9 @@ namespace Miniclip.ShapeShifter {
 
                 GUILayout.Box($"Current game: {currentGame}", titleStyle);
 
-                this.highlightedGame = GUILayout.SelectionGrid(
-                    this.highlightedGame,
-                    this.configuration.GameNames.ToArray(),
+                highlightedGame = GUILayout.SelectionGrid(
+                    highlightedGame,
+                    configuration.GameNames.ToArray(),
                     2,
                     buttonStyle
                 );
@@ -144,7 +154,7 @@ namespace Miniclip.ShapeShifter {
 
                 if (GUILayout.Button("Switch!", buttonStyle))
                 {
-                    this.SwitchToGame(this.highlightedGame);
+                    SwitchToGame(highlightedGame);
                 }
 
                 if (GUILayout.Button($"Overwrite {configuration.GameNames[highlightedGame]} skin", buttonStyle))
@@ -156,23 +166,23 @@ namespace Miniclip.ShapeShifter {
                         "Nevermind"
                     ))
                     {
-                        this.OverwriteSelectedSkin(this.highlightedGame);
+                        OverwriteSelectedSkin(highlightedGame);
                     }
                 }
             }
         }
         
-        private void OverwriteSelectedSkin(int selected) {
-            this.SavePendingChanges();
+        private static void OverwriteSelectedSkin(int selected) {
+            SavePendingChanges();
                 
-            string game = this.configuration.GameNames[selected];
+            string game = configuration.GameNames[selected];
 
-            if (this.ActiveGameName != game)
+            if (ActiveGameName != game)
             {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.Append($"This will overwrite the {game} skins with the current assets. ");
 
-                stringBuilder.Append($"The last asset switch was to {this.ActiveGameName}");
+                stringBuilder.Append($"The last asset switch was to {ActiveGameName}");
                 
 
                 stringBuilder.Append(" Are you sure?");
@@ -188,24 +198,24 @@ namespace Miniclip.ShapeShifter {
                 }
             }
             
-            this.PerformCopiesWithTracking(
+            PerformCopiesWithTracking(
                 selected: selected,
                 description: "Overwrite selected skin",
-                this.CopyFromUnityToSkins,
-                this.CopyFromOriginToSkinnedExternal
+                CopyFromUnityToSkins,
+                CopyFromOriginToSkinnedExternal
             );
         }
 
-        private void PerformCopiesWithTracking(
+        private static void PerformCopiesWithTracking(
             int selected,
             string description,
             Action<DirectoryInfo> internalAssetOperation,
             Action<DirectoryInfo> externalAssetOperation
         ) {
-            string game = this.configuration.GameNames[selected];
+            string game = configuration.GameNames[selected];
             ShapeShifterLogger.Log($"{description}: {game}");
 
-            string gameFolderPath = Path.Combine(this.skinsFolder.FullName, game);
+            string gameFolderPath = Path.Combine(skinsFolder.FullName, game);
 
             if (Directory.Exists(gameFolderPath)) {
                 // this will fail the total by 0-3, as it counts the game, the internal and the external directories
@@ -219,7 +229,7 @@ namespace Miniclip.ShapeShifter {
                 float progress = 0.0f;
                 float progressBarStep = 1.0f / totalDirectories;
 
-                this.PerformOperationOnPath(
+                PerformOperationOnPath(
                     gameFolderPath, 
                     InternalAssetsFolder,
                     internalAssetOperation,
@@ -228,7 +238,7 @@ namespace Miniclip.ShapeShifter {
                     ref progress
                 );
  
-                this.PerformOperationOnPath(
+                PerformOperationOnPath(
                     gameFolderPath, 
                     ExternalAssetsFolder,
                     externalAssetOperation,
@@ -237,7 +247,7 @@ namespace Miniclip.ShapeShifter {
                     ref progress
                 );
 
-                this.RefreshAllAssets();
+                RefreshAllAssets();
             } else {
                 EditorUtility.DisplayDialog(
                     "Shape Shifter",
@@ -245,7 +255,7 @@ namespace Miniclip.ShapeShifter {
                     "Fine, I'll take a look."
                 );
 
-                this.ActiveGame = 0;
+                ActiveGame = 0;
                 // TODO: ^this shouldn't just be assigned to 0, the operations should be atomic.
                 // If they fail, nothing should change.
             }
@@ -253,7 +263,7 @@ namespace Miniclip.ShapeShifter {
             EditorUtility.ClearProgressBar();
         }
         
-        private void PerformOperationOnPath(
+        private static void PerformOperationOnPath(
             string gameFolderPath,
             string assetFolder,
             Action<DirectoryInfo> operation,
@@ -275,7 +285,7 @@ namespace Miniclip.ShapeShifter {
             }
         }
 
-        private void RefreshAllAssets() {
+        private static void RefreshAllAssets() {
             // Force Unity to lose and regain focus, so it resolves any new changes on the packages
             // TODO: Replace this in Unity 2020 with PackageManager.Client.Resolve
             Process process = new Process {
@@ -292,7 +302,7 @@ namespace Miniclip.ShapeShifter {
             AssetDatabase.Refresh();
         }
 
-        private void SwitchToGame(int selected) {
+        private static void SwitchToGame(int selected) {
 
             if (configuration.ModifiedAssetPaths.Count > 0)
             {
@@ -311,14 +321,67 @@ namespace Miniclip.ShapeShifter {
                 OverwriteSelectedSkin(ActiveGame);
             }
             
-            this.PerformCopiesWithTracking(
+            PerformCopiesWithTracking(
                 selected,
                 "Switch to game",
-                this.CopyFromSkinsToUnity,
-                this.CopyFromSkinnedExternalToOrigin
+                CopyFromSkinsToUnity,
+                CopyFromSkinnedExternalToOrigin
             );
             ActiveGame = selected;
             configuration.ModifiedAssetPaths.Clear();
+        }
+        
+        private static void CopyIfMissingInternal(DirectoryInfo directory)
+        {
+                string guid = directory.Name;
+
+                // Ensure it has the same name, so we don't end up copying .DS_Store
+                string target = AssetDatabase.GUIDToAssetPath(guid);
+                string searchPattern = Path.GetFileName(target)+"*";
+
+                FileInfo[] files = directory.GetFiles(searchPattern);
+
+                if (files.Length > 0) {
+                    foreach (FileInfo fileInfo in files)
+                    {
+                        //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
+                        if (fileInfo.Extension == ".meta")
+                        {
+                            string destFileName = target + ".meta";
+                            if (File.Exists(PathUtils.GetFullPath(destFileName)))
+                            {
+                                ShapeShifterLogger.LogWarning($"{destFileName} already exists, skipping");
+                                continue;
+                            }
+                            
+                            fileInfo.CopyTo(destFileName, true);
+                        }
+                        else
+                        {
+                            if (File.Exists(PathUtils.GetFullPath(target)))
+                            {
+                                ShapeShifterLogger.LogWarning($"{target} already exists, skipping");
+                                continue;
+                            }
+                            
+                            fileInfo.CopyTo(target, true);
+                        }
+                    }
+               
+                    return;
+                }
+
+                DirectoryInfo[] directories = directory.GetDirectories();
+
+                if (directories.Length > 0) {
+                    target = Path.Combine(
+                        Application.dataPath.Replace("/Assets", string.Empty), 
+                        target
+                    );
+                
+                    IOUtils.CopyFolder(directories[0], new DirectoryInfo(target));
+                }
+            
         }
     }
 }
