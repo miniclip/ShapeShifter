@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -26,22 +26,22 @@ namespace Miniclip.ShapeShifter {
         {
             get
             {
-                if (!EditorPrefs.HasKey(ACTIVE_GAME_PLAYER_PREFS_KEY))
+                if (!ShapeShifterEditorPrefs.HasKey(ACTIVE_GAME_PLAYER_PREFS_KEY))
                 {
                     ShapeShifterLogger.Log(
-                        "Could not found any active game on EditorPrefs, setting by default game 0"
+                        "Could not find any active game on EditorPrefs, setting by default game 0"
                     );
                     ActiveGame = 0;
                 }
                 
-                return EditorPrefs.GetInt(ACTIVE_GAME_PLAYER_PREFS_KEY);
+                return ShapeShifterEditorPrefs.GetInt(ACTIVE_GAME_PLAYER_PREFS_KEY);
             }
             set
             {
                 ShapeShifterLogger.Log(
                     $"Setting active game on EditorPrefs: {value}"
                 );
-                EditorPrefs.SetInt(ACTIVE_GAME_PLAYER_PREFS_KEY, value);
+                ShapeShifterEditorPrefs.SetInt(ACTIVE_GAME_PLAYER_PREFS_KEY, value);
             }
         }
 
@@ -119,7 +119,9 @@ namespace Miniclip.ShapeShifter {
             }
             else
             {
+                IOUtils.TryCreateDirectory(skinDirectory.FullName, true);
                 IOUtils.CopyFile(origin, target);
+                IOUtils.CopyFile(origin+".meta", target+".meta");
             }
         }
 
@@ -173,6 +175,8 @@ namespace Miniclip.ShapeShifter {
         }
         
         private static void OverwriteSelectedSkin(int selected) {
+            configuration.ModifiedAssetPaths.Clear();
+
             SavePendingChanges();
                 
             string game = configuration.GameNames[selected];
@@ -204,6 +208,7 @@ namespace Miniclip.ShapeShifter {
                 CopyFromUnityToSkins,
                 CopyFromOriginToSkinnedExternal
             );
+
         }
 
         private static void PerformCopiesWithTracking(
@@ -337,6 +342,12 @@ namespace Miniclip.ShapeShifter {
 
                 // Ensure it has the same name, so we don't end up copying .DS_Store
                 string target = AssetDatabase.GUIDToAssetPath(guid);
+                if (string.IsNullOrEmpty(target))
+                {
+                    ShapeShifterLogger.LogError($"Can't find Asset Path for guid: {guid}");
+                    return;
+                }
+                
                 string searchPattern = Path.GetFileName(target)+"*";
 
                 FileInfo[] files = directory.GetFiles(searchPattern);

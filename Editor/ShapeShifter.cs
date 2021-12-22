@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -9,10 +9,12 @@ using UnityEngine;
 using Object = System.Object;
 
 namespace Miniclip.ShapeShifter {
+    [Serializable]
     public partial class ShapeShifter : EditorWindow {
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         private static readonly string ExternalAssetsFolder = "external";
         private static readonly string InternalAssetsFolder = "internal";
+        private static readonly string IsInitializedKey = "isInitialized";
         
         private static ShapeShifter instance;
         public static ShapeShifter Instance
@@ -45,7 +47,7 @@ namespace Miniclip.ShapeShifter {
         private static DirectoryInfo skinsFolder;
 
 
-        [MenuItem("Window/Shape Shifter", false, (int) 'G')]
+        [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, (int) 'G')]
         public static void OpenShapeShifter()
         {
             ShowNextToInspector(focus: true);
@@ -68,18 +70,37 @@ namespace Miniclip.ShapeShifter {
             InitializeShapeShifterCore();
             this.OnAssetSkinnerEnable();
             this.OnExternalAssetSkinnerEnable();
+            
         }
 
+        internal static void CopyMissingSkins()
+        {
+            if (!ShapeShifterEditorPrefs.GetBool(IsInitializedKey))
+            {
+                InitializeShapeShifterCore();
+                
+                PerformCopiesWithTracking(
+                    ActiveGame,
+                    "Add missing skins",
+                    CopyIfMissingInternal,
+                    CopyFromSkinnedExternalToOrigin
+                );
+            }
+        }
+        
         internal static void InitializeShapeShifterCore()
         {
+         
             InitialiseFolders();
             InitialiseConfiguration();
+
+            ShapeShifterEditorPrefs.SetBool(IsInitializedKey, true);
         }
 
         private static void InitialiseFolders()
         {
             skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
-            IOUtils.TryCreateDirectory(skinsFolder.FullName);
+            IOUtils.TryCreateDirectory(skinsFolder.FullName, false);
         }
 
         private static void InitialiseConfiguration() {
@@ -128,18 +149,8 @@ namespace Miniclip.ShapeShifter {
             }
             else
             {
-                //Get Active game stored in Editor Prefs
                 //Update Highlighted Game
                 highlightedGame = ActiveGame;
-
-                //Check for missing assets in project that exist in skins and copy them to project
-
-                PerformCopiesWithTracking(
-                    ActiveGame,
-                    "Add missing skins",
-                    CopyIfMissingInternal,
-                    CopyFromSkinnedExternalToOrigin
-                );
             }
             
             AssetDatabase.SaveAssets();
@@ -165,6 +176,7 @@ namespace Miniclip.ShapeShifter {
                 GUILayout.FlexibleSpace();
             }
             
+            
             this.Repaint();
         }
 
@@ -174,6 +186,11 @@ namespace Miniclip.ShapeShifter {
             // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save
             EditorApplication.ExecuteMenuItem("File/Save Project");
         }
-        
+
+        public static void SaveChanges()
+        {
+            if (configuration.ModifiedAssetPaths.Count > 0)
+                OverwriteSelectedSkin(ActiveGame);
+        }
     }
 }

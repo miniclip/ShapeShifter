@@ -291,7 +291,7 @@ namespace Miniclip.ShapeShifter {
                     ShapeShifterLogger.Log($"SKIN {game} : {origin}");
                 }
 
-                IOUtils.TryCreateDirectory(assetFolder);
+                IOUtils.TryCreateDirectory(assetFolder, true);
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
 
@@ -304,6 +304,7 @@ namespace Miniclip.ShapeShifter {
                 }
                 else
                 {
+                    
                     IOUtils.CopyFile(origin, target);
                     IOUtils.CopyFile(origin+".meta", target+".meta");
                 }
@@ -313,9 +314,9 @@ namespace Miniclip.ShapeShifter {
             GitUtils.Untrack(assetPath, true);
         }
         
-        public bool IsSkinned(string assetPath) => configuration.GameNames.Any(game => IsSkinned(assetPath, game));
+        public static bool IsSkinned(string assetPath) => configuration.GameNames.Any(game => IsSkinned(assetPath, game));
 
-        private bool IsSkinned(string assetPath, string game)
+        private static bool IsSkinned(string assetPath, string game)
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             
