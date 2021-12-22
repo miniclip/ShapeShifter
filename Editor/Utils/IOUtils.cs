@@ -8,12 +8,19 @@ namespace Miniclip.ShapeShifter.Utils
 {
     public class IOUtils
     {
-        public static void TryCreateDirectory(string directoryPath)
+        public static void TryCreateDirectory(string directoryPath, bool deleteIfExists)
         {
-            if (!Directory.Exists(directoryPath))
+            if (Directory.Exists(directoryPath))
             {
-                Directory.CreateDirectory(directoryPath);
+                if (!deleteIfExists)
+                {
+                    return;
+                }
+
+                Directory.Delete(directoryPath, true);
             }
+
+            Directory.CreateDirectory(directoryPath);
         }
 
         public static void CopyFolder(DirectoryInfo source, DirectoryInfo target)
