@@ -86,6 +86,8 @@ namespace Miniclip.ShapeShifter.Utils
 
             gitIgnoreContent.Add(GetAssetIgnoreIdentifier(assetPath));
             gitIgnoreContent.Add($"{pathRelativeToProjectFolder}");
+            gitIgnoreContent.Add(GetAssetIgnoreIdentifier(assetPath));
+            gitIgnoreContent.Add($"{pathRelativeToProjectFolder}.meta");
 
             SetGitIgnoreContent(gitIgnoreContent);
         }
@@ -96,7 +98,7 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 return;
             }
-
+            
             int lineToRemove = gitIgnoreContent.IndexOf(GetAssetIgnoreIdentifier(pathToAcknowledge));
 
             if (lineToRemove == -1)
@@ -105,7 +107,7 @@ namespace Miniclip.ShapeShifter.Utils
                 return;
             }
 
-            gitIgnoreContent.RemoveRange(lineToRemove, 2);
+            gitIgnoreContent.RemoveRange(lineToRemove, 4);
             ShapeShifterLogger.Log($"Removing {pathToAcknowledge} from .gitignore");
             SetGitIgnoreContent(gitIgnoreContent);
             Stage(pathToAcknowledge);
