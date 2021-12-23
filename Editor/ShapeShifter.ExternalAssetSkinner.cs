@@ -152,8 +152,8 @@ namespace Miniclip.ShapeShifter {
             string key = this.GenerateKeyFromRelativePath(relativePath);
             
             foreach (string game in configuration.GameNames) {
-                this.dirtyAssets.Remove(key);
-                this.previewPerAsset.Remove(key);
+                dirtyAssets.Remove(key);
+                previewPerAsset.Remove(key);
             
                 string assetFolder = Path.Combine(
                     skinsFolder.FullName,

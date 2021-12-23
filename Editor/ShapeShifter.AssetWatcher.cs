@@ -53,7 +53,7 @@ namespace Miniclip.ShapeShifter
         private void StartWatchingFolder(string pathToWatch) =>
             FileSystemWatcherManager.AddPathToWatchlist(pathToWatch, OnFileChanged);
 
-        private void StopWatchingFolder(string pathToUnwatch) =>
+        private static void StopWatchingFolder(string pathToUnwatch) =>
             FileSystemWatcherManager.RemovePathFromWatchlist(pathToUnwatch);
 
         private void ClearAllWatchedPaths() => FileSystemWatcherManager.RemoveAllPathsFromWatchlist();
@@ -62,8 +62,8 @@ namespace Miniclip.ShapeShifter
         {
             DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
             string game = assetDirectory.Parent.Parent.Name;
-            string key = this.GenerateAssetKey(game, assetDirectory.Name);
-            this.dirtyAssets.Add(key);
+            string key = GenerateAssetKey(game, assetDirectory.Name);
+            dirtyAssets.Add(key);
         }
 #endregion
     }

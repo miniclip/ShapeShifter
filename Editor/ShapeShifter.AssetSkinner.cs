@@ -13,8 +13,8 @@ namespace Miniclip.ShapeShifter {
         private Vector2 scrollPosition;
         private bool showSkinner = true;
 
-        private HashSet<string> dirtyAssets = new HashSet<string>();
-        private Dictionary<string, Texture2D> previewPerAsset = new Dictionary<string, Texture2D>();
+        private static HashSet<string> dirtyAssets = new HashSet<string>();
+        private static Dictionary<string, Texture2D> previewPerAsset = new Dictionary<string, Texture2D>();
         
         private static readonly string defaultIcon = "WelcomeScreen.AssetStoreLogo";
         private static readonly string errorIcon = "console.erroricon";
@@ -154,7 +154,7 @@ namespace Miniclip.ShapeShifter {
                         Path.GetFileName(assetPath)
                     );
 
-                    string key = this.GenerateAssetKey(game, guid);
+                    string key = GenerateAssetKey(game, guid);
                     this.GenerateAssetPreview(key, skinnedPath);
                     this.DrawAssetPreview(key, game, skinnedPath);
                 }
@@ -163,7 +163,7 @@ namespace Miniclip.ShapeShifter {
             GUI.backgroundColor = Color.red;
                 
             if (GUILayout.Button("Remove skins")) {
-                this.RemoveSkins(assetPath);
+                RemoveSkins(assetPath);
             }        
         }
 
@@ -171,15 +171,15 @@ namespace Miniclip.ShapeShifter {
             GUI.backgroundColor = Color.green;
                 
             if (GUILayout.Button("Skin it!")) {
-                this.SkinAsset(assetPath);
+                ShapeShifter.SkinAsset(assetPath);
             }
         }
         
         private void GenerateAssetPreview(string key, string assetPath)
         {
-            if (this.dirtyAssets.Contains(key) || !this.previewPerAsset.ContainsKey(key))
+            if (dirtyAssets.Contains(key) || !previewPerAsset.ContainsKey(key))
             {
-                this.dirtyAssets.Remove(key);
+                dirtyAssets.Remove(key);
 
                 Texture2D texturePreview = EditorGUIUtility.FindTexture(errorIcon);
                 if (Directory.Exists(assetPath))
@@ -214,7 +214,7 @@ namespace Miniclip.ShapeShifter {
                     }
                 }
 
-                this.previewPerAsset[key] = texturePreview;
+                previewPerAsset[key] = texturePreview;
             }
         }
         
@@ -223,17 +223,17 @@ namespace Miniclip.ShapeShifter {
         
         
         private void OnSelectionChange() {
-            this.dirtyAssets.Clear();
-            this.previewPerAsset.Clear();
+            dirtyAssets.Clear();
+            previewPerAsset.Clear();
             ClearAllWatchedPaths();
         }
 
-        private void RemoveSkins(string assetPath) {
+        public static void RemoveSkins(string assetPath) {
             foreach (string game in configuration.GameNames) {
                 string guid = AssetDatabase.AssetPathToGUID(assetPath);
-                string key = this.GenerateAssetKey(game, guid);
-                this.dirtyAssets.Remove(key);
-                this.previewPerAsset.Remove(key);
+                string key = GenerateAssetKey(game, guid);
+                dirtyAssets.Remove(key);
+                previewPerAsset.Remove(key);
                 
                 string assetFolder = Path.Combine(
                     skinsFolder.FullName,
@@ -262,7 +262,7 @@ namespace Miniclip.ShapeShifter {
             }
         }
 
-        private void SkinAsset(string assetPath, bool saveFirst = true)
+        public static void SkinAsset(string assetPath, bool saveFirst = true)
         {
             if (saveFirst)
             {
@@ -334,8 +334,8 @@ namespace Miniclip.ShapeShifter {
         }
         
         private void OnDisable() {
-            this.dirtyAssets.Clear();
-            this.previewPerAsset.Clear();
+            dirtyAssets.Clear();
+            previewPerAsset.Clear();
         }
         
         

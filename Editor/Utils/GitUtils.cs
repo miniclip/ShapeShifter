@@ -76,9 +76,12 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 return;
             }
-
+            
             string pathRelativeToProjectFolder = PathUtils.GetPathRelativeToProjectFolder(assetPath);
 
+            if (string.IsNullOrEmpty(pathRelativeToProjectFolder))
+                return;
+            
             if (gitIgnoreContent.Any(line => line.Contains(pathRelativeToProjectFolder)))
             {
                 return;
@@ -108,7 +111,7 @@ namespace Miniclip.ShapeShifter.Utils
             }
 
             gitIgnoreContent.RemoveRange(lineToRemove, 4);
-            ShapeShifterLogger.Log($"Removing {pathToAcknowledge} from .gitignore");
+            // ShapeShifterLogger.Log($"Removing {pathToAcknowledge} from .gitignore");
             SetGitIgnoreContent(gitIgnoreContent);
             Stage(pathToAcknowledge);
         }
@@ -119,7 +122,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             if (!File.Exists(gitIgnorePath))
             {
-                ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
+                // ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
                 gitIgnoreContent = null;
                 return false;
             }
@@ -134,7 +137,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             if (!File.Exists(gitIgnorePath))
             {
-                ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
+                // ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
                 return;
             }
 
@@ -174,7 +177,7 @@ namespace Miniclip.ShapeShifter.Utils
                 }
                 else
                 {
-                    ShapeShifterLogger.LogError(errorOutput);
+                    // ShapeShifterLogger.LogError(errorOutput);
                     throw new InvalidOperationException($"Failed to run git command: Exit Code: {exitCode.ToString()}");
                 }
             }
@@ -183,7 +186,7 @@ namespace Miniclip.ShapeShifter.Utils
         private static int RunProcessAndGetExitCode(string arguments, Process process, out string output,
             out string errorOutput)
         {
-            Debug.Log($"Running: git {arguments}");
+            // Debug.Log($"Running: git {arguments}");
             return process.Run(
                 application: "git",
                 arguments: arguments,

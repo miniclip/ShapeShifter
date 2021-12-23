@@ -63,7 +63,7 @@ namespace Miniclip.ShapeShifter {
             );
         }
 
-        private string GenerateAssetKey(string game, string guid) => game + ":" + guid;
+        private static string GenerateAssetKey(string game, string guid) => game + ":" + guid;
 
         private void OnEnable()
         {
