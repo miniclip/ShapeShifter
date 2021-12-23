@@ -14,7 +14,7 @@ namespace Miniclip.ShapeShifter.Tests
         }
 
         [Test]
-        public void SkinOneAsset()
+        public void SkinSprite()
         {
             var squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
             Assert.IsNotNull(squareSprite, $"Could not find {TestUtils.SpriteAssetName} on resources");
@@ -24,7 +24,7 @@ namespace Miniclip.ShapeShifter.Tests
             ShapeShifter.SkinAsset(AssetDatabase.GetAssetPath(squareSprite));
             
             Assert.IsTrue(ShapeShifter.IsSkinned(AssetDatabase.GetAssetPath(squareSprite)), "Asset should be skinned");
-
+            
         }
 
         [TearDown]

@@ -21,6 +21,11 @@ namespace Miniclip.ShapeShifter.Utils
         {
             RunGitCommand($"add {PathUtils.GetFullPath(assetPath)}");
         }
+        
+        internal static void UnStage(string assetPath)
+        {
+            RunGitCommand($"reset -- {PathUtils.GetFullPath(assetPath)}");
+        }
 
         internal static bool IsTracked(string assetPath)
         {
@@ -32,35 +37,51 @@ namespace Miniclip.ShapeShifter.Utils
                 return exitCode != 1;
             }
         }
+        
+        internal static bool IsStaged(string assetPath)
+        {
+            using (Process process = new Process())
+            {
+                string arguments = $"diff --name-only --cached";
+                RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
+
+                return output.Contains(PathUtils.GetPathRelativeToProjectFolder(assetPath));
+            }
+        }
 
         internal static void Track(string assetPath)
         {
-            if (IsTracked(assetPath))
-            {
-                ShapeShifterLogger.Log($"{assetPath} already tracked in git.");
-                return;
-            }
+            // if (IsTracked(assetPath))
+            // {
+            //     ShapeShifterLogger.Log($"{assetPath} already tracked in git.");
+            //     return;
+            // }
 
-            if (IsIgnored(assetPath))
-            {
+            // if (IsIgnored(assetPath))
+            // {
                 RemoveFromGitIgnore(assetPath);
 
-                Stage(PathUtils.GetFullPath(assetPath));
+                // Stage(PathUtils.GetFullPath(assetPath));
                 return;
-            }
+            // }
 
-            ShapeShifterLogger.Log($"Could not git track {assetPath}");
+            // ShapeShifterLogger.Log($"Could not git track {assetPath}");
         }
 
         internal static void Untrack(string assetPath, bool addToGitIgnore = false)
         {
             string fullFilePath = PathUtils.GetFullPath(assetPath);
-
+            
             if (IsTracked(fullFilePath))
-            {
+            { 
                 RunGitCommand($"rm -r --cached {fullFilePath}");
             }
-
+            else if(IsStaged(fullFilePath))
+            {
+                //TODO Unstage not working, file is still in the staging area after this
+                UnStage(fullFilePath);
+            }
+        
             if (addToGitIgnore)
             {
                 AddToGitIgnore(assetPath);
@@ -113,7 +134,7 @@ namespace Miniclip.ShapeShifter.Utils
             gitIgnoreContent.RemoveRange(lineToRemove, 4);
             // ShapeShifterLogger.Log($"Removing {pathToAcknowledge} from .gitignore");
             SetGitIgnoreContent(gitIgnoreContent);
-            Stage(pathToAcknowledge);
+            // Stage(pathToAcknowledge);
         }
 
         private static bool TryGetGitIgnoreContent(out List<string> gitIgnoreContent)
@@ -143,7 +164,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             File.WriteAllLines(gitIgnorePath, newGitIgnoreContent);
 
-            Stage(gitIgnorePath);
+            // Stage(gitIgnorePath);
         }
 
         private static string GetGitIgnorePath()
@@ -165,7 +186,7 @@ namespace Miniclip.ShapeShifter.Utils
             return gitIgnoreContent.Any(line => line.Contains(fileRelativePath));
         }
 
-        private static string RunGitCommand(string arguments)
+        internal static string RunGitCommand(string arguments)
         {
             using (Process process = new Process())
             {
@@ -178,7 +199,7 @@ namespace Miniclip.ShapeShifter.Utils
                 else
                 {
                     // ShapeShifterLogger.LogError(errorOutput);
-                    throw new InvalidOperationException($"Failed to run git command: Exit Code: {exitCode.ToString()}");
+                    throw new InvalidOperationException($"Failed to run git {arguments}: Exit Code: {exitCode.ToString()}");
                 }
             }
         }
@@ -186,7 +207,7 @@ namespace Miniclip.ShapeShifter.Utils
         private static int RunProcessAndGetExitCode(string arguments, Process process, out string output,
             out string errorOutput)
         {
-            // Debug.Log($"Running: git {arguments}");
+            Debug.Log($"Running: git {arguments}");
             return process.Run(
                 application: "git",
                 arguments: arguments,
