@@ -12,19 +12,54 @@ namespace Miniclip.ShapeShifter.Utils
 {
     class GitUtils
     {
+        private static readonly string git_status_modified = "M";
+        private static readonly string git_status_added = "A";
+        private static readonly string git_status_deleted = "D";
+        private static readonly string git_status_renamed = "R";
+        private static readonly string git_status_updated = "U";
+        private static readonly string git_status_untracked = "??";
+
         private static readonly string GIT_IGNORE_SHAPESHIFTER_LABEL = "#ShapeShifter";
 
         internal static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
-        internal static string RepositoryPath => RunGitCommand("rev-parse --git-dir");
+
+        internal static string RepositoryPath
+        {
+            get
+            {
+                string path;
+                if (string.IsNullOrEmpty(GitWorkingDirectory))
+                {
+                    path = RunGitCommand("rev-parse --git-dir", Application.dataPath);
+                    path = path.Remove(path.IndexOf(".git", StringComparison.Ordinal));
+                    GitWorkingDirectory = path;
+                }
+
+                return GitWorkingDirectory;
+            }
+        }
+
+        internal static string GitWorkingDirectory = string.Empty;
+
+        internal static bool IsStaged(string assetPath)
+        {
+            using (Process process = new Process())
+            {
+                string arguments = $"diff --name-only --cached";
+                RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
+
+                return output.Contains(PathUtils.GetPathRelativeToProjectFolder(assetPath));
+            }
+        }
 
         internal static void Stage(string assetPath)
         {
-            RunGitCommand($"add {PathUtils.GetFullPath(assetPath)}");
+            RunGitCommand($"add \"{PathUtils.GetFullPath(assetPath)}\"");
         }
-        
+
         internal static void UnStage(string assetPath)
         {
-            RunGitCommand($"reset -- {PathUtils.GetFullPath(assetPath)}");
+            RunGitCommand($"restore --staged \"{PathUtils.GetFullPath(assetPath)}\"");
         }
 
         internal static bool IsTracked(string assetPath)
@@ -35,17 +70,6 @@ namespace Miniclip.ShapeShifter.Utils
                 int exitCode = RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
 
                 return exitCode != 1;
-            }
-        }
-        
-        internal static bool IsStaged(string assetPath)
-        {
-            using (Process process = new Process())
-            {
-                string arguments = $"diff --name-only --cached";
-                RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
-
-                return output.Contains(PathUtils.GetPathRelativeToProjectFolder(assetPath));
             }
         }
 
@@ -59,10 +83,11 @@ namespace Miniclip.ShapeShifter.Utils
 
             // if (IsIgnored(assetPath))
             // {
-                RemoveFromGitIgnore(assetPath);
+            RemoveFromGitIgnore(assetPath);
 
-                // Stage(PathUtils.GetFullPath(assetPath));
-                return;
+            // Stage(PathUtils.GetFullPath(assetPath));
+            return;
+
             // }
 
             // ShapeShifterLogger.Log($"Could not git track {assetPath}");
@@ -71,17 +96,16 @@ namespace Miniclip.ShapeShifter.Utils
         internal static void Untrack(string assetPath, bool addToGitIgnore = false)
         {
             string fullFilePath = PathUtils.GetFullPath(assetPath);
-            
+
             if (IsTracked(fullFilePath))
-            { 
+            {
                 RunGitCommand($"rm -r --cached {fullFilePath}");
             }
-            else if(IsStaged(fullFilePath))
+            else if (IsStaged(fullFilePath))
             {
-                //TODO Unstage not working, file is still in the staging area after this
                 UnStage(fullFilePath);
             }
-        
+
             if (addToGitIgnore)
             {
                 AddToGitIgnore(assetPath);
@@ -97,21 +121,23 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 return;
             }
-            
+
             string pathRelativeToProjectFolder = PathUtils.GetPathRelativeToProjectFolder(assetPath);
 
             if (string.IsNullOrEmpty(pathRelativeToProjectFolder))
                 return;
-            
-            if (gitIgnoreContent.Any(line => line.Contains(pathRelativeToProjectFolder)))
+
+            string assetIgnoreIdentifier = GetAssetIgnoreIdentifier(assetPath);
+
+            if (gitIgnoreContent.Any(line => line.Equals(assetIgnoreIdentifier, StringComparison.Ordinal)))
             {
+                // a possible rename has happened, we should simply replace the existing ignore entry with this new one
+                gitIgnoreContent[gitIgnoreContent.IndexOf(assetIgnoreIdentifier) + 1] = pathRelativeToProjectFolder;
                 return;
             }
 
-            gitIgnoreContent.Add(GetAssetIgnoreIdentifier(assetPath));
+            gitIgnoreContent.Add(assetIgnoreIdentifier);
             gitIgnoreContent.Add($"{pathRelativeToProjectFolder}");
-            gitIgnoreContent.Add(GetAssetIgnoreIdentifier(assetPath));
-            gitIgnoreContent.Add($"{pathRelativeToProjectFolder}.meta");
 
             SetGitIgnoreContent(gitIgnoreContent);
         }
@@ -122,7 +148,7 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 return;
             }
-            
+
             int lineToRemove = gitIgnoreContent.IndexOf(GetAssetIgnoreIdentifier(pathToAcknowledge));
 
             if (lineToRemove == -1)
@@ -131,9 +157,11 @@ namespace Miniclip.ShapeShifter.Utils
                 return;
             }
 
-            gitIgnoreContent.RemoveRange(lineToRemove, 4);
+            gitIgnoreContent.RemoveRange(lineToRemove, 2);
+
             // ShapeShifterLogger.Log($"Removing {pathToAcknowledge} from .gitignore");
             SetGitIgnoreContent(gitIgnoreContent);
+
             // Stage(pathToAcknowledge);
         }
 
@@ -164,13 +192,12 @@ namespace Miniclip.ShapeShifter.Utils
 
             File.WriteAllLines(gitIgnorePath, newGitIgnoreContent);
 
-            // Stage(gitIgnorePath);
+            Stage(gitIgnorePath);
         }
 
         private static string GetGitIgnorePath()
         {
             string repositoryPath = RepositoryPath;
-            repositoryPath = repositoryPath.Remove(repositoryPath.IndexOf(".git", StringComparison.Ordinal));
 
             return Path.Combine(repositoryPath, ".gitignore");
         }
@@ -186,11 +213,17 @@ namespace Miniclip.ShapeShifter.Utils
             return gitIgnoreContent.Any(line => line.Contains(fileRelativePath));
         }
 
-        internal static string RunGitCommand(string arguments)
+        internal static string RunGitCommand(string arguments, string workingDirectory = null)
         {
             using (Process process = new Process())
             {
-                int exitCode = RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
+                int exitCode = RunProcessAndGetExitCode(
+                    arguments,
+                    process,
+                    out string output,
+                    out string errorOutput,
+                    workingDirectory
+                );
 
                 if (exitCode == 0)
                 {
@@ -199,19 +232,26 @@ namespace Miniclip.ShapeShifter.Utils
                 else
                 {
                     // ShapeShifterLogger.LogError(errorOutput);
-                    throw new InvalidOperationException($"Failed to run git {arguments}: Exit Code: {exitCode.ToString()}");
+                    throw new InvalidOperationException(
+                        $"Failed to run git {arguments}: Exit Code: {exitCode.ToString()}"
+                    );
                 }
             }
         }
 
         private static int RunProcessAndGetExitCode(string arguments, Process process, out string output,
-            out string errorOutput)
+            out string errorOutput, string workingDirectory = null)
         {
-            Debug.Log($"Running: git {arguments}");
+            if (workingDirectory == null)
+            {
+                workingDirectory = RepositoryPath;
+            }
+
+            Debug.Log($"Running: git {arguments} at {workingDirectory}");
             return process.Run(
                 application: "git",
                 arguments: arguments,
-                workingDirectory: Application.dataPath,
+                workingDirectory: workingDirectory,
                 out output,
                 out errorOutput
             );

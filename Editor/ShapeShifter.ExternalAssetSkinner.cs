@@ -16,24 +16,8 @@ namespace Miniclip.ShapeShifter {
         private int selectedExternalAsset;
         private bool showExternalSkinner = true;
 
-        private string DetermineRecommendedPath()
-        {
-            string repositoryRoot = GitUtils.RepositoryPath;
+        private string DetermineRecommendedPath() => GitUtils.RepositoryPath;
 
-            if (string.IsNullOrEmpty(repositoryRoot) || !repositoryRoot.Contains(".git"))
-            {
-                ShapeShifterLogger.LogError("Git repository not found. Is there supposed to be one?");
-
-                //start a bit outside of the project, but not too far away, we're trying to stay within
-                //the boundaries of assets related to this project, but without a repository this is
-                //just guesswork
-                return Application.dataPath + "/../../../";
-            }
-
-            //string.Replace won't work here as sometimes there's line breaks at the end of the standard output stream 
-            return repositoryRoot.Remove(repositoryRoot.IndexOf(".git", StringComparison.Ordinal));
-        }
-        
         private void DrawSkinnedExternalAssetSection(string relativePath) {
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
             

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
@@ -83,7 +84,7 @@ namespace Miniclip.ShapeShifter {
                     ActiveGame,
                     "Add missing skins",
                     CopyIfMissingInternal,
-                    CopyFromSkinnedExternalToOrigin
+                    CopyFromSkinnedExternalToOrigin //TODO: CopyIfMissingExternal
                 );
             }
         }
