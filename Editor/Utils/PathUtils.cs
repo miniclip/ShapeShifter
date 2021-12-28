@@ -27,6 +27,11 @@ namespace Miniclip.ShapeShifter.Utils
             return GetRootFolder(path).Equals(PACKAGES_FOLDER_NAME, StringComparison.Ordinal);
         }
         
+        private static bool IsPathRelativeToProject(string path)
+        {
+            string projectFolderName = Directory.GetParent(Application.dataPath).Name;
+            return GetRootFolder(path).Equals(projectFolderName, StringComparison.Ordinal);
+        }
 
         public static bool IsFullPath(string path) => Path.IsPathRooted(path);
 
@@ -96,8 +101,16 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 return Path.GetFullPath(path);
             }
+
+            if (IsPathRelativeToProject(path))
+            {
+                string projectContainerFolderName = Directory.GetParent(Application.dataPath).Parent.FullName;
+                
+                return Path.Combine(projectContainerFolderName, path);
+            }
             
             return string.Empty;
         }
+        
     }
 }
