@@ -18,11 +18,12 @@ namespace Miniclip.ShapeShifter.Utils
         private static readonly string git_status_renamed = "R";
         private static readonly string git_status_updated = "U";
         private static readonly string git_status_untracked = "??";
-
         private static readonly string GIT_IGNORE_SHAPESHIFTER_LABEL = "#ShapeShifter";
 
-        internal static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
+        private static string GitWorkingDirectory = string.Empty;
 
+        internal static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
+        
         internal static string RepositoryPath
         {
             get
@@ -39,7 +40,7 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
-        internal static string GitWorkingDirectory = string.Empty;
+        private static string GitIgnorePath() => Path.Combine(RepositoryPath, ".gitignore");
 
         internal static bool IsStaged(string assetPath)
         {
@@ -47,20 +48,13 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 string arguments = $"diff --name-only --cached";
                 RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
-
                 return output.Contains(PathUtils.GetPathRelativeToProjectFolder(assetPath));
             }
         }
 
-        internal static void Stage(string assetPath)
-        {
-            RunGitCommand($"add \"{PathUtils.GetFullPath(assetPath)}\"");
-        }
+        internal static void Stage(string assetPath) => RunGitCommand($"add \"{PathUtils.GetFullPath(assetPath)}\"");
 
-        internal static void UnStage(string assetPath)
-        {
-            RunGitCommand($"restore --staged \"{PathUtils.GetFullPath(assetPath)}\"");
-        }
+        internal static void UnStage(string assetPath) => RunGitCommand($"restore --staged \"{PathUtils.GetFullPath(assetPath)}\"");
 
         internal static bool IsTracked(string assetPath)
         {
@@ -117,7 +111,7 @@ namespace Miniclip.ShapeShifter.Utils
 
         private static void AddToGitIgnore(string assetPath)
         {
-            if (!TryGetGitIgnoreContent(out List<string> gitIgnoreContent))
+            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
             {
                 return;
             }
@@ -144,7 +138,7 @@ namespace Miniclip.ShapeShifter.Utils
 
         private static void RemoveFromGitIgnore(string pathToAcknowledge)
         {
-            if (!TryGetGitIgnoreContent(out List<string> gitIgnoreContent))
+            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
             {
                 return;
             }
@@ -165,13 +159,13 @@ namespace Miniclip.ShapeShifter.Utils
             // Stage(pathToAcknowledge);
         }
 
-        private static bool TryGetGitIgnoreContent(out List<string> gitIgnoreContent)
+        private static bool TryGetGitIgnoreLines(out List<string> gitIgnoreContent)
         {
-            string gitIgnorePath = GetGitIgnorePath();
+            string gitIgnorePath = GitIgnorePath();
 
             if (!File.Exists(gitIgnorePath))
             {
-                // ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
+                ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
                 gitIgnoreContent = null;
                 return false;
             }
@@ -182,11 +176,11 @@ namespace Miniclip.ShapeShifter.Utils
 
         private static void SetGitIgnoreContent(IEnumerable<string> newGitIgnoreContent)
         {
-            string gitIgnorePath = GetGitIgnorePath();
+            string gitIgnorePath = GitIgnorePath();
 
             if (!File.Exists(gitIgnorePath))
             {
-                // ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
+                ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
                 return;
             }
 
@@ -195,16 +189,10 @@ namespace Miniclip.ShapeShifter.Utils
             Stage(gitIgnorePath);
         }
 
-        private static string GetGitIgnorePath()
-        {
-            string repositoryPath = RepositoryPath;
-
-            return Path.Combine(repositoryPath, ".gitignore");
-        }
 
         private static bool IsIgnored(string assetPath)
         {
-            if (!TryGetGitIgnoreContent(out List<string> gitIgnoreContent))
+            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
                 return false;
 
             string folderName = Directory.GetParent(Application.dataPath).Name;
@@ -213,6 +201,36 @@ namespace Miniclip.ShapeShifter.Utils
             return gitIgnoreContent.Any(line => line.Contains(fileRelativePath));
         }
 
+        public static void DiscardChanges(string filePath)
+        {
+            RunGitCommand($"checkout \"{PathUtils.GetFullPath(filePath)}\"");
+        }
+        
+        internal static List<string> GetUncommittedDeletedFiles()
+        {
+            string[] uncommittedFiles = GetUncommittedChangedFiles();
+            uncommittedFiles = uncommittedFiles.Where(uncommittedFile => uncommittedFile.StartsWith(git_status_deleted)).ToArray();
+            for (int i = 0; i < uncommittedFiles.Length; i++)
+            {
+                uncommittedFiles[i] = uncommittedFiles[i].TrimStart(Convert.ToChar(git_status_deleted), ' ');
+            }
+
+            return uncommittedFiles.ToList();
+        }
+
+        private static string[] GetUncommittedChangedFiles()
+        {
+            string status = RunGitCommand("status --porcelain -u");
+            string[] splitted = status.Split('\n');
+
+            for (int index = 0; index < splitted.Length; index++)
+            {
+                splitted[index] = splitted[index].Trim();
+            }
+
+            return splitted;
+        }
+        
         internal static string RunGitCommand(string arguments, string workingDirectory = null)
         {
             using (Process process = new Process())
@@ -231,7 +249,6 @@ namespace Miniclip.ShapeShifter.Utils
                 }
                 else
                 {
-                    // ShapeShifterLogger.LogError(errorOutput);
                     throw new InvalidOperationException(
                         $"Failed to run git {arguments}: Exit Code: {exitCode.ToString()}"
                     );

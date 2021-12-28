@@ -8,6 +8,6 @@ public class ShapeShifterInitializer : MonoBehaviour
 {
     static ShapeShifterInitializer()
     {
-        ShapeShifter.CopyMissingSkins();
+        // ShapeShifter.RestoreMissingAssets();
     }
 }

@@ -6,22 +6,21 @@ using System.Text;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
-namespace Miniclip.ShapeShifter {
-    
+namespace Miniclip.ShapeShifter
+{
     public partial class ShapeShifter
     {
-
         private static string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
-        
+
         private static int highlightedGame;
+
         // private string lastSwitched;
-        
+
         private bool showSwitcher = true;
 
-        private static string ActiveGameName => configuration.GameNames[ActiveGame];
-        
+        private static string ActiveGameName => GetGameName(ActiveGame);
+
         public static int ActiveGame
         {
             get
@@ -33,7 +32,7 @@ namespace Miniclip.ShapeShifter {
                     );
                     ActiveGame = 0;
                 }
-                
+
                 return ShapeShifterEditorPrefs.GetInt(ACTIVE_GAME_PLAYER_PREFS_KEY);
             }
             set
@@ -45,31 +44,35 @@ namespace Miniclip.ShapeShifter {
             }
         }
 
-        private static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory) {
+        private static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory)
+        {
             string relativePath = GenerateRelativePathFromKey(directory.Name);
             string origin = Path.Combine(Application.dataPath, relativePath);
             string target = Path.Combine(directory.FullName, Path.GetFileName(origin));
             IOUtils.CopyFile(origin, target);
         }
-        
-        private static void CopyFromSkinnedExternalToOrigin(DirectoryInfo directory) {
+
+        private static void CopyFromSkinnedExternalToOrigin(DirectoryInfo directory)
+        {
             string relativePath = GenerateRelativePathFromKey(directory.Name);
             string target = Path.Combine(Application.dataPath, relativePath);
             string searchPattern = Path.GetFileName(target);
             FileInfo origin = directory.GetFiles(searchPattern)[0];
             origin.CopyTo(target, true);
         }
-        
-        private static void CopyFromSkinsToUnity(DirectoryInfo directory) {
+
+        private static void CopyFromSkinsToUnity(DirectoryInfo directory)
+        {
             string guid = directory.Name;
 
             // Ensure it has the same name, so we don't end up copying .DS_Store
             string target = AssetDatabase.GUIDToAssetPath(guid);
-            string searchPattern = Path.GetFileName(target)+"*";
+            string searchPattern = Path.GetFileName(target) + "*";
 
             FileInfo[] files = directory.GetFiles(searchPattern);
 
-            if (files.Length > 0) {
+            if (files.Length > 0)
+            {
                 foreach (FileInfo fileInfo in files)
                 {
                     //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
@@ -82,24 +85,25 @@ namespace Miniclip.ShapeShifter {
                         fileInfo.CopyTo(target, true);
                     }
                 }
-               
+
                 return;
             }
 
             DirectoryInfo[] directories = directory.GetDirectories();
 
-            if (directories.Length > 0) {
+            if (directories.Length > 0)
+            {
                 target = Path.Combine(
-                    Application.dataPath.Replace("/Assets", string.Empty), 
+                    Application.dataPath.Replace("/Assets", string.Empty),
                     target
                 );
-                
+
                 IOUtils.CopyFolder(directories[0], new DirectoryInfo(target));
             }
         }
 
-        private static void CopyFromUnityToSkins(DirectoryInfo skinDirectory) {
-            
+        private static void CopyFromUnityToSkins(DirectoryInfo skinDirectory)
+        {
             if (IOUtils.IsFolderEmpty(skinDirectory))
             {
                 //There shouldn't be an empty skin folder, most likely it was removed outside of ShapeShifter. E.g. discarding changes in a git client.
@@ -121,23 +125,27 @@ namespace Miniclip.ShapeShifter {
             {
                 IOUtils.TryCreateDirectory(skinDirectory.FullName, true);
                 IOUtils.CopyFile(origin, target);
-                IOUtils.CopyFile(origin+".meta", target+".meta");
+                IOUtils.CopyFile(origin + ".meta", target + ".meta");
             }
         }
 
-        private void OnAssetSwitcherGUI() {
+        private void OnAssetSwitcherGUI()
+        {
             this.showSwitcher = EditorGUILayout.Foldout(this.showSwitcher, "Asset Switcher");
 
-            if (! this.showSwitcher || configuration.GameNames.Count == 0) {
+            if (!this.showSwitcher || Configuration.GameNames.Count == 0)
+            {
                 return;
             }
-            
+
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
             GUIStyle buttonStyle = GUI.skin.GetStyle("Button");
-            GUIStyle labelStyle = GUI.skin.GetStyle("Label"); 
-                
-            using (new GUILayout.VerticalScope(boxStyle)) {
-                GUIStyle titleStyle = new GUIStyle (labelStyle){
+            GUIStyle labelStyle = GUI.skin.GetStyle("Label");
+
+            using (new GUILayout.VerticalScope(boxStyle))
+            {
+                GUIStyle titleStyle = new GUIStyle(labelStyle)
+                {
                     alignment = TextAnchor.MiddleCenter
                 };
 
@@ -147,7 +155,7 @@ namespace Miniclip.ShapeShifter {
 
                 highlightedGame = GUILayout.SelectionGrid(
                     highlightedGame,
-                    configuration.GameNames.ToArray(),
+                    Configuration.GameNames.ToArray(),
                     2,
                     buttonStyle
                 );
@@ -159,11 +167,11 @@ namespace Miniclip.ShapeShifter {
                     SwitchToGame(highlightedGame);
                 }
 
-                if (GUILayout.Button($"Overwrite {configuration.GameNames[highlightedGame]} skin", buttonStyle))
+                if (GUILayout.Button($"Overwrite {GetGameName(highlightedGame)} skin", buttonStyle))
                 {
                     if (EditorUtility.DisplayDialog(
                         "ShapeShifter",
-                        $"This will overwrite you current {configuration.GameNames[highlightedGame]} assets with the assets currently inside unity. Are you sure?",
+                        $"This will overwrite you current {GetGameName(highlightedGame)} assets with the assets currently inside unity. Are you sure?",
                         "Yes, overwrite it.",
                         "Nevermind"
                     ))
@@ -173,13 +181,14 @@ namespace Miniclip.ShapeShifter {
                 }
             }
         }
-        
-        private static void OverwriteSelectedSkin(int selected) {
-            configuration.ModifiedAssetPaths.Clear();
+
+        private static void OverwriteSelectedSkin(int selected)
+        {
+            Configuration.ModifiedAssetPaths.Clear();
 
             SavePendingChanges();
-                
-            string game = configuration.GameNames[selected];
+
+            string game = GetGameName(selected);
 
             if (ActiveGameName != game)
             {
@@ -187,7 +196,6 @@ namespace Miniclip.ShapeShifter {
                 stringBuilder.Append($"This will overwrite the {game} skins with the current assets. ");
 
                 stringBuilder.Append($"The last asset switch was to {ActiveGameName}");
-                
 
                 stringBuilder.Append(" Are you sure?");
 
@@ -201,50 +209,50 @@ namespace Miniclip.ShapeShifter {
                     return;
                 }
             }
-            
+
             PerformCopiesWithTracking(
                 selected: selected,
                 description: "Overwrite selected skin",
                 CopyFromUnityToSkins,
                 CopyFromOriginToSkinnedExternal
             );
-
         }
 
-        private static void PerformCopiesWithTracking(
-            int selected,
+        private static void PerformCopiesWithTracking(int selected,
             string description,
             Action<DirectoryInfo> internalAssetOperation,
-            Action<DirectoryInfo> externalAssetOperation
-        ) {
-            string game = configuration.GameNames[selected];
-            ShapeShifterLogger.Log($"{description}: {game}");
+            Action<DirectoryInfo> externalAssetOperation)
+        {
 
-            string gameFolderPath = Path.Combine(skinsFolder.FullName, game);
+            ShapeShifterLogger.Log($"{description}: {GetGameName(selected)}");
 
-            if (Directory.Exists(gameFolderPath)) {
+            string gameFolderPath = GetGameFolderPath(selected);
+
+            if (Directory.Exists(gameFolderPath))
+            {
                 // this will fail the total by 0-3, as it counts the game, the internal and the external directories
                 // but that doesn't make enough of a difference to justify making this a more complex calculation
                 int totalDirectories = Directory.EnumerateDirectories(
-                    gameFolderPath,
-                    "*",
-                    SearchOption.AllDirectories
-                ).Count();
-                
+                        gameFolderPath,
+                        "*",
+                        SearchOption.AllDirectories
+                    )
+                    .Count();
+
                 float progress = 0.0f;
                 float progressBarStep = 1.0f / totalDirectories;
 
                 PerformOperationOnPath(
-                    gameFolderPath, 
+                    gameFolderPath,
                     InternalAssetsFolder,
                     internalAssetOperation,
                     description,
                     progressBarStep,
                     ref progress
                 );
- 
+
                 PerformOperationOnPath(
-                    gameFolderPath, 
+                    gameFolderPath,
                     ExternalAssetsFolder,
                     externalAssetOperation,
                     description,
@@ -253,35 +261,49 @@ namespace Miniclip.ShapeShifter {
                 );
 
                 RefreshAllAssets();
-            } else {
+            }
+            else
+            {
                 EditorUtility.DisplayDialog(
                     "Shape Shifter",
-                    $"Could not {description.ToLower()}: {game}. Skins folder does not exist!",
+                    $"Could not {description.ToLower()}: {GetGameName(selected)}. Skins folder does not exist!",
                     "Fine, I'll take a look."
                 );
 
                 ActiveGame = 0;
+
                 // TODO: ^this shouldn't just be assigned to 0, the operations should be atomic.
                 // If they fail, nothing should change.
             }
 
             EditorUtility.ClearProgressBar();
         }
-        
-        private static void PerformOperationOnPath(
-            string gameFolderPath,
+
+        private static string GetGameName(int selected)
+        {
+            return Configuration.GameNames[selected];
+        }
+
+        private static string GetGameFolderPath(int selected)
+        {
+            return Path.Combine(SkinsFolder.FullName, GetGameName(selected));
+        }
+
+        private static void PerformOperationOnPath(string gameFolderPath,
             string assetFolder,
             Action<DirectoryInfo> operation,
             string description,
             float progressBarStep,
-            ref float progress
-        ) {
+            ref float progress)
+        {
             string assetFolderPath = Path.Combine(gameFolderPath, assetFolder);
 
-            if (Directory.Exists(assetFolderPath)) {
+            if (Directory.Exists(assetFolderPath))
+            {
                 DirectoryInfo internalFolder = new DirectoryInfo(assetFolderPath);
 
-                foreach (DirectoryInfo directory in internalFolder.GetDirectories()) {
+                foreach (DirectoryInfo directory in internalFolder.GetDirectories())
+                {
                     operation(directory);
 
                     progress += progressBarStep;
@@ -290,26 +312,30 @@ namespace Miniclip.ShapeShifter {
             }
         }
 
-        private static void RefreshAllAssets() {
+        private static void RefreshAllAssets()
+        {
             // Force Unity to lose and regain focus, so it resolves any new changes on the packages
             // TODO: Replace this in Unity 2020 with PackageManager.Client.Resolve
-            Process process = new Process {
-                StartInfo = new ProcessStartInfo {
+            Process process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
                     FileName = "osascript",
-                    Arguments = "-e 'tell application \"Finder\" to activate' -e 'delay 0.5' -e 'tell application \"Unity\" to activate'",
+                    Arguments =
+                        "-e 'tell application \"Finder\" to activate' -e 'delay 0.5' -e 'tell application \"Unity\" to activate'",
                     UseShellExecute = false,
                     CreateNoWindow = true
                 }
             };
-            
+
             process.Start();
-            
+
             AssetDatabase.Refresh();
         }
 
-        private static void SwitchToGame(int selected) {
-
-            if (configuration.ModifiedAssetPaths.Count > 0)
+        private static void SwitchToGame(int selected)
+        {
+            if (Configuration.ModifiedAssetPaths.Count > 0)
             {
                 bool continueSwitch = EditorUtility.DisplayDialog(
                     "Shape Shifter",
@@ -322,10 +348,10 @@ namespace Miniclip.ShapeShifter {
                 {
                     return;
                 }
-                
+
                 OverwriteSelectedSkin(ActiveGame);
             }
-            
+
             PerformCopiesWithTracking(
                 selected,
                 "Switch to game",
@@ -333,66 +359,69 @@ namespace Miniclip.ShapeShifter {
                 CopyFromSkinnedExternalToOrigin
             );
             ActiveGame = selected;
-            configuration.ModifiedAssetPaths.Clear();
+            Configuration.ModifiedAssetPaths.Clear();
         }
-        
+
         private static void CopyIfMissingInternal(DirectoryInfo directory)
         {
-                string guid = directory.Name;
+            string guid = directory.Name;
 
-                // Ensure it has the same name, so we don't end up copying .DS_Store
-                string target = AssetDatabase.GUIDToAssetPath(guid);
-                if (string.IsNullOrEmpty(target))
+            // Ensure it has the same name, so we don't end up copying .DS_Store
+            string target = AssetDatabase.GUIDToAssetPath(guid);
+            if (string.IsNullOrEmpty(target) && !missingGuidsToPathDictionary.TryGetValue(guid, out target))
+            {
+                ShapeShifterLogger.LogError($"Can't find Asset Path for guid: {guid}");
+                return;
+            }
+
+            string searchPattern = Path.GetFileName(target) + "*";
+
+            FileInfo[] files = directory.GetFiles(searchPattern);
+
+            if (files.Length > 0)
+            {
+                foreach (FileInfo fileInfo in files)
                 {
-                    ShapeShifterLogger.LogError($"Can't find Asset Path for guid: {guid}");
-                    return;
-                }
-                
-                string searchPattern = Path.GetFileName(target)+"*";
-
-                FileInfo[] files = directory.GetFiles(searchPattern);
-
-                if (files.Length > 0) {
-                    foreach (FileInfo fileInfo in files)
+                    //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
+                    if (fileInfo.Extension == ".meta")
                     {
-                        //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
-                        if (fileInfo.Extension == ".meta")
+                        string destFileName = target + ".meta";
+                        if (File.Exists(PathUtils.GetFullPath(destFileName)))
                         {
-                            string destFileName = target + ".meta";
-                            if (File.Exists(PathUtils.GetFullPath(destFileName)))
-                            {
-                                ShapeShifterLogger.LogWarning($"{destFileName} already exists, skipping");
-                                continue;
-                            }
-                            
-                            fileInfo.CopyTo(destFileName, true);
+                            ShapeShifterLogger.LogWarning($"{destFileName} already exists, skipping");
+                            continue;
                         }
-                        else
-                        {
-                            if (File.Exists(PathUtils.GetFullPath(target)))
-                            {
-                                ShapeShifterLogger.LogWarning($"{target} already exists, skipping");
-                                continue;
-                            }
-                            
-                            fileInfo.CopyTo(target, true);
-                        }
+
+                        fileInfo.CopyTo(destFileName, true);
                     }
-               
-                    return;
+                    else
+                    {
+                        if (File.Exists(PathUtils.GetFullPath(target)))
+                        {
+                            ShapeShifterLogger.LogWarning($"{target} already exists, skipping");
+                            continue;
+                        }
+
+                        ShapeShifterLogger.Log($"Copied missing asset: {target}");
+
+                        fileInfo.CopyTo(target, true);
+                    }
                 }
 
-                DirectoryInfo[] directories = directory.GetDirectories();
+                return;
+            }
 
-                if (directories.Length > 0) {
-                    target = Path.Combine(
-                        Application.dataPath.Replace("/Assets", string.Empty), 
-                        target
-                    );
-                
-                    IOUtils.CopyFolder(directories[0], new DirectoryInfo(target));
-                }
-            
+            DirectoryInfo[] directories = directory.GetDirectories();
+
+            if (directories.Length > 0)
+            {
+                target = Path.Combine(
+                    Application.dataPath.Replace("/Assets", string.Empty),
+                    target
+                );
+
+                IOUtils.CopyFolder(directories[0], new DirectoryInfo(target));
+            }
         }
     }
 }

@@ -30,6 +30,24 @@ namespace Miniclip.ShapeShifter {
             }
         }
 
+        private static ShapeShifterConfiguration configuration;
+
+        public static ShapeShifterConfiguration Configuration
+        {
+            get
+            {
+                if (configuration != null)
+                {
+                    return configuration;
+                }
+                InitialiseConfiguration();
+                return configuration;
+            }
+            set => configuration = value;
+        }
+
+       
+
         private static readonly Type[] SupportedTypes = {
             typeof(AnimationClip),
             typeof(AnimatorController),
@@ -41,12 +59,22 @@ namespace Miniclip.ShapeShifter {
             typeof(Texture2D)
         };
         
-        private static ShapeShifterConfiguration configuration;
         private static Editor defaultConfigurationEditor;
         private bool showConfiguration = false;
         
         private static DirectoryInfo skinsFolder;
-
+        public static DirectoryInfo SkinsFolder
+        {
+            get
+            {
+                if (skinsFolder == null)
+                {
+                    InitialiseFolders();
+                }
+                return skinsFolder;
+            }
+            set => skinsFolder = value;
+        }
 
         [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, (int) 'G')]
         public static void OpenShapeShifter()
@@ -73,13 +101,57 @@ namespace Miniclip.ShapeShifter {
             this.OnExternalAssetSkinnerEnable();
             
         }
+        internal static Dictionary<string, string> missingGuidsToPathDictionary = new Dictionary<string, string>();
 
-        internal static void CopyMissingSkins()
+        internal static void RestoreMissingAssets()
         {
-            if (!ShapeShifterEditorPrefs.GetBool(IsInitializedKey))
+            InitializeShapeShifterCore();
+
+            List<string> missingAssets = new List<string>();
+
+            string assetFolderPath = Path.Combine(GetGameFolderPath(ActiveGame), InternalAssetsFolder);
+
+            if (Directory.Exists(assetFolderPath))
             {
-                InitializeShapeShifterCore();
-                
+                DirectoryInfo internalFolder = new DirectoryInfo(assetFolderPath);
+
+                foreach (DirectoryInfo directory in internalFolder.GetDirectories())
+                {
+                    string guid = directory.Name;
+
+                    string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+
+                    if (string.IsNullOrEmpty(assetPath))
+                    {
+                        missingAssets.Add(guid);
+                        continue;
+                    }
+
+                    if (!File.Exists(PathUtils.GetFullPath(assetPath)))
+                    {
+                        missingAssets.Add(guid);
+                        continue;
+                    }
+                }
+
+                // get all deleted meta files
+                IEnumerable<string> deletedMetas = GitUtils.GetUncommittedDeletedFiles()
+                    .Where(deletedMeta => deletedMeta.Contains(".meta"));
+
+                //Restore meta files and do not call AssetDatabase refresh to prevent from being deleted again
+                //Store in dictionary mapping guid to path, since AssetDatabase.GUIDToAssetPath will not work
+                foreach (var deletedMeta in deletedMetas)
+                {
+                    ShapeShifterLogger.Log($"Restoring {deletedMeta}");
+                    GitUtils.DiscardChanges(PathUtils.GetFullPath(deletedMeta));
+
+                    string metaGUID = ExtractGUIDFromMetaFile(PathUtils.GetFullPath(deletedMeta));
+
+                    string fullpath = PathUtils.GetFullPath(deletedMeta).Replace(".meta", "");
+
+                    missingGuidsToPathDictionary.Add(metaGUID, PathUtils.GetPathRelativeToAssetsFolder(fullpath));
+                }
+
                 PerformCopiesWithTracking(
                     ActiveGame,
                     "Add missing skins",
@@ -88,10 +160,37 @@ namespace Miniclip.ShapeShifter {
                 );
             }
         }
-        
+
+        private static string ExtractGUIDFromMetaFile(string path)
+        {
+            if (Path.GetExtension(path) != ".meta")
+            {
+                ShapeShifterLogger.LogError($"Trying to extract guid from non meta file : {path}");
+                return string.Empty;
+            }
+            
+            using (StreamReader reader = new StreamReader(path)) {
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+                    
+                    if (!line.StartsWith("guid"))
+                        continue;
+
+                    return line.Split(' ')[1];
+                }
+            }
+
+            return string.Empty;
+        }
+
         internal static void InitializeShapeShifterCore()
         {
-         
+            if (ShapeShifterEditorPrefs.GetBool(IsInitializedKey)) //TODO: To be changed for a settings provider?
+            {
+                return;
+            }
+            
             InitialiseFolders();
             InitialiseConfiguration();
 
@@ -100,8 +199,8 @@ namespace Miniclip.ShapeShifter {
 
         private static void InitialiseFolders()
         {
-            skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
-            IOUtils.TryCreateDirectory(skinsFolder.FullName, false);
+            SkinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
+            IOUtils.TryCreateDirectory(SkinsFolder.FullName, false);
         }
 
         private static void InitialiseConfiguration() {
@@ -173,7 +272,13 @@ namespace Miniclip.ShapeShifter {
                 this.OnAssetSwitcherGUI();
                 this.OnAssetSkinnerGUI();
                 this.OnExternalAssetSkinnerGUI();
-                
+
+                if (GUILayout.Button("Check for missing assets"))
+                {
+                   RestoreMissingAssets();
+                }
+
+
                 GUILayout.FlexibleSpace();
             }
             
@@ -190,7 +295,7 @@ namespace Miniclip.ShapeShifter {
 
         public static void SaveChanges()
         {
-            if (configuration.ModifiedAssetPaths.Count > 0)
+            if (Configuration.ModifiedAssetPaths.Count > 0)
                 OverwriteSelectedSkin(ActiveGame);
         }
     }

@@ -5,9 +5,17 @@ namespace Miniclip.ShapeShifter
     public partial class ShapeShifter
     {
 #region Unity Folder
+        
+        public enum ModificationType
+        {
+            IMPORT = 0,
+            RENAME = 1,
+            DELETE = 2
+        }
+        
         public void RegisterModifiedAssetInUnity(string modifiedAssetPath)
         {
-            if (configuration.ModifiedAssetPaths.Contains(modifiedAssetPath))
+            if (Configuration.ModifiedAssetPaths.Contains(modifiedAssetPath))
                 return;
 
             if (!IsSkinned(modifiedAssetPath))
@@ -20,7 +28,7 @@ namespace Miniclip.ShapeShifter
                 return;
             }
 
-            configuration.ModifiedAssetPaths.Add(modifiedAssetPath);
+            Configuration.ModifiedAssetPaths.Add(modifiedAssetPath);
         }
 
         private bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)

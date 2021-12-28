@@ -22,10 +22,10 @@ namespace Miniclip.ShapeShifter {
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
             
             using (new GUILayout.HorizontalScope(boxStyle)) {
-                foreach (string game in configuration.GameNames) {
+                foreach (string game in Configuration.GameNames) {
                     string key = this.GenerateKeyFromRelativePath(relativePath);
                     string assetPath = Path.Combine(
-                        skinsFolder.FullName,
+                        SkinsFolder.FullName,
                         game,
                         ExternalAssetsFolder,
                         key,
@@ -68,7 +68,7 @@ namespace Miniclip.ShapeShifter {
         
         private void OnExternalAssetSkinnerEnable() {
             this.externalConfigurationEditor = Editor.CreateEditor(
-                configuration,
+                Configuration,
                 typeof(ShapeShifterExternalConfigurationEditor)
             );
         }
@@ -87,18 +87,18 @@ namespace Miniclip.ShapeShifter {
             GUIStyle buttonStyle = GUI.skin.GetStyle("Button");
 
             using (new GUILayout.VerticalScope(boxStyle)) {
-                int count = configuration.SkinnedExternalAssetPaths.Count;
+                int count = Configuration.SkinnedExternalAssetPaths.Count;
                 
                 if (count > 0) {
                     this.selectedExternalAsset = GUILayout.SelectionGrid(
                         this.selectedExternalAsset,
-                        configuration.SkinnedExternalAssetPaths.ToArray(),
+                        Configuration.SkinnedExternalAssetPaths.ToArray(),
                         2,
                         buttonStyle
                     );
 
                     if (this.selectedExternalAsset >= 0 && this.selectedExternalAsset < count) {
-                        string relativePath = configuration.SkinnedExternalAssetPaths[this.selectedExternalAsset];
+                        string relativePath = Configuration.SkinnedExternalAssetPaths[this.selectedExternalAsset];
                         this.DrawSkinnedExternalAssetSection(relativePath);
                     }
                 }
@@ -135,12 +135,12 @@ namespace Miniclip.ShapeShifter {
         private void RemoveExternalSkins(string relativePath) {
             string key = this.GenerateKeyFromRelativePath(relativePath);
             
-            foreach (string game in configuration.GameNames) {
+            foreach (string game in Configuration.GameNames) {
                 dirtyAssets.Remove(key);
                 previewPerAsset.Remove(key);
             
                 string assetFolder = Path.Combine(
-                    skinsFolder.FullName,
+                    SkinsFolder.FullName,
                     game,
                     ExternalAssetsFolder,
                     key
@@ -149,7 +149,7 @@ namespace Miniclip.ShapeShifter {
                 Directory.Delete(assetFolder, true);                
             }
 
-            configuration.SkinnedExternalAssetPaths.Remove(relativePath);
+            Configuration.SkinnedExternalAssetPaths.Remove(relativePath);
         }
 
         private void SkinExternalFile() {
@@ -166,7 +166,7 @@ namespace Miniclip.ShapeShifter {
 
             string relativeAssetPath = this.GetRelativeURIPath(absoluteAssetPath, Application.dataPath);
             
-            if (configuration.SkinnedExternalAssetPaths.Contains(relativeAssetPath)) {
+            if (Configuration.SkinnedExternalAssetPaths.Contains(relativeAssetPath)) {
                 EditorUtility.DisplayDialog(
                     "Shape Shifter",
                     $"Could not skin: {relativeAssetPath}. It was already skinned.",
@@ -176,7 +176,7 @@ namespace Miniclip.ShapeShifter {
                 return;
             }
             
-            configuration.SkinnedExternalAssetPaths.Add(relativeAssetPath);
+            Configuration.SkinnedExternalAssetPaths.Add(relativeAssetPath);
             
             // even though it's an "external" file, it still might be a Unity file (ex: ProjectSettings), so it's
             // still important to make sure any pending changes are saved before generating copies
@@ -185,9 +185,9 @@ namespace Miniclip.ShapeShifter {
             string origin = absoluteAssetPath;
             string key = this.GenerateKeyFromRelativePath(relativeAssetPath);
             
-            foreach (string game in configuration.GameNames) {
+            foreach (string game in Configuration.GameNames) {
                 string assetFolder = Path.Combine(
-                    skinsFolder.FullName,
+                    SkinsFolder.FullName,
                     game, 
                     ExternalAssetsFolder,
                     key
