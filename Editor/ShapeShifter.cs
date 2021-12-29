@@ -258,6 +258,12 @@ namespace Miniclip.ShapeShifter {
         }
         
         private void OnGUI() {
+
+            if (configuration == null)
+            {
+                this.Close();
+            }
+            
             using (new GUILayout.VerticalScope()) {
                 this.showConfiguration = EditorGUILayout.Foldout(this.showConfiguration, "Configuration");
 
