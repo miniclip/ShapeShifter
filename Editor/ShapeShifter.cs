@@ -204,6 +204,9 @@ namespace Miniclip.ShapeShifter {
         }
 
         private static void InitialiseConfiguration() {
+            
+            Debug.Log("##! Initialise Configuration");
+            
             if (configuration != null) {
                 return;
             }
