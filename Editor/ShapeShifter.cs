@@ -7,11 +7,12 @@ using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
-using Object = System.Object;
 
 namespace Miniclip.ShapeShifter {
     [Serializable]
     public partial class ShapeShifter : EditorWindow {
+
+        private static readonly string ConfigurationResourceFolderPath = "Assets/Editor Default Resources/";
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         private static readonly string ExternalAssetsFolder = "external";
         private static readonly string InternalAssetsFolder = "internal";
@@ -204,7 +205,7 @@ namespace Miniclip.ShapeShifter {
 
         private static void InitialiseConfiguration() {
             
-            Debug.Log("##! Initialise Configuration");
+            Debug.Log("##! 1 Initialise Configuration");
             
             if (configuration != null) {
                 return;
@@ -214,20 +215,34 @@ namespace Miniclip.ShapeShifter {
                 ConfigurationResource
             );
 
+            Debug.Log($"##! 1 Initialise Configuration {configuration != null}");
+
+            
+            string configurationPath = PathUtils.GetFullPath(Path.Combine(
+                ConfigurationResourceFolderPath,
+                ConfigurationResource
+            ));
+            
+            if (configuration == null && File.Exists(configurationPath))
+            {
+                configuration = AssetDatabase.LoadAssetAtPath<ShapeShifterConfiguration>(configurationPath);
+                Debug.Log($"##! 2 Initialise Configuration {configuration != null}");
+            }
+            Debug.Log($"##! 3 Initialise Configuration {configuration != null}");
+
             if (configuration == null)
             {
                 configuration = CreateInstance<ShapeShifterConfiguration>();
 
-                string folderPath = "Assets/Editor Default Resources/";
 
-                if (!AssetDatabase.IsValidFolder(folderPath))
+                if (!AssetDatabase.IsValidFolder(ConfigurationResourceFolderPath))
                 {
                     AssetDatabase.CreateFolder("Assets", "Editor Default Resources");
                 }
 
                 AssetDatabase.CreateAsset(
                     configuration,
-                    folderPath + ConfigurationResource
+                    ConfigurationResourceFolderPath + ConfigurationResource
                 );
                 
                 EditorUtility.SetDirty(configuration);

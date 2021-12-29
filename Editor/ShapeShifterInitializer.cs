@@ -9,9 +9,11 @@ public class ShapeShifterInitializer
 {
     static ShapeShifterInitializer()
     {
-        Debug.Log("##! InitializeOnLoad");
+        Debug.Log("##!1 InitializeOnLoad");
         if (!ShapeShifterEditorPrefs.GetBool(ShapeShifter.IsInitializedKey)) //TODO: To be changed for a settings provider?
         {
+            Debug.Log("##!2 InitializeOnLoad");
+
             ShapeShifter.InitializeShapeShifterCore();
             ShapeShifter.RestoreMissingAssets();
         }
