@@ -13,8 +13,11 @@ namespace Miniclip.ShapeShifter
             DELETE = 2
         }
         
-        public void RegisterModifiedAssetInUnity(string modifiedAssetPath)
+        public static void RegisterModifiedAssetInUnity(string modifiedAssetPath)
         {
+            if (configuration == null) //TODO use IsInitialized instead
+                return;
+            
             if (Configuration.ModifiedAssetPaths.Contains(modifiedAssetPath))
                 return;
 
@@ -31,7 +34,7 @@ namespace Miniclip.ShapeShifter
             Configuration.ModifiedAssetPaths.Add(modifiedAssetPath);
         }
 
-        private bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)
+        private static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)
         {
             if (assetPath == "Assets/")
             {

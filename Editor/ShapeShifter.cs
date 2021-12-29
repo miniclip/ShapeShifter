@@ -17,19 +17,6 @@ namespace Miniclip.ShapeShifter {
         private static readonly string InternalAssetsFolder = "internal";
         private static readonly string IsInitializedKey = "isInitialized";
         
-        private static ShapeShifter instance;
-        public static ShapeShifter Instance
-        {
-            get
-            {
-                if (instance == null)
-                {
-                    instance = ShowNextToInspector();
-                }
-                return instance;
-            }
-        }
-
         private static ShapeShifterConfiguration configuration;
 
         public static ShapeShifterConfiguration Configuration

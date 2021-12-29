@@ -12,8 +12,7 @@ namespace Miniclip.ShapeShifter
         {
             foreach (string importedAsset in importedAssets)
             {
-                Debug.Log($"imported {importedAsset}");
-                ShapeShifter.Instance.RegisterModifiedAssetInUnity(importedAsset);
+                ShapeShifter.RegisterModifiedAssetInUnity(importedAsset);
             }
 
             foreach (string deletedAsset in deletedAssets)
@@ -28,8 +27,7 @@ namespace Miniclip.ShapeShifter
 
             foreach (string movedAsset in movedAssets)
             {
-                Debug.Log($"Moved {movedAsset}");
-                ShapeShifter.Instance.RegisterModifiedAssetInUnity(movedAsset);
+                ShapeShifter.RegisterModifiedAssetInUnity(movedAsset);
 
             }
         }
