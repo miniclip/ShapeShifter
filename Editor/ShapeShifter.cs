@@ -15,7 +15,7 @@ namespace Miniclip.ShapeShifter {
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         private static readonly string ExternalAssetsFolder = "external";
         private static readonly string InternalAssetsFolder = "internal";
-        private static readonly string IsInitializedKey = "isInitialized";
+        public static readonly string IsInitializedKey = "isInitialized";
         
         private static ShapeShifterConfiguration configuration;
 

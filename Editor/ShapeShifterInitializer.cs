@@ -8,6 +8,11 @@ public class ShapeShifterInitializer : MonoBehaviour
 {
     static ShapeShifterInitializer()
     {
-        // ShapeShifter.RestoreMissingAssets();
+        Debug.Log("##! InitializeOnLoad");
+        if (ShapeShifterEditorPrefs.GetBool(ShapeShifter.IsInitializedKey)) //TODO: To be changed for a settings provider?
+        {
+            ShapeShifter.InitializeShapeShifterCore();
+            ShapeShifter.RestoreMissingAssets();
+        }
     }
 }
