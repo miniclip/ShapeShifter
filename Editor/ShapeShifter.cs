@@ -66,7 +66,15 @@ namespace Miniclip.ShapeShifter {
         [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, (int) 'G')]
         public static void OpenShapeShifter()
         {
+            InitializeShapeShifterCore();
+
             ShowNextToInspector(focus: true);
+        }
+        
+        [MenuItem("Window/Shape Shifter/Print Initialise state", false, (int) 'G')]
+        public static void PrintInitialiseState()
+        {
+            ShapeShifterLogger.Log($"Initialised: {ShapeShifterEditorPrefs.GetBool(IsInitializedKey)}");
         }
         internal static ShapeShifter ShowNextToInspector(bool focus = false) {
             Assembly editorAssembly = typeof(Editor).Assembly;
@@ -83,7 +91,11 @@ namespace Miniclip.ShapeShifter {
 
         private void OnEnable()
         {
-            InitializeShapeShifterCore();
+            if (configuration == null)
+            {
+                this.Close();
+                return;
+            }
             this.OnAssetSkinnerEnable();
             this.OnExternalAssetSkinnerEnable();
             
