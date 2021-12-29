@@ -218,10 +218,10 @@ namespace Miniclip.ShapeShifter {
             Debug.Log($"##! 1 Initialise Configuration {configuration != null}");
 
             
-            string configurationPath = PathUtils.GetFullPath(Path.Combine(
+            string configurationPath = Path.Combine(
                 ConfigurationResourceFolderPath,
                 ConfigurationResource
-            ));
+            );
             
             if (configuration == null && File.Exists(configurationPath))
             {
