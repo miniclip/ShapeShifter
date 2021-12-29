@@ -9,6 +9,12 @@ public class ShapeShifterInitializer
 {
     static ShapeShifterInitializer()
     {
+        EditorApplication.delayCall -= Init;
+        EditorApplication.delayCall += Init;
+    }
+
+    private static void Init()
+    {
         Debug.Log("##!1 InitializeOnLoad");
         if (!ShapeShifterEditorPrefs.GetBool(ShapeShifter.IsInitializedKey)) //TODO: To be changed for a settings provider?
         {
