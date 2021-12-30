@@ -18,10 +18,11 @@ namespace Miniclip.ShapeShifter.Utils
         private static readonly string git_status_renamed = "R";
         private static readonly string git_status_updated = "U";
         private static readonly string git_status_untracked = "??";
-        
+
         private static readonly string GIT_IGNORE_SHAPESHIFTER_LABEL = "#ShapeShifter";
 
         private static string GitWorkingDirectory = string.Empty;
+
         internal static string RepositoryPath
         {
             get
@@ -39,14 +40,17 @@ namespace Miniclip.ShapeShifter.Utils
         }
 
         private static string GitIgnorePath() => Path.Combine(RepositoryPath, ".gitignore");
+
         private static string GetAssetIgnoreIdentifier(string assetPath) =>
             $"{GIT_IGNORE_SHAPESHIFTER_LABEL} {AssetDatabase.AssetPathToGUID(assetPath)}";
-        
+
         internal static bool CanStage(string assetPath)
         {
             ChangedFileGitInfo[] unstagedFiles = GetUnstagedFiles();
 
-            return unstagedFiles.Any(file => file.path.Contains(PathUtils.GetPathRelativeToRepositoryFolder(assetPath)));
+            return unstagedFiles.Any(
+                file => file.path.Contains(PathUtils.GetPathRelativeToRepositoryFolder(assetPath))
+            );
         }
 
         internal static bool CanUnstage(string assetPath)
@@ -55,7 +59,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             return stagedFiles.Any(file => file.path.Contains(PathUtils.GetPathRelativeToRepositoryFolder(assetPath)));
         }
-        
+
         internal static void Stage(string assetPath)
         {
             if (CanStage(assetPath))
@@ -81,21 +85,8 @@ namespace Miniclip.ShapeShifter.Utils
 
         internal static void Track(string assetPath)
         {
-            // if (IsTracked(assetPath))
-            // {
-            //     ShapeShifterLogger.Log($"{assetPath} already tracked in git.");
-            //     return;
-            // }
-
-            // if (IsIgnored(assetPath))
-            // {
             RemoveFromGitIgnore(assetPath);
             Stage(assetPath);
-            return;
-
-            // }
-
-            // ShapeShifterLogger.Log($"Could not git track {assetPath}");
         }
 
         internal static void Untrack(string assetPath, bool addToGitIgnore = false)
@@ -116,8 +107,6 @@ namespace Miniclip.ShapeShifter.Utils
                 AddToGitIgnore(assetPath);
             }
         }
-
-       
 
         private static void AddToGitIgnore(string assetPath)
         {
@@ -199,7 +188,6 @@ namespace Miniclip.ShapeShifter.Utils
             Stage(gitIgnorePath);
         }
 
-
         private static bool IsIgnored(string assetPath)
         {
             if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
@@ -215,7 +203,7 @@ namespace Miniclip.ShapeShifter.Utils
         {
             RunGitCommand($"checkout \"{PathUtils.GetFullPath(assetPath)}\"");
         }
-        
+
         internal static ChangedFileGitInfo[] GetAllChangedFilesGitInfo()
         {
             string status = RunGitCommand("status --porcelain -u");
@@ -253,7 +241,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             return changedFiles.Where(file => file.status.Contains(git_status_deleted)).ToList();
         }
-        
+
         internal static string RunGitCommand(string arguments, string workingDirectory = null)
         {
             using (Process process = new Process())
@@ -296,7 +284,7 @@ namespace Miniclip.ShapeShifter.Utils
                 out errorOutput
             );
         }
-        
+
         internal struct ChangedFileGitInfo
         {
             public string status;
@@ -310,13 +298,13 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 status = line.Substring(0, 2);
                 path = line.Substring(3);
-                
+
                 if (status == git_status_untracked)
                 {
                     isTracked = false;
                     hasUnstagedChanges = true;
                     hasStagedChanges = false;
-                    
+
                     //git status surrounds untracked files path with "", need to remove them
                     path = path.Trim('\"');
                     return;
@@ -328,5 +316,4 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
     }
-    
 }
