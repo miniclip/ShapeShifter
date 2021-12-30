@@ -12,12 +12,12 @@ namespace Miniclip.ShapeShifter.Utils
 {
     class GitUtils
     {
-        private static readonly string git_status_modified = "M";
-        private static readonly string git_status_added = "A";
+        // private static readonly string git_status_modified = "M";
+        // private static readonly string git_status_added = "A";
         private static readonly string git_status_deleted = "D";
-        private static readonly string git_status_renamed = "R";
-        private static readonly string git_status_updated = "U";
-        private static readonly string git_status_untracked = "??";
+        // private static readonly string git_status_renamed = "R";
+        // private static readonly string git_status_updated = "U";
+        // private static readonly string git_status_untracked = "??";
         private static readonly string GIT_IGNORE_SHAPESHIFTER_LABEL = "#ShapeShifter";
 
         private static string GitWorkingDirectory = string.Empty;

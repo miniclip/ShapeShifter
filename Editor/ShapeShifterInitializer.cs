@@ -1,33 +1,24 @@
 using Miniclip.ShapeShifter;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
-using UnityEditor.Callbacks;
-using UnityEngine;
 
 [InitializeOnLoad]
 public class ShapeShifterInitializer
 {
     static ShapeShifterInitializer()
     {
-        EditorApplication.delayCall -= Init;
         EditorApplication.delayCall += Init;
+        EditorApplication.quitting += EditorApplicationOnQuitting;
     }
 
     private static void Init()
     {
-        Debug.Log("##!1 InitializeOnLoad");
-        if (!ShapeShifterEditorPrefs.GetBool(ShapeShifter.IsInitializedKey)) //TODO: To be changed for a settings provider?
-        {
-            Debug.Log("##!2 InitializeOnLoad");
-
-            ShapeShifter.InitializeShapeShifterCore();
-            ShapeShifter.RestoreMissingAssets();
-        }
+        ShapeShifter.InitializeShapeShifterCore();
     }
 
-    [DidReloadScripts]
-    static void ScriptsReloaded()
+    private static void EditorApplicationOnQuitting()
     {
-        Debug.Log("##! Scripts Reloaded");
+        EditorApplication.delayCall -= Init;
+        EditorApplication.quitting -= EditorApplicationOnQuitting;
     }
 }

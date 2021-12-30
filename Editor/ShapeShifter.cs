@@ -6,6 +6,7 @@ using System.Reflection;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEditor.Animations;
+using UnityEditor.VersionControl;
 using UnityEngine;
 
 namespace Miniclip.ShapeShifter {
@@ -16,7 +17,7 @@ namespace Miniclip.ShapeShifter {
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         private static readonly string ExternalAssetsFolder = "external";
         private static readonly string InternalAssetsFolder = "internal";
-        public static readonly string IsInitializedKey = "isInitialized";
+        private static readonly string IsInitializedKey = "isInitialized";
         
         private static ShapeShifterConfiguration configuration;
 
@@ -92,7 +93,7 @@ namespace Miniclip.ShapeShifter {
 
         private void OnEnable()
         {
-            if (configuration == null)
+            if (Configuration == null)
             {
                 this.Close();
                 return;
@@ -105,10 +106,11 @@ namespace Miniclip.ShapeShifter {
 
         internal static void RestoreMissingAssets()
         {
-            InitializeShapeShifterCore();
+            missingGuidsToPathDictionary.Clear();
 
             List<string> missingAssets = new List<string>();
 
+            
             string assetFolderPath = Path.Combine(GetGameFolderPath(ActiveGame), InternalAssetsFolder);
 
             if (Directory.Exists(assetFolderPath))
@@ -184,17 +186,27 @@ namespace Miniclip.ShapeShifter {
             return string.Empty;
         }
 
+        internal static bool IsInitialized
+        {
+            get => ShapeShifterEditorPrefs.GetBool(IsInitializedKey);
+            private set => ShapeShifterEditorPrefs.SetBool(IsInitializedKey, value);
+        }
+        
         internal static void InitializeShapeShifterCore()
         {
-            if (ShapeShifterEditorPrefs.GetBool(IsInitializedKey)) //TODO: To be changed for a settings provider?
+            if (IsInitialized) //TODO: To be changed for a settings provider?
             {
                 return;
             }
             
+            ShapeShifterLogger.Log("Setting up");
+
             InitialiseFolders();
             InitialiseConfiguration();
+            RestoreMissingAssets();
 
-            ShapeShifterEditorPrefs.SetBool(IsInitializedKey, true);
+            
+            IsInitialized = true;
         }
 
         private static void InitialiseFolders()
@@ -205,8 +217,6 @@ namespace Miniclip.ShapeShifter {
 
         private static void InitialiseConfiguration() {
             
-            Debug.Log("##! 1 Initialise Configuration");
-            
             if (configuration != null) {
                 return;
             }
@@ -215,9 +225,6 @@ namespace Miniclip.ShapeShifter {
                 ConfigurationResource
             );
 
-            Debug.Log($"##! 1 Initialise Configuration {configuration != null}");
-
-            
             string configurationPath = Path.Combine(
                 ConfigurationResourceFolderPath,
                 ConfigurationResource
@@ -226,10 +233,9 @@ namespace Miniclip.ShapeShifter {
             if (configuration == null && File.Exists(configurationPath))
             {
                 configuration = AssetDatabase.LoadAssetAtPath<ShapeShifterConfiguration>(configurationPath);
-                Debug.Log($"##! 2 Initialise Configuration {configuration != null}");
             }
-            Debug.Log($"##! 3 Initialise Configuration {configuration != null}");
 
+            
             if (configuration == null)
             {
                 configuration = CreateInstance<ShapeShifterConfiguration>();
@@ -301,6 +307,14 @@ namespace Miniclip.ShapeShifter {
                    RestoreMissingAssets();
                 }
 
+                if (GUILayout.Button("Test"))
+                {
+                    AssetList assets = new AssetList();
+                    Task t = Provider.Status(assets);
+                    t.Wait();
+                    t.assetList.ForEach(asset => Debug.Log(asset.name + " " + asset.state.ToString()));
+                    
+                }
 
                 GUILayout.FlexibleSpace();
             }
