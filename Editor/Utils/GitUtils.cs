@@ -46,14 +46,14 @@ namespace Miniclip.ShapeShifter.Utils
         {
             ChangedFileGitInfo[] unstagedFiles = GetUnstagedFiles();
 
-            return unstagedFiles.Any(file => file.path == PathUtils.GetPathRelativeToRepositoryFolder(assetPath));
+            return unstagedFiles.Any(file => file.path.Contains(PathUtils.GetPathRelativeToRepositoryFolder(assetPath)));
         }
 
         internal static bool CanUnstage(string assetPath)
         {
             ChangedFileGitInfo[] stagedFiles = GetStagedFiles();
 
-            return stagedFiles.Any(file => file.path == PathUtils.GetPathRelativeToRepositoryFolder(assetPath));
+            return stagedFiles.Any(file => file.path.Contains(PathUtils.GetPathRelativeToRepositoryFolder(assetPath)));
         }
         
         internal static void Stage(string assetPath)
