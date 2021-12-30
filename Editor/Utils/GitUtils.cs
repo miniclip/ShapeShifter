@@ -12,18 +12,16 @@ namespace Miniclip.ShapeShifter.Utils
 {
     class GitUtils
     {
-        // private static readonly string git_status_modified = "M";
-        // private static readonly string git_status_added = "A";
+        private static readonly string git_status_modified = "M";
+        private static readonly string git_status_added = "A";
         private static readonly string git_status_deleted = "D";
-        // private static readonly string git_status_renamed = "R";
-        // private static readonly string git_status_updated = "U";
-        // private static readonly string git_status_untracked = "??";
+        private static readonly string git_status_renamed = "R";
+        private static readonly string git_status_updated = "U";
+        private static readonly string git_status_untracked = "??";
+        
         private static readonly string GIT_IGNORE_SHAPESHIFTER_LABEL = "#ShapeShifter";
 
         private static string GitWorkingDirectory = string.Empty;
-
-        internal static string CurrentBranch => RunGitCommand("rev-parse --abbrev-ref HEAD");
-        
         internal static string RepositoryPath
         {
             get
@@ -41,20 +39,34 @@ namespace Miniclip.ShapeShifter.Utils
         }
 
         private static string GitIgnorePath() => Path.Combine(RepositoryPath, ".gitignore");
-
-        internal static bool IsStaged(string assetPath)
+        private static string GetAssetIgnoreIdentifier(string assetPath) =>
+            $"{GIT_IGNORE_SHAPESHIFTER_LABEL} {AssetDatabase.AssetPathToGUID(assetPath)}";
+        
+        internal static bool CanStage(string assetPath)
         {
-            using (Process process = new Process())
-            {
-                string arguments = $"diff --name-only --cached";
-                RunProcessAndGetExitCode(arguments, process, out string output, out string errorOutput);
-                return output.Contains(PathUtils.GetPathRelativeToProjectFolder(assetPath));
-            }
+            ChangedFileGitInfo[] unstagedFiles = GetUnstagedFiles();
+
+            return unstagedFiles.Any(file => file.path == PathUtils.GetPathRelativeToRepositoryFolder(assetPath));
         }
 
-        internal static void Stage(string assetPath) => RunGitCommand($"add \"{PathUtils.GetFullPath(assetPath)}\"");
+        internal static bool CanUnstage(string assetPath)
+        {
+            ChangedFileGitInfo[] stagedFiles = GetStagedFiles();
 
-        internal static void UnStage(string assetPath) => RunGitCommand($"restore --staged \"{PathUtils.GetFullPath(assetPath)}\"");
+            return stagedFiles.Any(file => file.path == PathUtils.GetPathRelativeToRepositoryFolder(assetPath));
+        }
+        
+        internal static void Stage(string assetPath)
+        {
+            if (CanStage(assetPath))
+                RunGitCommand($"add \"{PathUtils.GetFullPath(assetPath)}\"");
+        }
+
+        internal static void UnStage(string assetPath)
+        {
+            if (CanUnstage(assetPath))
+                RunGitCommand($"restore --staged \"{PathUtils.GetFullPath(assetPath)}\"");
+        }
 
         internal static bool IsTracked(string assetPath)
         {
@@ -78,8 +90,7 @@ namespace Miniclip.ShapeShifter.Utils
             // if (IsIgnored(assetPath))
             // {
             RemoveFromGitIgnore(assetPath);
-
-            // Stage(PathUtils.GetFullPath(assetPath));
+            Stage(assetPath);
             return;
 
             // }
@@ -95,7 +106,7 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 RunGitCommand($"rm -r --cached {fullFilePath}");
             }
-            else if (IsStaged(fullFilePath))
+            else if (CanUnstage(fullFilePath))
             {
                 UnStage(fullFilePath);
             }
@@ -106,8 +117,7 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
-        private static string GetAssetIgnoreIdentifier(string assetPath) =>
-            $"{GIT_IGNORE_SHAPESHIFTER_LABEL} {AssetDatabase.AssetPathToGUID(assetPath)}";
+       
 
         private static void AddToGitIgnore(string assetPath)
         {
@@ -201,34 +211,47 @@ namespace Miniclip.ShapeShifter.Utils
             return gitIgnoreContent.Any(line => line.Contains(fileRelativePath));
         }
 
-        public static void DiscardChanges(string filePath)
+        public static void DiscardChanges(string assetPath)
         {
-            RunGitCommand($"checkout \"{PathUtils.GetFullPath(filePath)}\"");
+            RunGitCommand($"checkout \"{PathUtils.GetFullPath(assetPath)}\"");
         }
         
-        internal static List<string> GetUncommittedDeletedFiles()
-        {
-            string[] uncommittedFiles = GetUncommittedChangedFiles();
-            uncommittedFiles = uncommittedFiles.Where(uncommittedFile => uncommittedFile.StartsWith(git_status_deleted)).ToArray();
-            for (int i = 0; i < uncommittedFiles.Length; i++)
-            {
-                uncommittedFiles[i] = uncommittedFiles[i].TrimStart(Convert.ToChar(git_status_deleted), ' ');
-            }
-
-            return uncommittedFiles.ToList();
-        }
-
-        private static string[] GetUncommittedChangedFiles()
+        internal static ChangedFileGitInfo[] GetAllChangedFilesGitInfo()
         {
             string status = RunGitCommand("status --porcelain -u");
             string[] splitted = status.Split('\n');
 
-            for (int index = 0; index < splitted.Length; index++)
+            return splitted.Select(line => new ChangedFileGitInfo(line)).ToArray();
+        }
+
+        internal static ChangedFileGitInfo[] GetUnstagedFiles(ChangedFileGitInfo[] changedFiles = null)
+        {
+            if (changedFiles == null)
             {
-                splitted[index] = splitted[index].Trim();
+                return GetAllChangedFilesGitInfo().Where(file => file.hasUnstagedChanges).ToArray();
             }
 
-            return splitted;
+            return changedFiles.Where(file => file.hasUnstagedChanges).ToArray();
+        }
+
+        internal static ChangedFileGitInfo[] GetStagedFiles(ChangedFileGitInfo[] changedFiles = null)
+        {
+            if (changedFiles == null)
+            {
+                return GetAllChangedFilesGitInfo().Where(file => file.hasStagedChanges).ToArray();
+            }
+
+            return changedFiles.Where(file => file.hasStagedChanges).ToArray();
+        }
+
+        internal static List<ChangedFileGitInfo> GetDeletedFiles(ChangedFileGitInfo[] changedFiles = null)
+        {
+            if (changedFiles == null)
+            {
+                return GetAllChangedFilesGitInfo().Where(file => file.status.Contains(git_status_deleted)).ToList();
+            }
+
+            return changedFiles.Where(file => file.status.Contains(git_status_deleted)).ToList();
         }
         
         internal static string RunGitCommand(string arguments, string workingDirectory = null)
@@ -273,5 +296,37 @@ namespace Miniclip.ShapeShifter.Utils
                 out errorOutput
             );
         }
+        
+        internal struct ChangedFileGitInfo
+        {
+            public string status;
+            public bool hasStagedChanges;
+            public bool hasUnstagedChanges;
+            public bool isTracked;
+            public bool isFullyStaged => hasStagedChanges && !hasUnstagedChanges;
+            public string path;
+
+            public ChangedFileGitInfo(string line)
+            {
+                status = line.Substring(0, 2);
+                path = line.Substring(3);
+                
+                if (status == git_status_untracked)
+                {
+                    isTracked = false;
+                    hasUnstagedChanges = true;
+                    hasStagedChanges = false;
+                    
+                    //git status surrounds untracked files path with "", need to remove them
+                    path = path.Trim('\"');
+                    return;
+                }
+
+                isTracked = true;
+                hasStagedChanges = !status.StartsWith(" ");
+                hasUnstagedChanges = !status.EndsWith(" ");
+            }
+        }
     }
+    
 }

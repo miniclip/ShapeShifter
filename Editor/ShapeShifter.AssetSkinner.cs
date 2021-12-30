@@ -244,7 +244,7 @@ namespace Miniclip.ShapeShifter {
 
                 StopWatchingFolder(assetFolder);
                 Directory.Delete(assetFolder, true);
-                // GitUtils.Stage(assetFolder);
+                GitUtils.Stage(assetFolder);
             }
             GitUtils.Track(assetPath);
         }
@@ -308,7 +308,7 @@ namespace Miniclip.ShapeShifter {
                     IOUtils.CopyFile(origin, target);
                     IOUtils.CopyFile(origin+".meta", target+".meta");
                 }
-                // GitUtils.Stage(assetFolder);
+                GitUtils.Stage(assetFolder);
             }
             
             GitUtils.Untrack(assetPath, true);

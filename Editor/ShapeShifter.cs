@@ -8,6 +8,7 @@ using UnityEditor;
 using UnityEditor.Animations;
 using UnityEditor.VersionControl;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Miniclip.ShapeShifter {
     [Serializable]
@@ -18,7 +19,7 @@ namespace Miniclip.ShapeShifter {
         private static readonly string ExternalAssetsFolder = "external";
         private static readonly string InternalAssetsFolder = "internal";
         private static readonly string IsInitializedKey = "isInitialized";
-        
+
         private static ShapeShifterConfiguration configuration;
 
         public static ShapeShifterConfiguration Configuration
@@ -29,13 +30,12 @@ namespace Miniclip.ShapeShifter {
                 {
                     return configuration;
                 }
+
                 InitialiseConfiguration();
                 return configuration;
             }
             set => configuration = value;
         }
-
-       
 
         private static readonly Type[] SupportedTypes = {
             typeof(AnimationClip),
@@ -137,19 +137,19 @@ namespace Miniclip.ShapeShifter {
                 }
 
                 // get all deleted meta files
-                IEnumerable<string> deletedMetas = GitUtils.GetUncommittedDeletedFiles()
-                    .Where(deletedMeta => deletedMeta.Contains(".meta"));
+                IEnumerable<GitUtils.ChangedFileGitInfo> deletedMetas = GitUtils.GetDeletedFiles()
+                    .Where(deletedMeta => deletedMeta.path.Contains(".meta"));
 
                 //Restore meta files and do not call AssetDatabase refresh to prevent from being deleted again
                 //Store in dictionary mapping guid to path, since AssetDatabase.GUIDToAssetPath will not work
                 foreach (var deletedMeta in deletedMetas)
                 {
-                    ShapeShifterLogger.Log($"Restoring {deletedMeta}");
-                    GitUtils.DiscardChanges(PathUtils.GetFullPath(deletedMeta));
+                    ShapeShifterLogger.Log($"Restoring {deletedMeta.path}");
+                    GitUtils.DiscardChanges(PathUtils.GetFullPath(deletedMeta.path));
 
-                    string metaGUID = ExtractGUIDFromMetaFile(PathUtils.GetFullPath(deletedMeta));
+                    string metaGUID = ExtractGUIDFromMetaFile(PathUtils.GetFullPath(deletedMeta.path));
 
-                    string fullpath = PathUtils.GetFullPath(deletedMeta).Replace(".meta", "");
+                    string fullpath = PathUtils.GetFullPath(deletedMeta.path).Replace(".meta", "");
 
                     missingGuidsToPathDictionary.Add(metaGUID, PathUtils.GetPathRelativeToAssetsFolder(fullpath));
                 }
@@ -309,13 +309,33 @@ namespace Miniclip.ShapeShifter {
 
                 if (GUILayout.Button("Test"))
                 {
-                    AssetList assets = new AssetList();
-                    Task t = Provider.Status(assets);
-                    t.Wait();
-                    t.assetList.ForEach(asset => Debug.Log(asset.name + " " + asset.state.ToString()));
+                    GitUtils.ChangedFileGitInfo[] changedFiles = GitUtils.GetAllChangedFilesGitInfo();
+
+                    var d1 = GitUtils.GetDeletedFiles(changedFiles);
+
+                    var d2 = GitUtils.GetUnstagedFiles(changedFiles);
                     
+                    Debug.Log("Unstaged");
+                    foreach (GitUtils.ChangedFileGitInfo fileGitInfo in d2)
+                    {
+                        Debug.Log(fileGitInfo.path);
+                    }
+                }
+                
+                if (GUILayout.Button("Can Stage"))
+                {
+                    var selection = Selection.GetFiltered<Object>(SelectionMode.Assets).FirstOrDefault();
+
+                    Debug.Log($"CanStage: {GitUtils.CanStage(AssetDatabase.GetAssetPath(selection))}");
                 }
 
+                if (GUILayout.Button("Can Unstage"))
+                {
+                    var selection = Selection.GetFiltered<Object>(SelectionMode.Assets).FirstOrDefault();
+
+                    Debug.Log($"CanStage: {GitUtils.CanUnstage(AssetDatabase.GetAssetPath(selection))}");
+                }
+                
                 GUILayout.FlexibleSpace();
             }
             

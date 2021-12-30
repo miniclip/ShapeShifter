@@ -69,8 +69,16 @@ namespace Miniclip.ShapeShifter.Utils
 
             return GetRelativeTo(fullPath, projectFolderName);
         }
+        
+        internal static string GetPathRelativeToRepositoryFolder(string path)
+        {
+            string fullPath = GetFullPath(path);
+            string projectFolderName = Directory.GetParent(GitUtils.RepositoryPath).Name;
 
-        private static string GetRelativeTo(string path, string relativeTo)
+            return GetRelativeTo(fullPath, projectFolderName, false);
+        }
+
+        private static string GetRelativeTo(string path, string relativeTo, bool includeRelativeToInPath = true)
         {
             List<string> split = path.Split(Path.DirectorySeparatorChar).ToList();
 
@@ -80,12 +88,20 @@ namespace Miniclip.ShapeShifter.Utils
             }
 
             int indexOfRelativeTo = split.IndexOf(relativeTo);
-            string result = string.Join(
-                Path.DirectorySeparatorChar.ToString(),
-                split.GetRange(indexOfRelativeTo, split.Count - indexOfRelativeTo)
-            );
-
-            return result;
+            if (includeRelativeToInPath)
+            {
+                return string.Join(
+                    Path.DirectorySeparatorChar.ToString(),
+                    split.GetRange(indexOfRelativeTo, split.Count - indexOfRelativeTo)
+                );
+            }
+            else
+            {
+                return string.Join(
+                    Path.DirectorySeparatorChar.ToString(),
+                    split.GetRange(indexOfRelativeTo+1, split.Count - indexOfRelativeTo-1)
+                );
+            }
         }
 
         internal static string GetFullPath(string path)
