@@ -6,23 +6,23 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Utils
 {
-    public class PathUtils
+    internal class PathUtils
     {
         private static string ASSETS_FOLDER_NAME => "Assets";
         private static string PACKAGES_FOLDER_NAME => "Packages";
-
+        
         private static bool IsInternalPath(string path)
         {
             string[] folders = path.Split(Path.DirectorySeparatorChar);
             return folders.Contains(ASSETS_FOLDER_NAME);
         }
 
-        public static bool IsPathRelativeToAssets(string path)
+        internal static bool IsPathRelativeToAssets(string path)
         {
             return GetRootFolder(path).Equals(ASSETS_FOLDER_NAME, StringComparison.Ordinal);
         }
 
-        public static bool IsPathRelativeToPackages(string path)
+        internal static bool IsPathRelativeToPackages(string path)
         {
             return GetRootFolder(path).Equals(PACKAGES_FOLDER_NAME, StringComparison.Ordinal);
         }
@@ -32,9 +32,7 @@ namespace Miniclip.ShapeShifter.Utils
             string projectFolderName = Directory.GetParent(Application.dataPath).Name;
             return GetRootFolder(path).Equals(projectFolderName, StringComparison.Ordinal);
         }
-
-        public static bool IsFullPath(string path) => Path.IsPathRooted(path);
-
+        
         private static string GetRootFolder(string path)
         {
             while (true)
