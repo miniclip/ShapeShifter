@@ -36,7 +36,7 @@ namespace Miniclip.ShapeShifter {
             }
             set => configuration = value;
         }
-
+        
         private static readonly Type[] SupportedTypes = {
             typeof(AnimationClip),
             typeof(AnimatorController),
@@ -58,7 +58,8 @@ namespace Miniclip.ShapeShifter {
             {
                 if (skinsFolder == null)
                 {
-                    InitialiseFolders();
+                    skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
+                    IOUtils.TryCreateDirectory(SkinsFolder.FullName, false);
                 }
                 return skinsFolder;
             }
@@ -118,20 +119,13 @@ namespace Miniclip.ShapeShifter {
             
             ShapeShifterLogger.Log("Setting up");
 
-            InitialiseFolders();
             InitialiseConfiguration();
             RetrieveMissingAssets();
 
             
             IsInitialized = true;
         }
-
-        private static void InitialiseFolders()
-        {
-            SkinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
-            IOUtils.TryCreateDirectory(SkinsFolder.FullName, false);
-        }
-
+        
         private static void InitialiseConfiguration() {
             
             if (configuration != null) {
