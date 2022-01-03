@@ -41,8 +41,15 @@ namespace Miniclip.ShapeShifter
                     $"Setting active game on EditorPrefs: {value}"
                 );
                 ShapeShifterEditorPrefs.SetInt(ACTIVE_GAME_PLAYER_PREFS_KEY, value);
+                
+                activeGameSkin = new GameSkin(ActiveGameName);
+                
             }
         }
+
+        private static GameSkin activeGameSkin;
+        public static GameSkin ActiveGameSkin => activeGameSkin;
+
 
         private static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory)
         {
@@ -365,7 +372,7 @@ namespace Miniclip.ShapeShifter
         private static void CopyIfMissingInternal(DirectoryInfo directory)
         {
             string guid = directory.Name;
-
+            
             // Ensure it has the same name, so we don't end up copying .DS_Store
             string target = AssetDatabase.GUIDToAssetPath(guid);
             if (string.IsNullOrEmpty(target) && !missingGuidsToPathDictionary.TryGetValue(guid, out target))
@@ -385,14 +392,14 @@ namespace Miniclip.ShapeShifter
                     //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
                     if (fileInfo.Extension == ".meta")
                     {
-                        string destFileName = target + ".meta";
-                        if (File.Exists(PathUtils.GetFullPath(destFileName)))
+                        string metaFile = target + ".meta";
+                        if (File.Exists(PathUtils.GetFullPath(metaFile)))
                         {
-                            ShapeShifterLogger.LogWarning($"{destFileName} already exists, skipping");
                             continue;
                         }
 
-                        fileInfo.CopyTo(destFileName, true);
+                        ShapeShifterLogger.LogWarning($"Recovering: {metaFile}");
+                        fileInfo.CopyTo(metaFile, true);
                     }
                     else
                     {
@@ -402,8 +409,7 @@ namespace Miniclip.ShapeShifter
                             continue;
                         }
 
-                        ShapeShifterLogger.Log($"Copied missing asset: {target}");
-
+                        ShapeShifterLogger.LogWarning($"Recovering: {target}");
                         fileInfo.CopyTo(target, true);
                     }
                 }

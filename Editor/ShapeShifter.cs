@@ -16,8 +16,8 @@ namespace Miniclip.ShapeShifter {
 
         private static readonly string ConfigurationResourceFolderPath = "Assets/Editor Default Resources/";
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
-        private static readonly string ExternalAssetsFolder = "external";
-        private static readonly string InternalAssetsFolder = "internal";
+        internal static readonly string ExternalAssetsFolder = "external";
+        internal static readonly string InternalAssetsFolder = "internal";
         private static readonly string IsInitializedKey = "isInitialized";
 
         private static ShapeShifterConfiguration configuration;
@@ -109,29 +109,24 @@ namespace Miniclip.ShapeShifter {
             missingGuidsToPathDictionary.Clear();
 
             List<string> missingAssets = new List<string>();
-
             
-            string assetFolderPath = Path.Combine(GetGameFolderPath(ActiveGame), InternalAssetsFolder);
-
-            if (Directory.Exists(assetFolderPath))
+            if (ActiveGameSkin.HasInternalSkins())
             {
-                DirectoryInfo internalFolder = new DirectoryInfo(assetFolderPath);
+                var internalGUIDs = ActiveGameSkin.GetGUIDs(SkinType.Internal);
 
-                foreach (DirectoryInfo directory in internalFolder.GetDirectories())
+                foreach (string internalGUID in internalGUIDs)
                 {
-                    string guid = directory.Name;
-
-                    string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                    string assetPath = AssetDatabase.GUIDToAssetPath(internalGUID);
 
                     if (string.IsNullOrEmpty(assetPath))
                     {
-                        missingAssets.Add(guid);
+                        missingAssets.Add(internalGUID);
                         continue;
                     }
 
                     if (!File.Exists(PathUtils.GetFullPath(assetPath)))
                     {
-                        missingAssets.Add(guid);
+                        missingAssets.Add(internalGUID);
                         continue;
                     }
                 }
