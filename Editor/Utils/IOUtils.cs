@@ -8,7 +8,7 @@ namespace Miniclip.ShapeShifter.Utils
 {
     public class IOUtils
     {
-        public static void TryCreateDirectory(string directoryPath, bool deleteIfExists)
+        public static void TryCreateDirectory(string directoryPath, bool deleteIfExists = false)
         {
             if (Directory.Exists(directoryPath))
             {
