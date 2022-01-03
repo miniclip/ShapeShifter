@@ -37,17 +37,6 @@ namespace Miniclip.ShapeShifter {
             set => configuration = value;
         }
         
-        private static readonly Type[] SupportedTypes = {
-            typeof(AnimationClip),
-            typeof(AnimatorController),
-            typeof(DefaultAsset),
-            typeof(GameObject),
-            typeof(MonoScript),
-            typeof(SceneAsset),
-            typeof(ScriptableObject),
-            typeof(Texture2D)
-        };
-        
         private static Editor defaultConfigurationEditor;
         private bool showConfiguration = false;
         

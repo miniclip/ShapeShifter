@@ -30,7 +30,7 @@ namespace Miniclip.ShapeShifter {
             {".unity", "SceneAsset Icon"},
             {".xml", "TextAsset Icon"},
         };
-
+        
         private void OnAssetSkinnerEnable()
         {
         }
@@ -46,39 +46,27 @@ namespace Miniclip.ShapeShifter {
 
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
 
-            using (new GUILayout.VerticalScope(boxStyle)) {
-                GUILayout.Label ("Selected assets:", EditorStyles.boldLabel);
-                    
-                Object[] assets = Selection.GetFiltered<Object>(SelectionMode.Assets);
-                List<Object> supportedAssets = new List<Object>(assets.Length);
-                
-                foreach (Object asset in assets) {
-                    Type assetType = asset.GetType();
+            using (new GUILayout.VerticalScope(boxStyle))
+            {
+                GUILayout.Label("Selected assets:", EditorStyles.boldLabel);
 
-                    if (assetType == typeof(DefaultAsset)) {
-                        if (AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(asset))) {
-                            supportedAssets.Add(asset);
-                            continue;
-                        }
-                    }
-                    
-                    foreach (Type supportedType in SupportedTypes) {
-                        if (assetType == supportedType || assetType.IsSubclassOf(supportedType)) {
-                            supportedAssets.Add(asset);
-                            break;
-                        }
-                    }
-                }
+                Object[] assets = Selection.GetFiltered<Object>(SelectionMode.Assets);
                 
-                if (supportedAssets.Count == 0) {
+                List<Object> supportedAssets = assets.GetSupportedAssetsFromArray();
+                
+                if (supportedAssets.Count == 0)
+                {
                     GUILayout.Label("None.");
-                } else {
+                }
+                else
+                {
                     this.scrollPosition = GUILayout.BeginScrollView(this.scrollPosition);
-                        
-                    foreach (Object asset in supportedAssets) {
+
+                    foreach (Object asset in supportedAssets)
+                    {
                         this.DrawAssetSection(asset);
                     }
-                
+
                     GUILayout.EndScrollView();
                 }
             }
