@@ -275,7 +275,6 @@ namespace Miniclip.ShapeShifter.Utils
                 workingDirectory = RepositoryPath;
             }
 
-            Debug.Log($"Running: git {arguments} at {workingDirectory}");
             return process.Run(
                 application: "git",
                 arguments: arguments,
