@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Miniclip.ShapeShifter
 {
@@ -76,5 +77,7 @@ namespace Miniclip.ShapeShifter
         internal bool HasExternalSkins() => Directory.Exists(externalSkinsFolder);
 
         internal bool HasInternalSkins() => Directory.Exists(internalSkinsFolder);
+
+        public bool HasGUID(string guid) => GetExistingGUIDs(SkinType.Internal).Any(existingGUID => existingGUID.Equals(guid));
     }
 }
