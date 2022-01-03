@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,9 +15,7 @@ namespace Miniclip.ShapeShifter
         private static string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
 
         private static int highlightedGame;
-
-        // private string lastSwitched;
-
+        
         private bool showSwitcher = true;
 
         private static string ActiveGameName => GetGameName(ActiveGame);
@@ -41,15 +40,89 @@ namespace Miniclip.ShapeShifter
                     $"Setting active game on EditorPrefs: {value}"
                 );
                 ShapeShifterEditorPrefs.SetInt(ACTIVE_GAME_PLAYER_PREFS_KEY, value);
-                
-                activeGameSkin = new GameSkin(ActiveGameName);
-                
             }
         }
+        internal static GameSkin ActiveGameSkin => new GameSkin(ActiveGameName); //TODO cache this
 
-        private static GameSkin activeGameSkin;
-        public static GameSkin ActiveGameSkin => activeGameSkin;
+        private static Dictionary<string, string> missingGuidsToPathDictionary = new Dictionary<string, string>();
 
+        private static string ExtractGUIDFromMetaFile(string path)
+        {
+            if (Path.GetExtension(path) != ".meta")
+            {
+                ShapeShifterLogger.LogError($"Trying to extract guid from non meta file : {path}");
+                return string.Empty;
+            }
+
+            using (StreamReader reader = new StreamReader(path))
+            {
+                while (!reader.EndOfStream)
+                {
+                    var line = reader.ReadLine();
+
+                    if (!line.StartsWith("guid"))
+                        continue;
+
+                    return line.Split(' ')[1];
+                }
+            }
+
+            return string.Empty;
+        }
+
+        internal static void RetrieveMissingAssets()
+        {
+            missingGuidsToPathDictionary.Clear();
+
+            List<string> missingAssets = new List<string>();
+
+            if (ActiveGameSkin.HasInternalSkins())
+            {
+                var internalGUIDs = ActiveGameSkin.GetExistingGUIDs(SkinType.Internal);
+
+                foreach (string internalGUID in internalGUIDs)
+                {
+                    string assetPath = AssetDatabase.GUIDToAssetPath(internalGUID);
+
+                    if (string.IsNullOrEmpty(assetPath))
+                    {
+                        missingAssets.Add(internalGUID);
+                        continue;
+                    }
+
+                    if (!File.Exists(PathUtils.GetFullPath(assetPath)))
+                    {
+                        missingAssets.Add(internalGUID);
+                        continue;
+                    }
+                }
+
+                // get all deleted meta files
+                IEnumerable<GitUtils.ChangedFileGitInfo> deletedMetas = GitUtils.GetDeletedFiles()
+                    .Where(deletedMeta => deletedMeta.path.Contains(".meta"));
+
+                //Restore meta files and do not call AssetDatabase refresh to prevent from being deleted again
+                //Store in dictionary mapping guid to path, since AssetDatabase.GUIDToAssetPath will not work
+                foreach (var deletedMeta in deletedMetas)
+                {
+                    ShapeShifterLogger.Log($"Restoring {deletedMeta.path}");
+                    GitUtils.DiscardChanges(PathUtils.GetFullPath(deletedMeta.path));
+
+                    string metaGUID = ExtractGUIDFromMetaFile(PathUtils.GetFullPath(deletedMeta.path));
+
+                    string fullpath = PathUtils.GetFullPath(deletedMeta.path).Replace(".meta", "");
+
+                    missingGuidsToPathDictionary.Add(metaGUID, PathUtils.GetPathRelativeToAssetsFolder(fullpath));
+                }
+
+                PerformCopiesWithTracking(
+                    ActiveGame,
+                    "Add missing skins",
+                    CopyIfMissingInternal,
+                    CopyFromSkinnedExternalToOrigin //TODO: CopyIfMissingExternal
+                );
+            }
+        }
 
         private static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory)
         {
@@ -230,7 +303,6 @@ namespace Miniclip.ShapeShifter
             Action<DirectoryInfo> internalAssetOperation,
             Action<DirectoryInfo> externalAssetOperation)
         {
-
             ShapeShifterLogger.Log($"{description}: {GetGameName(selected)}");
 
             string gameFolderPath = GetGameFolderPath(selected);
@@ -276,11 +348,6 @@ namespace Miniclip.ShapeShifter
                     $"Could not {description.ToLower()}: {GetGameName(selected)}. Skins folder does not exist!",
                     "Fine, I'll take a look."
                 );
-
-                ActiveGame = 0;
-
-                // TODO: ^this shouldn't just be assigned to 0, the operations should be atomic.
-                // If they fail, nothing should change.
             }
 
             EditorUtility.ClearProgressBar();
@@ -344,19 +411,31 @@ namespace Miniclip.ShapeShifter
         {
             if (Configuration.ModifiedAssetPaths.Count > 0)
             {
-                bool continueSwitch = EditorUtility.DisplayDialog(
+                int choice = EditorUtility.DisplayDialogComplex(
                     "Shape Shifter",
                     $"There are unsaved changes in your skinned assets. You should make sure to save them into your Active Game folder",
-                    "OK",
-                    "Cancel Switch"
+                    $"Save changes to {ActiveGameName} and switch to {GetGameName(selected)}.",
+                    "Cancel Switch",
+                    $"Discard changes and switch to {GetGameName(selected)}"
                 );
 
-                if (!continueSwitch)
+                switch (choice)
                 {
-                    return;
-                }
+                    case 0:
+                        OverwriteSelectedSkin(ActiveGame);
+                        break;
 
-                OverwriteSelectedSkin(ActiveGame);
+                    case 1:
+                        //Early return
+                        return;
+
+                    case 2:
+                        //just start switching
+                        break;
+
+                    default:
+                        break;
+                }
             }
 
             PerformCopiesWithTracking(
@@ -372,7 +451,7 @@ namespace Miniclip.ShapeShifter
         private static void CopyIfMissingInternal(DirectoryInfo directory)
         {
             string guid = directory.Name;
-            
+
             // Ensure it has the same name, so we don't end up copying .DS_Store
             string target = AssetDatabase.GUIDToAssetPath(guid);
             if (string.IsNullOrEmpty(target) && !missingGuidsToPathDictionary.TryGetValue(guid, out target))
@@ -405,7 +484,6 @@ namespace Miniclip.ShapeShifter
                     {
                         if (File.Exists(PathUtils.GetFullPath(target)))
                         {
-                            ShapeShifterLogger.LogWarning($"{target} already exists, skipping");
                             continue;
                         }
 

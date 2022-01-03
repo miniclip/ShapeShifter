@@ -102,85 +102,7 @@ namespace Miniclip.ShapeShifter {
             this.OnExternalAssetSkinnerEnable();
             
         }
-        internal static Dictionary<string, string> missingGuidsToPathDictionary = new Dictionary<string, string>();
-
-        internal static void RestoreMissingAssets()
-        {
-            missingGuidsToPathDictionary.Clear();
-
-            List<string> missingAssets = new List<string>();
-            
-            if (ActiveGameSkin.HasInternalSkins())
-            {
-                var internalGUIDs = ActiveGameSkin.GetGUIDs(SkinType.Internal);
-
-                foreach (string internalGUID in internalGUIDs)
-                {
-                    string assetPath = AssetDatabase.GUIDToAssetPath(internalGUID);
-
-                    if (string.IsNullOrEmpty(assetPath))
-                    {
-                        missingAssets.Add(internalGUID);
-                        continue;
-                    }
-
-                    if (!File.Exists(PathUtils.GetFullPath(assetPath)))
-                    {
-                        missingAssets.Add(internalGUID);
-                        continue;
-                    }
-                }
-
-                // get all deleted meta files
-                IEnumerable<GitUtils.ChangedFileGitInfo> deletedMetas = GitUtils.GetDeletedFiles()
-                    .Where(deletedMeta => deletedMeta.path.Contains(".meta"));
-
-                //Restore meta files and do not call AssetDatabase refresh to prevent from being deleted again
-                //Store in dictionary mapping guid to path, since AssetDatabase.GUIDToAssetPath will not work
-                foreach (var deletedMeta in deletedMetas)
-                {
-                    ShapeShifterLogger.Log($"Restoring {deletedMeta.path}");
-                    GitUtils.DiscardChanges(PathUtils.GetFullPath(deletedMeta.path));
-
-                    string metaGUID = ExtractGUIDFromMetaFile(PathUtils.GetFullPath(deletedMeta.path));
-
-                    string fullpath = PathUtils.GetFullPath(deletedMeta.path).Replace(".meta", "");
-
-                    missingGuidsToPathDictionary.Add(metaGUID, PathUtils.GetPathRelativeToAssetsFolder(fullpath));
-                }
-
-                PerformCopiesWithTracking(
-                    ActiveGame,
-                    "Add missing skins",
-                    CopyIfMissingInternal,
-                    CopyFromSkinnedExternalToOrigin //TODO: CopyIfMissingExternal
-                );
-            }
-        }
-
-        private static string ExtractGUIDFromMetaFile(string path)
-        {
-            if (Path.GetExtension(path) != ".meta")
-            {
-                ShapeShifterLogger.LogError($"Trying to extract guid from non meta file : {path}");
-                return string.Empty;
-            }
-            
-            using (StreamReader reader = new StreamReader(path)) {
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-                    
-                    if (!line.StartsWith("guid"))
-                        continue;
-
-                    return line.Split(' ')[1];
-                }
-            }
-
-            return string.Empty;
-        }
-
+        
         internal static bool IsInitialized
         {
             get => ShapeShifterEditorPrefs.GetBool(IsInitializedKey);
@@ -198,7 +120,7 @@ namespace Miniclip.ShapeShifter {
 
             InitialiseFolders();
             InitialiseConfiguration();
-            RestoreMissingAssets();
+            RetrieveMissingAssets();
 
             
             IsInitialized = true;
@@ -299,41 +221,11 @@ namespace Miniclip.ShapeShifter {
 
                 if (GUILayout.Button("Check for missing assets"))
                 {
-                   RestoreMissingAssets();
-                }
-
-                if (GUILayout.Button("Test"))
-                {
-                    GitUtils.ChangedFileGitInfo[] changedFiles = GitUtils.GetAllChangedFilesGitInfo();
-
-                    var d1 = GitUtils.GetDeletedFiles(changedFiles);
-
-                    var d2 = GitUtils.GetUnstagedFiles(changedFiles);
-                    
-                    Debug.Log("Unstaged");
-                    foreach (GitUtils.ChangedFileGitInfo fileGitInfo in d2)
-                    {
-                        Debug.Log(fileGitInfo.path);
-                    }
-                }
-                
-                if (GUILayout.Button("Can Stage"))
-                {
-                    var selection = Selection.GetFiltered<Object>(SelectionMode.Assets).FirstOrDefault();
-
-                    Debug.Log($"CanStage: {GitUtils.CanStage(AssetDatabase.GetAssetPath(selection))}");
-                }
-
-                if (GUILayout.Button("Can Unstage"))
-                {
-                    var selection = Selection.GetFiltered<Object>(SelectionMode.Assets).FirstOrDefault();
-
-                    Debug.Log($"CanStage: {GitUtils.CanUnstage(AssetDatabase.GetAssetPath(selection))}");
+                   RetrieveMissingAssets();
                 }
                 
                 GUILayout.FlexibleSpace();
             }
-            
             
             this.Repaint();
         }

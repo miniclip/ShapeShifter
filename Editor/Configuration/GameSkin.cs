@@ -5,7 +5,7 @@ using System.IO;
 namespace Miniclip.ShapeShifter
 {
     [Serializable]
-    public class GameSkin
+    internal class GameSkin
     {
         private string name;
 
@@ -13,9 +13,9 @@ namespace Miniclip.ShapeShifter
         private string internalSkinsFolder;
         private string externalSkinsFolder;
 
-        public DirectoryInfo mainFolderDirectoryInfo;
+        internal DirectoryInfo mainFolderDirectoryInfo;
 
-        public GameSkin(string name)
+        internal GameSkin(string name)
         {
             this.name = name ?? throw new ArgumentNullException(nameof(name));
 
@@ -24,13 +24,13 @@ namespace Miniclip.ShapeShifter
             externalSkinsFolder = Path.Combine(GetGameFolderPath(name), ShapeShifter.ExternalAssetsFolder);
         }
 
-        public string ExternalSkinsFolder => externalSkinsFolder;
+        internal string ExternalSkinsFolder => externalSkinsFolder;
 
-        public string InternalSkinsFolder => internalSkinsFolder;
+        internal string InternalSkinsFolder => internalSkinsFolder;
 
-        public string MainFolder => mainFolder;
+        internal string MainFolder => mainFolder;
 
-        public DirectoryInfo MainFolderDirectoryInfo
+        internal DirectoryInfo MainFolderDirectoryInfo
         {
             get
             {
@@ -51,7 +51,7 @@ namespace Miniclip.ShapeShifter
             return Path.Combine(ShapeShifter.SkinsFolder.FullName, name);
         }
 
-        public List<string> GetGUIDs(SkinType skinType)
+        internal List<string> GetExistingGUIDs(SkinType skinType)
         {
             List<string> guids = new List<string>();
             if (Directory.Exists(internalSkinsFolder))
@@ -67,7 +67,7 @@ namespace Miniclip.ShapeShifter
             return guids;
         }
 
-        public bool IsValid()
+        internal bool IsValid()
         {
             return Directory.Exists(mainFolder)
                    && (HasInternalSkins() || HasExternalSkins());
