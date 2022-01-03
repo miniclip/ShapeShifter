@@ -15,7 +15,7 @@ namespace Miniclip.ShapeShifter
         private static string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
 
         private static int highlightedGame;
-        
+
         private bool showSwitcher = true;
 
         private static string ActiveGameName => GetGameName(ActiveGame);
@@ -42,6 +42,7 @@ namespace Miniclip.ShapeShifter
                 ShapeShifterEditorPrefs.SetInt(ACTIVE_GAME_PLAYER_PREFS_KEY, value);
             }
         }
+
         internal static GameSkin ActiveGameSkin => new GameSkin(ActiveGameName); //TODO cache this
 
         private static Dictionary<string, string> missingGuidsToPathDictionary = new Dictionary<string, string>();
@@ -75,7 +76,7 @@ namespace Miniclip.ShapeShifter
             missingGuidsToPathDictionary.Clear();
 
             List<string> missingAssets = new List<string>();
-
+            Stopwatch stopwatch = Stopwatch.StartNew();
             if (ActiveGameSkin.HasInternalSkins())
             {
                 var internalGUIDs = ActiveGameSkin.GetExistingGUIDs(SkinType.Internal);
@@ -98,21 +99,33 @@ namespace Miniclip.ShapeShifter
                 }
 
                 // get all deleted meta files
-                IEnumerable<GitUtils.ChangedFileGitInfo> deletedMetas = GitUtils.GetDeletedFiles()
+                IEnumerable<GitUtils.ChangedFileGitInfo> deletedMetasInGit = GitUtils.GetDeletedFiles()
                     .Where(deletedMeta => deletedMeta.path.Contains(".meta"));
 
                 //Restore meta files and do not call AssetDatabase refresh to prevent from being deleted again
                 //Store in dictionary mapping guid to path, since AssetDatabase.GUIDToAssetPath will not work
-                foreach (var deletedMeta in deletedMetas)
+                foreach (var deletedMeta in deletedMetasInGit)
                 {
-                    ShapeShifterLogger.Log($"Restoring {deletedMeta.path}");
-                    GitUtils.DiscardChanges(PathUtils.GetFullPath(deletedMeta.path));
+                    // ShapeShifterLogger.Log($"Retrieving {deletedMeta.path}");
 
-                    string metaGUID = ExtractGUIDFromMetaFile(PathUtils.GetFullPath(deletedMeta.path));
+                    string metaFullPath = PathUtils.GetFullPath(deletedMeta.path);
 
-                    string fullpath = PathUtils.GetFullPath(deletedMeta.path).Replace(".meta", "");
+                    //need to recover deleted meta to check its contents
+                    GitUtils.DiscardChanges(metaFullPath);
 
-                    missingGuidsToPathDictionary.Add(metaGUID, PathUtils.GetPathRelativeToAssetsFolder(fullpath));
+                    string metaGUID = ExtractGUIDFromMetaFile(metaFullPath);
+
+                    string fullpath = metaFullPath.Replace(".meta", "");
+
+                    if (ActiveGameSkin.HasGUID(metaGUID))
+                    {
+                        missingGuidsToPathDictionary.Add(metaGUID, PathUtils.GetPathRelativeToAssetsFolder(fullpath));
+                    }
+                    else
+                    {
+                        //if there are no skins with this guid, delete meta again
+                        FileUtil.DeleteFileOrDirectory(metaFullPath);
+                    }
                 }
 
                 PerformCopiesWithTracking(
@@ -120,6 +133,14 @@ namespace Miniclip.ShapeShifter
                     "Add missing skins",
                     CopyIfMissingInternal,
                     CopyFromSkinnedExternalToOrigin //TODO: CopyIfMissingExternal
+                );
+
+                stopwatch.Stop();
+                int missingCount = missingGuidsToPathDictionary.Count;
+                ShapeShifterLogger.Log(
+                    missingCount > 0
+                        ? $"Finished retrieving {missingCount} assets in {stopwatch.Elapsed.TotalSeconds}"
+                        : $"Nothing to retrieve."
                 );
             }
         }
@@ -477,7 +498,7 @@ namespace Miniclip.ShapeShifter
                             continue;
                         }
 
-                        ShapeShifterLogger.LogWarning($"Recovering: {metaFile}");
+                        ShapeShifterLogger.Log($"Retrieving: {metaFile}");
                         fileInfo.CopyTo(metaFile, true);
                     }
                     else
@@ -487,7 +508,7 @@ namespace Miniclip.ShapeShifter
                             continue;
                         }
 
-                        ShapeShifterLogger.LogWarning($"Recovering: {target}");
+                        ShapeShifterLogger.Log($"Retrieving: {target}");
                         fileInfo.CopyTo(target, true);
                     }
                 }
