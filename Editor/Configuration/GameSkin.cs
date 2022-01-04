@@ -7,7 +7,7 @@ using Miniclip.ShapeShifter.Utils;
 namespace Miniclip.ShapeShifter
 {
     [Serializable]
-    internal class GameSkin
+    class GameSkin
     {
         private string name;
 
@@ -32,6 +32,8 @@ namespace Miniclip.ShapeShifter
 
         internal string MainFolder => mainFolder;
 
+        internal string Name => name;
+
         internal DirectoryInfo MainFolderDirectoryInfo
         {
             get
@@ -48,10 +50,7 @@ namespace Miniclip.ShapeShifter
             set => mainFolderDirectoryInfo = value;
         }
 
-        private string GetGameFolderPath(string name)
-        {
-            return Path.Combine(ShapeShifter.SkinsFolder.FullName, name);
-        }
+        private string GetGameFolderPath(string name) => Path.Combine(ShapeShifter.SkinsFolder.FullName, name);
 
         internal List<AssetSkin> GetAssetSkins(SkinType skinType)
         {
@@ -68,18 +67,15 @@ namespace Miniclip.ShapeShifter
             return assetSkins;
         }
 
-        internal bool IsValid()
-        {
-            return Directory.Exists(mainFolder)
-                   && (HasInternalSkins() || HasExternalSkins());
-        }
+        internal bool IsValid() =>
+            Directory.Exists(mainFolder)
+            && (HasInternalSkins() || HasExternalSkins());
 
         internal bool HasExternalSkins() => Directory.Exists(externalSkinsFolder);
 
         internal bool HasInternalSkins() => Directory.Exists(internalSkinsFolder);
 
-        public bool HasGUID(string guid) =>
-            GetAssetSkins(SkinType.Internal).Any(assetSkin => assetSkin.Guid == guid);
+        public bool HasGUID(string guid) => GetAssetSkins(SkinType.Internal).Any(assetSkin => assetSkin.Guid == guid);
 
         public AssetSkin GetAssetSkin(string guid)
         {
@@ -91,15 +87,15 @@ namespace Miniclip.ShapeShifter
         }
     }
 
-    internal class AssetSkin
+    class AssetSkin
     {
         private string guid;
         private string path;
 
         public AssetSkin(string guid, string path)
         {
-            this.Guid = guid;
-            this.Path = path;
+            Guid = guid;
+            Path = path;
         }
 
         internal string Guid

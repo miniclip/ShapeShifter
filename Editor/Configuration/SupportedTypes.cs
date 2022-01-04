@@ -18,7 +18,8 @@ namespace Miniclip.ShapeShifter
             typeof(MonoScript),
             typeof(SceneAsset),
             typeof(ScriptableObject),
-            typeof(Texture2D)
+            typeof(Texture2D),
+            typeof(TextAsset)
         };
 
         public static bool IsSupported(Object asset)

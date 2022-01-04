@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Utils;
@@ -11,12 +12,13 @@ namespace Miniclip.ShapeShifter.Tests
     {
         private static string TempFolderName = "Assets/ShapeShifterTestAssets";
 
-        internal static string SpriteAssetName = "shapeshifter.test.square";
+        internal static string SpriteAssetName = "shapeshifter.test.sprite";
+        internal static string TextFileAssetName = "shapeshifter.test.textfile";
+        private static List<string> cachedGameNames;
 
         internal static Sprite SkinTestSprite()
         {
             Sprite testSprite = GetTestSprite();
-
             ShapeShifter.SkinAsset(AssetDatabase.GetAssetPath(testSprite));
             return testSprite;
         }
@@ -25,6 +27,13 @@ namespace Miniclip.ShapeShifter.Tests
         {
             Sprite testSprite = GetAsset<Sprite>(SpriteAssetName);
             Assert.IsNotNull(testSprite, $"Could not find {SpriteAssetName} on resources");
+            return testSprite;
+        }
+        
+        internal static TextAsset GetTestTextAsset()
+        {
+            TextAsset testSprite = GetAsset<TextAsset>(TextFileAssetName);
+            Assert.IsNotNull(testSprite, $"Could not find {TextFileAssetName} on resources");
             return testSprite;
         }
 
@@ -54,28 +63,35 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsNotNull(asset, $"Could not load {name}");
             return asset;
         }
-
+        
         internal static void Reset()
         {
-            string squareAssetPath = GetPackageAssetPath(SpriteAssetName);
-            string source = Path.GetFullPath(squareAssetPath);
-            string destination = Path.Combine(Path.GetFullPath(TempFolderName), Path.GetFileName(squareAssetPath));
-            IOUtils.TryCreateDirectory(TempFolderName, true);
-            IOUtils.CopyFile(source, destination);
+            CopyAllTestResourcesFromPackagesToAssetsFolder();
 
             AssetDatabase.Refresh();
+            
+            cachedGameNames = new List<string>(ShapeShifter.Configuration.GameNames);
+            ShapeShifter.Configuration.GameNames.Clear();
+            ShapeShifter.Configuration.GameNames.Add("Game0");
+            ShapeShifter.Configuration.GameNames.Add("Game1");
 
-            if (ShapeShifter.IsSkinned(squareAssetPath))
-            {
-                ShapeShifter.RemoveSkins(squareAssetPath);
-            }
+        }
 
-            if (ShapeShifter.IsSkinned(GetAssetPath(SpriteAssetName)))
-            {
-                ShapeShifter.RemoveSkins(GetAssetPath(SpriteAssetName));
-            }
+        private static void CopyAllTestResourcesFromPackagesToAssetsFolder()
+        {
+            IOUtils.TryCreateDirectory(TempFolderName, true);
 
-            Assert.IsFalse(ShapeShifter.IsSkinned(squareAssetPath));
+            CopyResourceFromPackagesToAssetsFolder(SpriteAssetName);
+            CopyResourceFromPackagesToAssetsFolder(TextFileAssetName);
+        }
+
+        private static void CopyResourceFromPackagesToAssetsFolder(string assetName)
+        {
+            string packageAssetPath = GetPackageAssetPath(assetName);
+            string source = Path.GetFullPath(packageAssetPath);
+            string destination = Path.Combine(Path.GetFullPath(TempFolderName), Path.GetFileName(packageAssetPath));
+            Debug.Log($"Copying from {source} to {destination}");
+            IOUtils.CopyFile(source, destination);
         }
 
         internal static void TearDown()
@@ -85,10 +101,17 @@ namespace Miniclip.ShapeShifter.Tests
                 ShapeShifter.RemoveSkins(GetAssetPath(SpriteAssetName));
             }
 
+            if (ShapeShifter.IsSkinned(GetAssetPath(TextFileAssetName)))
+            {
+                ShapeShifter.RemoveSkins(GetAssetPath(TextFileAssetName));
+            }
+
+            
             FileUtil.DeleteFileOrDirectory(TempFolderName);
             FileUtil.DeleteFileOrDirectory(TempFolderName + ".meta");
             GitUtils.Stage(TempFolderName);
             AssetDatabase.Refresh();
+            ShapeShifter.Configuration.GameNames = cachedGameNames;
         }
     }
 }

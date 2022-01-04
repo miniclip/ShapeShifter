@@ -10,7 +10,6 @@ namespace Miniclip.ShapeShifter.Tests
         [OneTimeSetUp]
         public void Setup()
         {
-            Debug.Log("Setup");
             TestUtils.Reset();
         }
 
