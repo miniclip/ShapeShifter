@@ -11,7 +11,7 @@ namespace Miniclip.ShapeShifter.Utils
         private static string ASSETS_FOLDER_NAME => "Assets";
         private static string PACKAGES_FOLDER_NAME => "Packages";
         
-        private static bool IsInternalPath(string path)
+        internal static bool IsInternalPath(string path)
         {
             string[] folders = path.Split(Path.DirectorySeparatorChar);
             return folders.Contains(ASSETS_FOLDER_NAME);
@@ -27,13 +27,19 @@ namespace Miniclip.ShapeShifter.Utils
             return GetRootFolder(path).Equals(PACKAGES_FOLDER_NAME, StringComparison.Ordinal);
         }
         
-        private static bool IsPathRelativeToProject(string path)
+        internal static bool IsPathRelativeToProject(string path)
         {
             string projectFolderName = Directory.GetParent(Application.dataPath).Name;
             return GetRootFolder(path).Equals(projectFolderName, StringComparison.Ordinal);
         }
         
-        private static string GetRootFolder(string path)
+        internal static bool IsPathRelativeToSkins(string path)
+        {
+            string skinFolderName = "Skins";
+            return GetRootFolder(path).Equals(skinFolderName, StringComparison.Ordinal);
+        }
+        
+        internal static string GetRootFolder(string path)
         {
             while (true)
             {
@@ -121,6 +127,11 @@ namespace Miniclip.ShapeShifter.Utils
                 string projectContainerFolderName = Directory.GetParent(Application.dataPath).Parent.FullName;
                 
                 return Path.Combine(projectContainerFolderName, path);
+            }
+
+            if (IsPathRelativeToSkins(path))
+            {
+                return Path.Combine(ShapeShifter.SkinsFolder.Parent.FullName, path);
             }
             
             return string.Empty;

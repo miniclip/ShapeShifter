@@ -1,10 +1,12 @@
+using System.Collections.Generic;
 using System.IO;
+using Miniclip.ShapeShifter.Utils;
 
 namespace Miniclip.ShapeShifter
 {
     public partial class ShapeShifter
     {
-#region Unity Folder
+#region Internal
         
         public enum ModificationType
         {
@@ -17,31 +19,31 @@ namespace Miniclip.ShapeShifter
         {
             if (configuration == null) //TODO use IsInitialized instead
                 return;
-            
-            if (Configuration.ModifiedAssetPaths.Contains(modifiedAssetPath))
-                return;
 
-            if (!IsSkinned(modifiedAssetPath))
+            bool isModifiedAssetSkinned = IsSkinned(modifiedAssetPath);
+
+            List<string> configurationModifiedAssetPaths = Configuration.ModifiedAssetPaths;
+
+            if (isModifiedAssetSkinned && !configurationModifiedAssetPaths.Contains(modifiedAssetPath))
             {
-                if (TryGetParentSkinnedFolder(modifiedAssetPath, out string skinnedFolderPath))
-                {
-                    RegisterModifiedAssetInUnity(skinnedFolderPath);
-                }
-
+                configurationModifiedAssetPaths.Add(modifiedAssetPath);
                 return;
             }
 
-            Configuration.ModifiedAssetPaths.Add(modifiedAssetPath);
+            if (configurationModifiedAssetPaths.Contains(modifiedAssetPath))
+            {
+                configurationModifiedAssetPaths.Remove(modifiedAssetPath);
+                return;
+            }
+
+            if (TryGetParentSkinnedFolder(modifiedAssetPath, out string skinnedFolderPath))
+            {
+                RegisterModifiedAssetInUnity(skinnedFolderPath);
+            }
         }
 
         private static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)
         {
-            if (assetPath == "Assets/")
-            {
-                skinnedParentFolderPath = null;
-                return false;
-            }
-
             string[] parentFolders = assetPath.Split('/');
 
             for (int index = parentFolders.Length - 1; index >= 0; index--)
@@ -60,7 +62,7 @@ namespace Miniclip.ShapeShifter
         }
 #endregion
 
-#region Skins Folder
+#region External
         private void StartWatchingFolder(string pathToWatch) =>
             FileSystemWatcherManager.AddPathToWatchlist(pathToWatch, OnFileChanged);
 

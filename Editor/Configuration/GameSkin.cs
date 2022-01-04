@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Utils;
 
 namespace Miniclip.ShapeShifter
 {
@@ -52,20 +53,19 @@ namespace Miniclip.ShapeShifter
             return Path.Combine(ShapeShifter.SkinsFolder.FullName, name);
         }
 
-        internal List<string> GetExistingGUIDs(SkinType skinType)
+        internal List<AssetSkin> GetAssetSkins(SkinType skinType)
         {
-            List<string> guids = new List<string>();
+            List<AssetSkin> assetSkins = new List<AssetSkin>();
             if (Directory.Exists(internalSkinsFolder))
             {
                 DirectoryInfo internalFolder = new DirectoryInfo(internalSkinsFolder);
-
                 foreach (DirectoryInfo directory in internalFolder.GetDirectories())
                 {
-                    guids.Add(directory.Name);
+                    assetSkins.Add(new AssetSkin(directory.Name, directory.FullName));
                 }
             }
 
-            return guids;
+            return assetSkins;
         }
 
         internal bool IsValid()
@@ -78,6 +78,42 @@ namespace Miniclip.ShapeShifter
 
         internal bool HasInternalSkins() => Directory.Exists(internalSkinsFolder);
 
-        public bool HasGUID(string guid) => GetExistingGUIDs(SkinType.Internal).Any(existingGUID => existingGUID.Equals(guid));
+        public bool HasGUID(string guid) =>
+            GetAssetSkins(SkinType.Internal).Any(assetSkin => assetSkin.Guid == guid);
+
+        public AssetSkin GetAssetSkin(string guid)
+        {
+            List<AssetSkin> existing = GetAssetSkins(SkinType.Internal);
+
+            AssetSkin assetSkin = existing.FirstOrDefault(s => s.Guid == guid);
+
+            return assetSkin;
+        }
+    }
+
+    internal class AssetSkin
+    {
+        private string guid;
+        private string path;
+
+        public AssetSkin(string guid, string path)
+        {
+            this.Guid = guid;
+            this.Path = path;
+        }
+
+        internal string Guid
+        {
+            get => guid;
+            set => guid = value;
+        }
+
+        internal string Path
+        {
+            get => path;
+            set => path = value;
+        }
+
+        public bool IsValid() => !IOUtils.IsFolderEmpty(path);
     }
 }

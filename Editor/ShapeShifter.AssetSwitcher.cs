@@ -74,11 +74,12 @@ namespace Miniclip.ShapeShifter
         internal static void RetrieveMissingAssets()
         {
             missingGuidsToPathDictionary.Clear();
-
             List<string> missingAssets = new List<string>();
             Stopwatch stopwatch = Stopwatch.StartNew();
             if (ActiveGameSkin.HasInternalSkins())
             {
+                EditorUtility.DisplayProgressBar("ShapeShifter", "Checking for missing assets", 0.5f);
+
                 var internalGUIDs = ActiveGameSkin.GetExistingGUIDs(SkinType.Internal);
 
                 foreach (string internalGUID in internalGUIDs)
@@ -134,15 +135,17 @@ namespace Miniclip.ShapeShifter
                     CopyIfMissingInternal,
                     CopyFromSkinnedExternalToOrigin //TODO: CopyIfMissingExternal
                 );
-
-                stopwatch.Stop();
-                int missingCount = missingGuidsToPathDictionary.Count;
-                ShapeShifterLogger.Log(
-                    missingCount > 0
-                        ? $"Finished retrieving {missingCount} assets in {stopwatch.Elapsed.TotalSeconds}"
-                        : $"Nothing to retrieve."
-                );
             }
+            
+            EditorUtility.ClearProgressBar();
+
+            stopwatch.Stop();
+            int missingCount = missingGuidsToPathDictionary.Count;
+            ShapeShifterLogger.Log(
+                missingCount > 0
+                    ? $"Finished retrieving {missingCount} assets in {stopwatch.Elapsed.TotalSeconds}"
+                    : $"Nothing to retrieve."
+            );
         }
 
         private static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory)

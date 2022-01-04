@@ -41,7 +41,10 @@ namespace Miniclip.ShapeShifter.Utils
 
         private static string GitIgnorePath() => Path.Combine(RepositoryPath, ".gitignore");
 
-        private static string GetAssetIgnoreIdentifier(string assetPath) =>
+        private static string GenerateAssetIgnoreIdentifierFromGUID(string guid) =>
+            $"{GIT_IGNORE_SHAPESHIFTER_LABEL} {guid}";
+
+        private static string GenerateAssetIgnoreIdentifierFromAssetPath(string assetPath) =>
             $"{GIT_IGNORE_SHAPESHIFTER_LABEL} {AssetDatabase.AssetPathToGUID(assetPath)}";
 
         internal static bool CanStage(string assetPath)
@@ -63,13 +66,17 @@ namespace Miniclip.ShapeShifter.Utils
         internal static void Stage(string assetPath)
         {
             if (CanStage(assetPath))
+            {
                 RunGitCommand($"add \"{PathUtils.GetFullPath(assetPath)}\"");
+            }
         }
 
         internal static void UnStage(string assetPath)
         {
             if (CanUnstage(assetPath))
+            {
                 RunGitCommand($"restore --staged \"{PathUtils.GetFullPath(assetPath)}\"");
+            }
         }
 
         internal static bool IsTracked(string assetPath)
@@ -118,9 +125,11 @@ namespace Miniclip.ShapeShifter.Utils
             string pathRelativeToProjectFolder = PathUtils.GetPathRelativeToProjectFolder(assetPath);
 
             if (string.IsNullOrEmpty(pathRelativeToProjectFolder))
+            {
                 return;
+            }
 
-            string assetIgnoreIdentifier = GetAssetIgnoreIdentifier(assetPath);
+            string assetIgnoreIdentifier = GenerateAssetIgnoreIdentifierFromAssetPath(assetPath);
 
             if (gitIgnoreContent.Any(line => line.Equals(assetIgnoreIdentifier, StringComparison.Ordinal)))
             {
@@ -142,11 +151,11 @@ namespace Miniclip.ShapeShifter.Utils
                 return;
             }
 
-            int lineToRemove = gitIgnoreContent.IndexOf(GetAssetIgnoreIdentifier(pathToAcknowledge));
+            int lineToRemove = gitIgnoreContent.IndexOf(GenerateAssetIgnoreIdentifierFromAssetPath(pathToAcknowledge));
 
             if (lineToRemove == -1)
             {
-                ShapeShifterLogger.LogError($"Couldn't find {pathToAcknowledge} on .gitignore");
+                ShapeShifterLogger.LogWarning($"Couldn't find {pathToAcknowledge} on .gitignore");
                 return;
             }
 
@@ -188,15 +197,29 @@ namespace Miniclip.ShapeShifter.Utils
             Stage(gitIgnorePath);
         }
 
-        private static bool IsIgnored(string assetPath)
+        internal static bool IsIgnored(string guid)
         {
             if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
+            {
                 return false;
+            }
 
-            string folderName = Directory.GetParent(Application.dataPath).Name;
-            string fileRelativePath = Path.Combine(folderName, assetPath);
+            return gitIgnoreContent.Any(
+                line => line.Equals(GenerateAssetIgnoreIdentifierFromGUID(guid), StringComparison.Ordinal)
+            );
+        }
 
-            return gitIgnoreContent.Any(line => line.Contains(fileRelativePath));
+        public static string GetIgnoredPath(string guid)
+        {
+            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
+            {
+                return string.Empty;
+            }
+
+            string ignoreIdentifier = GenerateAssetIgnoreIdentifierFromGUID(guid);
+
+            int index = gitIgnoreContent.FindIndex(line => line == ignoreIdentifier) + 1;
+            return gitIgnoreContent[index];
         }
 
         public static void DiscardChanges(string assetPath)
@@ -236,7 +259,9 @@ namespace Miniclip.ShapeShifter.Utils
         {
             if (changedFiles == null)
             {
-                return GetAllChangedFilesGitInfo().Where(file => file.status.Contains(git_status_deleted)).ToList();
+                return GetAllChangedFilesGitInfo()
+                    .Where(file => file.status.Contains(git_status_deleted) && !file.isFullyStaged)
+                    .ToList();
             }
 
             return changedFiles.Where(file => file.status.Contains(git_status_deleted)).ToList();
@@ -276,9 +301,9 @@ namespace Miniclip.ShapeShifter.Utils
             }
 
             return process.Run(
-                application: "git",
-                arguments: arguments,
-                workingDirectory: workingDirectory,
+                "git",
+                arguments,
+                workingDirectory,
                 out output,
                 out errorOutput
             );

@@ -93,27 +93,13 @@ namespace Miniclip.ShapeShifter {
             
         }
         
-        internal static bool IsInitialized
-        {
-            get => ShapeShifterEditorPrefs.GetBool(IsInitializedKey);
-            private set => ShapeShifterEditorPrefs.SetBool(IsInitializedKey, value);
-        }
-        
         internal static void InitializeShapeShifterCore()
         {
-            if (IsInitialized) //TODO: To be changed for a settings provider?
-            {
-                return;
-            }
-            
             ShapeShifterLogger.Log("Setting up");
 
             InitialiseConfiguration();
             RetrieveMissingAssets();
-
-            
-            IsInitialized = true;
-        }
+     }
         
         private static void InitialiseConfiguration() {
             

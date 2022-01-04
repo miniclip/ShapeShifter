@@ -7,16 +7,31 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Tests
 {
-    internal class TestUtils
+    class TestUtils
     {
-        internal static string TempFolderName = "Assets/ShapeShifterTestAssets";
+        private static string TempFolderName = "Assets/ShapeShifterTestAssets";
 
         internal static string SpriteAssetName = "shapeshifter.test.square";
+
+        internal static Sprite SkinTestSprite()
+        {
+            Sprite testSprite = GetTestSprite();
+
+            ShapeShifter.SkinAsset(AssetDatabase.GetAssetPath(testSprite));
+            return testSprite;
+        }
+
+        internal static Sprite GetTestSprite()
+        {
+            Sprite testSprite = GetAsset<Sprite>(SpriteAssetName);
+            Assert.IsNotNull(testSprite, $"Could not find {SpriteAssetName} on resources");
+            return testSprite;
+        }
 
         internal static string GetAssetPath(string name)
         {
             string[] assetGUIDs = AssetDatabase.FindAssets(name);
-            var assetGUID = assetGUIDs.FirstOrDefault(
+            string assetGUID = assetGUIDs.FirstOrDefault(
                 guid => PathUtils.IsPathRelativeToAssets(AssetDatabase.GUIDToAssetPath(guid))
             );
             return AssetDatabase.GUIDToAssetPath(assetGUID);
@@ -30,9 +45,9 @@ namespace Miniclip.ShapeShifter.Tests
             );
             return AssetDatabase.GUIDToAssetPath(assetGUID);
         }
-        
+
         internal static T GetAsset<T>(string name)
-        where T : UnityEngine.Object
+        where T : Object
         {
             string assetPath = GetAssetPath(name);
             T asset = AssetDatabase.LoadAssetAtPath<T>(assetPath);
@@ -47,13 +62,9 @@ namespace Miniclip.ShapeShifter.Tests
             string destination = Path.Combine(Path.GetFullPath(TempFolderName), Path.GetFileName(squareAssetPath));
             IOUtils.TryCreateDirectory(TempFolderName, true);
             IOUtils.CopyFile(source, destination);
-            // FileUtil.CopyFileOrDirectory(
-            //     source,
-            //     destination
-            // );
 
             AssetDatabase.Refresh();
-            
+
             if (ShapeShifter.IsSkinned(squareAssetPath))
             {
                 ShapeShifter.RemoveSkins(squareAssetPath);
@@ -63,7 +74,7 @@ namespace Miniclip.ShapeShifter.Tests
             {
                 ShapeShifter.RemoveSkins(GetAssetPath(SpriteAssetName));
             }
-            
+
             Assert.IsFalse(ShapeShifter.IsSkinned(squareAssetPath));
         }
 
@@ -73,8 +84,10 @@ namespace Miniclip.ShapeShifter.Tests
             {
                 ShapeShifter.RemoveSkins(GetAssetPath(SpriteAssetName));
             }
-            
+
             FileUtil.DeleteFileOrDirectory(TempFolderName);
+            FileUtil.DeleteFileOrDirectory(TempFolderName + ".meta");
+            GitUtils.Stage(TempFolderName);
             AssetDatabase.Refresh();
         }
     }
