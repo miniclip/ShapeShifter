@@ -19,7 +19,6 @@ namespace Miniclip.ShapeShifter
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         internal static readonly string ExternalAssetsFolder = "external";
         internal static readonly string InternalAssetsFolder = "internal";
-        private static readonly string IsInitializedKey = "isInitialized";
 
         private static ShapeShifterConfiguration configuration;
 
@@ -65,13 +64,7 @@ namespace Miniclip.ShapeShifter
 
             ShowNextToInspector(true);
         }
-
-        [MenuItem("Window/Shape Shifter/Print Initialise state", false, (int) 'G')]
-        public static void PrintInitialiseState()
-        {
-            ShapeShifterLogger.Log($"Initialised: {ShapeShifterEditorPrefs.GetBool(IsInitializedKey)}");
-        }
-
+        
         internal static ShapeShifter ShowNextToInspector(bool focus = false)
         {
             Assembly editorAssembly = typeof(Editor).Assembly;
