@@ -71,7 +71,7 @@ namespace Miniclip.ShapeShifter
             return string.Empty;
         }
 
-        internal static void RetrieveMissingAssets()
+        internal static void RestoreMissingAssets()
         {
             missingGuidsToPathDictionary.Clear();
             List<string> missingAssets = new List<string>();

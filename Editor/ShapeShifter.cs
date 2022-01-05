@@ -98,7 +98,7 @@ namespace Miniclip.ShapeShifter {
             ShapeShifterLogger.Log("Setting up");
 
             InitialiseConfiguration();
-            RetrieveMissingAssets();
+            RestoreMissingAssets();
      }
         
         private static void InitialiseConfiguration() {
@@ -190,7 +190,7 @@ namespace Miniclip.ShapeShifter {
 
                 if (GUILayout.Button("Check for missing assets"))
                 {
-                   RetrieveMissingAssets();
+                   RestoreMissingAssets();
                 }
                 
                 GUILayout.FlexibleSpace();

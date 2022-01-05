@@ -3,19 +3,13 @@ using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using NUnit.Framework;
 using UnityEditor;
-using UnityEditor.VersionControl;
 using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Tests
 {
-    public class TestAssetSkinner
+    public class TestAssetSkinner : TestBase
     {
-        [SetUp]
-        public void Setup()
-        {
-            TestUtils.Reset();
-        }
-
+      
         [Test]
         public void TestSkinSprite()
         {
@@ -64,11 +58,6 @@ namespace Miniclip.ShapeShifter.Tests
             ShapeShifter.RemoveSkins(assetPath);
             Assert.IsTrue(!GitUtils.IsIgnored(guid), "GUID should not be in git ignore");
         }
-    
-        [TearDown]
-        public void Teardown()
-        {
-            TestUtils.TearDown();
-        }
+        
     }
 }

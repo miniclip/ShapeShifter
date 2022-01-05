@@ -6,13 +6,8 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Tests
 {
-    public class TestPathUtils
+    public class TestPathUtils : TestBase
     {
-        [SetUp]
-        public void Setup()
-        {
-            TestUtils.Reset();
-        }
 
         [Test]
         public void TestPathOperations()
@@ -34,7 +29,7 @@ namespace Miniclip.ShapeShifter.Tests
         }
 
         [Test]
-        public void GetFullPathFromSkinAsset()
+        public void TestFullPathFromSkinPath()
         {
             var squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
             Assert.IsNotNull(squareSprite, $"Could not find {TestUtils.SpriteAssetName} on resources");
@@ -59,10 +54,5 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(Path.IsPathRooted(assetSkinPath));
          }
         
-        [TearDown]
-        public void TearDown()
-        {
-            TestUtils.TearDown();
-        }
     }
 }

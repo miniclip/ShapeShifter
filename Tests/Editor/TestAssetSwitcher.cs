@@ -9,14 +9,8 @@ using UnityEngine;
 namespace Miniclip.ShapeShifter.Tests
 
 {
-    public class TestAssetSwitcher
+    public class TestAssetSwitcher : TestBase
     {
-        [SetUp]
-        public void Setup()
-        {
-            TestUtils.Reset();
-        }
-
         [Test]
         public void TestSwitchWithTextAsset()
         {
@@ -120,10 +114,5 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 3, "Skinned folder should still have the original file amount");
         }
 
-        [TearDown]
-        public void TearDown()
-        {
-            TestUtils.TearDown();
-        }
     }
 }
