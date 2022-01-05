@@ -197,8 +197,6 @@ namespace Miniclip.ShapeShifter
                         fileInfo.CopyTo(target, true);
                     }
                 }
-
-                return;
             }
 
             DirectoryInfo[] directories = directory.GetDirectories();

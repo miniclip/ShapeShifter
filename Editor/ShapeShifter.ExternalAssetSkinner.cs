@@ -203,7 +203,7 @@ namespace Miniclip.ShapeShifter {
                     origin = overridesPerGame[game];
                 }
                 
-                IOUtils.CopyFile(origin, target, false);
+                IOUtils.CopyFile(origin, target);
             }
         }
     }

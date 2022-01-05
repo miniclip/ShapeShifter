@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
-using UnityEngine;
+using UnityEditor;
 
 namespace Miniclip.ShapeShifter.Utils
 {
-    public class IOUtils
+    class IOUtils
     {
-        public static void TryCreateDirectory(string directoryPath, bool deleteIfExists = false)
+        internal static void TryCreateDirectory(string directoryPath, bool deleteIfExists = false)
         {
             if (Directory.Exists(directoryPath))
             {
@@ -23,38 +21,24 @@ namespace Miniclip.ShapeShifter.Utils
             Directory.CreateDirectory(directoryPath);
         }
 
-        public static void CopyFolder(DirectoryInfo source, DirectoryInfo target)
+        internal static void CopyFolder(DirectoryInfo source, DirectoryInfo target)
         {
-            Directory.CreateDirectory(target.FullName);
-
-            foreach (FileInfo file in target.GetFiles())
-            {
-                file.Delete();
-            }
-
-            foreach (DirectoryInfo directory in target.GetDirectories())
-            {
-                directory.Delete(true);
-            }
-
-            foreach (FileInfo file in source.GetFiles())
-            {
-                file.CopyTo(Path.Combine(target.FullName, file.Name), true);
-            }
-
-            foreach (DirectoryInfo nextSource in source.GetDirectories())
-            {
-                DirectoryInfo nextTarget = target.CreateSubdirectory(nextSource.Name);
-                CopyFolder(nextSource, nextTarget);
-            }
+            CopyFolder(source.FullName, target.FullName);
         }
 
-        public static void CopyFile(string source, string destination, bool overwrite = true)
+        internal static void CopyFolder(string source, string target)
         {
-            File.Copy(source, destination, overwrite);
+            FileUtil.ReplaceDirectory(source, target);
         }
-        
-        public static bool IsFolderEmpty(string path) => Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
-        public static bool IsFolderEmpty(DirectoryInfo directoryInfo) => IsFolderEmpty(directoryInfo.FullName);
+
+        internal static void CopyFile(string source, string destination)
+        {
+            FileUtil.ReplaceFile(source, destination);
+        }
+
+        internal static bool IsFolderEmpty(string path) =>
+            Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
+
+        internal static bool IsFolderEmpty(DirectoryInfo directoryInfo) => IsFolderEmpty(directoryInfo.FullName);
     }
 }
