@@ -127,8 +127,6 @@ namespace Miniclip.ShapeShifter
                 //Store in dictionary mapping guid to path, since AssetDatabase.GUIDToAssetPath will not work
                 foreach (var deletedMeta in deletedMetasInGit)
                 {
-                    // ShapeShifterLogger.Log($"Retrieving {deletedMeta.path}");
-
                     string metaFullPath = PathUtils.GetFullPath(deletedMeta.path);
 
                     //need to recover deleted meta to check its contents
@@ -153,7 +151,7 @@ namespace Miniclip.ShapeShifter
                     ActiveGame,
                     "Add missing skins",
                     CopyIfMissingInternal,
-                    CopyFromSkinnedExternalToOrigin //TODO: CopyIfMissingExternal
+                    CopyFromSkinnedExternalToOrigin
                 );
             }
             
@@ -199,7 +197,6 @@ namespace Miniclip.ShapeShifter
             {
                 foreach (FileInfo fileInfo in files)
                 {
-                    //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
                     if (fileInfo.Extension == ".meta")
                     {
                         fileInfo.CopyTo(target + ".meta", true);
@@ -468,7 +465,6 @@ namespace Miniclip.ShapeShifter
                         break;
 
                     case 1:
-                        //Early return
                         return;
 
                     case 2:

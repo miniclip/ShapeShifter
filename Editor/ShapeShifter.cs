@@ -10,10 +10,11 @@ using UnityEditor.VersionControl;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace Miniclip.ShapeShifter {
+namespace Miniclip.ShapeShifter
+{
     [Serializable]
-    public partial class ShapeShifter : EditorWindow {
-
+    public partial class ShapeShifter : EditorWindow
+    {
         private static readonly string ConfigurationResourceFolderPath = "Assets/Editor Default Resources/";
         private static readonly string ConfigurationResource = "ShapeShifterConfiguration.asset";
         internal static readonly string ExternalAssetsFolder = "external";
@@ -36,11 +37,12 @@ namespace Miniclip.ShapeShifter {
             }
             set => configuration = value;
         }
-        
+
         private static Editor defaultConfigurationEditor;
         private bool showConfiguration = false;
-        
+
         private static DirectoryInfo skinsFolder;
+
         public static DirectoryInfo SkinsFolder
         {
             get
@@ -50,6 +52,7 @@ namespace Miniclip.ShapeShifter {
                     skinsFolder = new DirectoryInfo(Application.dataPath + "/../../Skins/");
                     IOUtils.TryCreateDirectory(SkinsFolder.FullName, false);
                 }
+
                 return skinsFolder;
             }
             set => skinsFolder = value;
@@ -60,21 +63,23 @@ namespace Miniclip.ShapeShifter {
         {
             InitializeShapeShifterCore();
 
-            ShowNextToInspector(focus: true);
+            ShowNextToInspector(true);
         }
-        
+
         [MenuItem("Window/Shape Shifter/Print Initialise state", false, (int) 'G')]
         public static void PrintInitialiseState()
         {
             ShapeShifterLogger.Log($"Initialised: {ShapeShifterEditorPrefs.GetBool(IsInitializedKey)}");
         }
-        internal static ShapeShifter ShowNextToInspector(bool focus = false) {
+
+        internal static ShapeShifter ShowNextToInspector(bool focus = false)
+        {
             Assembly editorAssembly = typeof(Editor).Assembly;
             Type inspectorWindowType = editorAssembly.GetType("UnityEditor.InspectorWindow");
-            
+
             return GetWindow<ShapeShifter>(
-                "Shape Shifter", 
-                focus, 
+                "Shape Shifter",
+                focus,
                 inspectorWindowType
             );
         }
@@ -85,29 +90,30 @@ namespace Miniclip.ShapeShifter {
         {
             if (Configuration == null)
             {
-                this.Close();
+                Close();
                 return;
             }
-            this.OnAssetSkinnerEnable();
-            this.OnExternalAssetSkinnerEnable();
-            
+
+            OnAssetSkinnerEnable();
+            OnExternalAssetSkinnerEnable();
         }
-        
+
         internal static void InitializeShapeShifterCore()
         {
             ShapeShifterLogger.Log("Setting up");
 
             InitialiseConfiguration();
             RestoreMissingAssets();
-     }
-        
-        private static void InitialiseConfiguration() {
-            
-            if (configuration != null) {
+        }
+
+        private static void InitialiseConfiguration()
+        {
+            if (configuration != null)
+            {
                 return;
             }
 
-            configuration = (ShapeShifterConfiguration)EditorGUIUtility.Load(
+            configuration = (ShapeShifterConfiguration) EditorGUIUtility.Load(
                 ConfigurationResource
             );
 
@@ -115,17 +121,15 @@ namespace Miniclip.ShapeShifter {
                 ConfigurationResourceFolderPath,
                 ConfigurationResource
             );
-            
+
             if (configuration == null && File.Exists(configurationPath))
             {
                 configuration = AssetDatabase.LoadAssetAtPath<ShapeShifterConfiguration>(configurationPath);
             }
 
-            
             if (configuration == null)
             {
                 configuration = CreateInstance<ShapeShifterConfiguration>();
-
 
                 if (!AssetDatabase.IsValidFolder(ConfigurationResourceFolderPath))
                 {
@@ -136,7 +140,7 @@ namespace Miniclip.ShapeShifter {
                     configuration,
                     ConfigurationResourceFolderPath + ConfigurationResource
                 );
-                
+
                 EditorUtility.SetDirty(configuration);
                 AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
@@ -146,62 +150,65 @@ namespace Miniclip.ShapeShifter {
                 configuration,
                 typeof(ShapeShifterConfigurationEditor)
             );
-            
+
             AssetDatabase.Refresh();
 
             if (configuration.GameNames.Count == 0)
             {
-                ShapeShifterLogger.Log("Shapeshifter has no configured games, creating a default one and making it active");
+                ShapeShifterLogger.Log(
+                    "Shapeshifter has no configured games, creating a default one and making it active"
+                );
                 configuration.GameNames.Add("Default");
                 SwitchToGame(0);
                 EditorUtility.SetDirty(configuration);
             }
             else
             {
-                //Update Highlighted Game
                 highlightedGame = ActiveGame;
             }
-            
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
-        
-        private void OnGUI() {
 
+        private void OnGUI()
+        {
             if (configuration == null)
             {
-                this.Close();
+                Close();
             }
-            
-            using (new GUILayout.VerticalScope()) {
-                this.showConfiguration = EditorGUILayout.Foldout(this.showConfiguration, "Configuration");
 
-                if (this.showConfiguration && defaultConfigurationEditor != null)
+            using (new GUILayout.VerticalScope())
+            {
+                showConfiguration = EditorGUILayout.Foldout(showConfiguration, "Configuration");
+
+                if (showConfiguration && defaultConfigurationEditor != null)
                 {
                     defaultConfigurationEditor.OnInspectorGUI();
 
                     // TODO: hide this when it's no longer necessary, as direct access to this list may cause issues
-                    this.externalConfigurationEditor.OnInspectorGUI();
+                    externalConfigurationEditor.OnInspectorGUI();
                 }
 
-                this.OnAssetSwitcherGUI();
-                this.OnAssetSkinnerGUI();
-                this.OnExternalAssetSkinnerGUI();
+                OnAssetSwitcherGUI();
+                OnAssetSkinnerGUI();
+                OnExternalAssetSkinnerGUI();
 
                 if (GUILayout.Button("Check for missing assets"))
                 {
-                   RestoreMissingAssets();
+                    RestoreMissingAssets();
                 }
-                
+
                 GUILayout.FlexibleSpace();
             }
-            
-            this.Repaint();
+
+            Repaint();
         }
 
-        private static void SavePendingChanges() {
+        private static void SavePendingChanges()
+        {
             AssetDatabase.SaveAssets();
-            
+
             // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save
             EditorApplication.ExecuteMenuItem("File/Save Project");
         }
@@ -209,7 +216,9 @@ namespace Miniclip.ShapeShifter {
         public static void SaveChanges()
         {
             if (Configuration.ModifiedAssetPaths.Count > 0)
+            {
                 OverwriteSelectedSkin(ActiveGame);
+            }
         }
     }
 }

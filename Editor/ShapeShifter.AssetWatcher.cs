@@ -17,7 +17,7 @@ namespace Miniclip.ShapeShifter
         
         public static void RegisterModifiedAssetInUnity(string modifiedAssetPath)
         {
-            if (configuration == null) //TODO use IsInitialized instead
+            if (configuration == null)
                 return;
 
             bool isModifiedAssetSkinned = IsSkinned(modifiedAssetPath);

@@ -161,10 +161,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             gitIgnoreContent.RemoveRange(lineToRemove, 2);
 
-            // ShapeShifterLogger.Log($"Removing {pathToAcknowledge} from .gitignore");
             SetGitIgnoreContent(gitIgnoreContent);
-
-            // Stage(pathToAcknowledge);
         }
 
         private static bool TryGetGitIgnoreLines(out List<string> gitIgnoreContent)
