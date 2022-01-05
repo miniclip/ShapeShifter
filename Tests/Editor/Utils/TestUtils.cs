@@ -14,29 +14,10 @@ namespace Miniclip.ShapeShifter.Tests
 
         internal static string SpriteAssetName = "shapeshifter.test.sprite";
         internal static string TextFileAssetName = "shapeshifter.test.textfile";
-        private static List<string> cachedGameNames;
-
-        internal static Sprite SkinTestSprite()
-        {
-            Sprite testSprite = GetTestSprite();
-            ShapeShifter.SkinAsset(AssetDatabase.GetAssetPath(testSprite));
-            return testSprite;
-        }
-
-        internal static Sprite GetTestSprite()
-        {
-            Sprite testSprite = GetAsset<Sprite>(SpriteAssetName);
-            Assert.IsNotNull(testSprite, $"Could not find {SpriteAssetName} on resources");
-            return testSprite;
-        }
+        internal static string FolderAssetName = "shapeshifter.test.folder";
         
-        internal static TextAsset GetTestTextAsset()
-        {
-            TextAsset testSprite = GetAsset<TextAsset>(TextFileAssetName);
-            Assert.IsNotNull(testSprite, $"Could not find {TextFileAssetName} on resources");
-            return testSprite;
-        }
-
+        private static List<string> cachedGameNames;
+        
         internal static string GetAssetPath(string name)
         {
             string[] assetGUIDs = AssetDatabase.FindAssets(name);
@@ -83,6 +64,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             CopyResourceFromPackagesToAssetsFolder(SpriteAssetName);
             CopyResourceFromPackagesToAssetsFolder(TextFileAssetName);
+            CopyResourceFromPackagesToAssetsFolder(FolderAssetName);
         }
 
         private static void CopyResourceFromPackagesToAssetsFolder(string assetName)
@@ -90,8 +72,7 @@ namespace Miniclip.ShapeShifter.Tests
             string packageAssetPath = GetPackageAssetPath(assetName);
             string source = Path.GetFullPath(packageAssetPath);
             string destination = Path.Combine(Path.GetFullPath(TempFolderName), Path.GetFileName(packageAssetPath));
-            Debug.Log($"Copying from {source} to {destination}");
-            IOUtils.CopyFile(source, destination);
+            FileUtil.CopyFileOrDirectory(source, destination);
         }
 
         internal static void TearDown()
@@ -104,6 +85,11 @@ namespace Miniclip.ShapeShifter.Tests
             if (ShapeShifter.IsSkinned(GetAssetPath(TextFileAssetName)))
             {
                 ShapeShifter.RemoveSkins(GetAssetPath(TextFileAssetName));
+            }
+
+            if (ShapeShifter.IsSkinned(GetAssetPath(FolderAssetName)))
+            {
+                ShapeShifter.RemoveSkins(GetAssetPath(FolderAssetName));
             }
 
             

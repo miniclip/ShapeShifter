@@ -279,7 +279,7 @@ namespace Miniclip.ShapeShifter
                     SwitchToGame(highlightedGame);
                 }
 
-                if (GUILayout.Button($"Overwrite {GetGameName(highlightedGame)} skin", buttonStyle))
+                if (GUILayout.Button($"Overwrite all {GetGameName(highlightedGame)} skins", buttonStyle))
                 {
                     if (EditorUtility.DisplayDialog(
                         "ShapeShifter",

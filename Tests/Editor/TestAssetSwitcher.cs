@@ -19,7 +19,7 @@ namespace Miniclip.ShapeShifter.Tests
         [Test]
         public void TestSwitchWithTextAsset()
         {
-            TextAsset testAsset = TestUtils.GetTestTextAsset();
+            TextAsset testAsset = TestUtils.GetAsset<TextAsset>(TestUtils.TextFileAssetName);
             string assetPath = AssetDatabase.GetAssetPath(testAsset);
             string assetFullPath = PathUtils.GetFullPath(assetPath);
 
