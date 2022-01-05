@@ -49,7 +49,7 @@ namespace Miniclip.ShapeShifter.Tests
         
 
         [Test]
-        public void SkinnedAssetIsAddedToGitIgnore()
+        public void TestGitIgnoreAfterSkinningOperations()
         {
             Sprite squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
             ShapeShifter.SkinAsset(AssetDatabase.GetAssetPath(squareSprite));
@@ -60,22 +60,11 @@ namespace Miniclip.ShapeShifter.Tests
             var ignoredPath = GitUtils.GetIgnoredPath(guid);
             Assert.IsTrue(ignoredPath == PathUtils.GetPathRelativeToRepositoryFolder(assetPath), $"Asset path {assetPath} is different from {ignoredPath}");
             Assert.IsTrue(PathUtils.GetFullPath(ignoredPath) == PathUtils.GetFullPath(assetPath), $"Asset path {assetPath} is different from {ignoredPath}");
-        }
-        
-        [Test]
-        public void UnskinnedAssetIsRemovedFromGitIgnore()
-        {
-            Sprite squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
-            ShapeShifter.SkinAsset(AssetDatabase.GetAssetPath(squareSprite));
-            string assetPath = AssetDatabase.GetAssetPath(squareSprite);
-            string guid = AssetDatabase.AssetPathToGUID(assetPath);
-            
-            Assert.IsTrue(GitUtils.IsIgnored(guid), "GUID should be in git ignore");
             
             ShapeShifter.RemoveSkins(assetPath);
             Assert.IsTrue(!GitUtils.IsIgnored(guid), "GUID should not be in git ignore");
         }
-
+    
         [TearDown]
         public void Teardown()
         {
