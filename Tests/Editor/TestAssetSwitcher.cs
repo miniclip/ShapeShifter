@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using NUnit.Framework;
 using UnityEditor;
@@ -30,7 +31,7 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(!ShapeShifter.IsSkinned(assetPath));
 
             ShapeShifter.SkinAsset(assetPath);
-            
+
             ShapeShifter.SwitchToGame(1, true);
             Assert.IsTrue(ShapeShifter.ActiveGame == 1, "Active game should be 1");
 
@@ -77,6 +78,46 @@ namespace Miniclip.ShapeShifter.Tests
                 string.Equals(textGame1, "Game1", StringComparison.Ordinal),
                 "Text file content should be Game1"
             );
+        }
+
+        [Test]
+        public void TestSwitchWithFolder()
+        {
+            DefaultAsset folderAsset = TestUtils.GetAsset<DefaultAsset>(TestUtils.FolderAssetName);
+            string assetPath = AssetDatabase.GetAssetPath(folderAsset);
+            string fullAssetPath = PathUtils.GetFullPath(assetPath);
+
+            ShapeShifter.SkinAsset(assetPath);
+
+            Assert.IsTrue(ShapeShifter.IsSkinned(assetPath), "Folder was not skinned");
+
+            ShapeShifter.SwitchToGame(0, true);
+
+            string skinPath = Path.Combine(ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).Path, TestUtils.FolderAssetName);
+
+            Assert.IsTrue(PathUtils.GetAssetCountInFolder(fullAssetPath) == 3, "Incorrect number of files in folder before folder modification");
+            Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 3, "Skinned folder does not have same number of files as original");
+
+            DirectoryInfo directoryInfo = new DirectoryInfo(fullAssetPath);
+
+            var fileToDelete = directoryInfo.GetFiles().FirstOrDefault(info => info.Extension != ".meta");
+            fileToDelete.Delete();
+
+            AssetDatabase.Refresh();
+
+            Assert.IsTrue(PathUtils.GetAssetCountInFolder(fullAssetPath) == 2, "Expected to have 1 less file after deleting one");
+            Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 3, "Skinned folder should still have the original file amount");
+
+            ShapeShifter.OverwriteSelectedSkin(0);
+            
+            Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 2, "Skinned folder should have 2 files only after overwrite");
+            
+            ShapeShifter.SwitchToGame(1);
+            
+            skinPath = Path.Combine(ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).Path, TestUtils.FolderAssetName);
+
+            Assert.IsTrue(PathUtils.GetAssetCountInFolder(fullAssetPath) == 3, "Expected to have 3 files after switching to unmodified skinned folder");
+            Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 3, "Skinned folder should still have the original file amount");
         }
 
         [TearDown]

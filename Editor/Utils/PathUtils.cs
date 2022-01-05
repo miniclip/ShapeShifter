@@ -139,7 +139,7 @@ namespace Miniclip.ShapeShifter.Utils
 
         internal static int GetAssetCountInFolder(string path)
         {
-            if (!AssetDatabase.IsValidFolder(GetPathRelativeToAssetsFolder(path)))
+            if (!Directory.Exists(path))
             {
                 Debug.LogError("Trying to count number of assets inside path that is not a folder.");
                 return 0;
