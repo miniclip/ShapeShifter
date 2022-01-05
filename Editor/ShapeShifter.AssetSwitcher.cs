@@ -43,7 +43,19 @@ namespace Miniclip.ShapeShifter
             }
         }
 
-        internal static GameSkin ActiveGameSkin => new GameSkin(ActiveGameName); //TODO cache this
+        private static GameSkin activeGameSkin = null;
+        internal static GameSkin ActiveGameSkin
+        {
+            get
+            {
+                if (activeGameSkin != null && activeGameSkin.Name == ActiveGameName)
+                    return activeGameSkin;
+                
+                activeGameSkin = new GameSkin(ActiveGameName);
+
+                return activeGameSkin;
+            }
+        }
 
         private static Dictionary<string, string> missingGuidsToPathDictionary = new Dictionary<string, string>();
 
@@ -460,9 +472,6 @@ namespace Miniclip.ShapeShifter
                         return;
 
                     case 2:
-                        //just start switching
-                        break;
-
                     default:
                         break;
                 }
