@@ -191,6 +191,18 @@ namespace Miniclip.ShapeShifter
                 {
                     RestoreMissingAssets();
                 }
+                
+                if (GUILayout.Button("Rename"))
+                {
+                    var selected = Selection.GetFiltered<Object>(SelectionMode.Assets).FirstOrDefault();
+                    var path = AssetDatabase.GetAssetPath(selected);
+                    if (selected != null)
+                    {
+                        AssetDatabase.RenameAsset(path, "testRename");
+                        Debug.Log(AssetDatabase.AssetPathToGUID(path));
+                        // AssetDatabase.SaveAssets();
+                    }
+                }
 
                 GUILayout.FlexibleSpace();
             }

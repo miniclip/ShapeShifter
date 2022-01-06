@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Utils;
+using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
@@ -111,5 +112,25 @@ namespace Miniclip.ShapeShifter
         }
 
         public bool IsValid() => !IOUtils.IsFolderEmpty(path);
+
+        public void Rename(string newName)
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(path);
+            
+            int totalDirectories = directoryInfo.EnumerateDirectories().Count();
+            int totalFiles = directoryInfo.EnumerateFiles().Count();
+            
+            Debug.Log($"Directories: {totalDirectories} | Files: {totalFiles}");
+            
+            if (totalDirectories > 0)
+            {
+                Debug.Log("We should rename a folder and folder.meta");
+            }
+            else
+            {
+                Debug.Log("We should rename a file and file.meta");
+            }
+            
+        }
     }
 }

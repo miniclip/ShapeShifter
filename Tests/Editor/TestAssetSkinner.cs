@@ -51,7 +51,7 @@ namespace Miniclip.ShapeShifter.Tests
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             
             Assert.IsTrue(GitUtils.IsIgnored(guid), "GUID should be in git ignore");
-            var ignoredPath = GitUtils.GetIgnoredPath(guid);
+            var ignoredPath = GitUtils.GetIgnoredPathByGUID(guid);
             Assert.IsTrue(ignoredPath == PathUtils.GetPathRelativeToRepositoryFolder(assetPath), $"Asset path {assetPath} is different from {ignoredPath}");
             Assert.IsTrue(PathUtils.GetFullPath(ignoredPath) == PathUtils.GetFullPath(assetPath), $"Asset path {assetPath} is different from {ignoredPath}");
             

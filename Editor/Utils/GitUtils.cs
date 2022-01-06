@@ -206,7 +206,7 @@ namespace Miniclip.ShapeShifter.Utils
             );
         }
 
-        public static string GetIgnoredPath(string guid)
+        public static string GetIgnoredPathByGUID(string guid)
         {
             if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
             {

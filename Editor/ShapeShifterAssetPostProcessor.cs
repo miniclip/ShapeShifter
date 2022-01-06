@@ -1,6 +1,5 @@
 ﻿using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
-using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
@@ -10,25 +9,26 @@ namespace Miniclip.ShapeShifter
             string[] movedAssets,
             string[] movedFromAssetPaths)
         {
+            //changed
             foreach (string importedAsset in importedAssets)
             {
-                ShapeShifter.RegisterModifiedAssetInUnity(importedAsset);
+                ShapeShifter.OnImportedAsset(importedAsset);
+            }
+
+            //renamed
+            foreach (string movedAsset in movedAssets)
+            {
+                ShapeShifter.OnMovedAsset(movedAsset);
             }
 
             foreach (string deletedAsset in deletedAssets)
             {
-                //TODO ACPT-2755 handle deleted skinned assets
-
                 if (ShapeShifter.IsSkinned(deletedAsset))
                 {
-                    ShapeShifterLogger.LogWarning("You deleted an asset that currently has skins. Shapeshifter still can't handle this correctly");
+                    ShapeShifterLogger.LogWarning(
+                        "You deleted an asset that currently has skins. Shapeshifter will recover it the next chance it has."
+                    );
                 }
-            }
-
-            foreach (string movedAsset in movedAssets)
-            {
-                ShapeShifter.RegisterModifiedAssetInUnity(movedAsset);
-
             }
         }
     }

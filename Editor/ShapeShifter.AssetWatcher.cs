@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using Miniclip.ShapeShifter.Utils;
+using UnityEditor;
+using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
@@ -15,16 +17,16 @@ namespace Miniclip.ShapeShifter
             DELETE = 2
         }
         
-        public static void RegisterModifiedAssetInUnity(string modifiedAssetPath)
+        public static void OnImportedAsset(string modifiedAssetPath)
         {
             if (configuration == null)
                 return;
 
-            bool isModifiedAssetSkinned = IsSkinned(modifiedAssetPath);
+            bool isSkinned = IsSkinned(modifiedAssetPath);
 
             List<string> configurationModifiedAssetPaths = Configuration.ModifiedAssetPaths;
 
-            if (isModifiedAssetSkinned && !configurationModifiedAssetPaths.Contains(modifiedAssetPath))
+            if (isSkinned && !configurationModifiedAssetPaths.Contains(modifiedAssetPath))
             {
                 configurationModifiedAssetPaths.Add(modifiedAssetPath);
                 return;
@@ -38,10 +40,33 @@ namespace Miniclip.ShapeShifter
 
             if (TryGetParentSkinnedFolder(modifiedAssetPath, out string skinnedFolderPath))
             {
-                RegisterModifiedAssetInUnity(skinnedFolderPath);
+                OnImportedAsset(skinnedFolderPath);
             }
         }
 
+        public static void OnMovedAsset(string movedAsset)
+        {
+            if (configuration == null)
+                return;
+
+            bool isSkinned = IsSkinned(movedAsset);
+
+            if (!isSkinned)
+                return;
+            
+            string guid = AssetDatabase.AssetPathToGUID(movedAsset);
+            
+            foreach (string gameName in Configuration.GameNames)
+            {
+                Debug.Log(gameName);
+                GameSkin gameSkin = new GameSkin(gameName);
+
+                var assetSkin = gameSkin.GetAssetSkin(guid);
+                
+                assetSkin.Rename(movedAsset);
+            }
+        }
+        
         private static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)
         {
             string[] parentFolders = assetPath.Split('/');
@@ -79,5 +104,6 @@ namespace Miniclip.ShapeShifter
             dirtyAssets.Add(key);
         }
 #endregion
+        
     }
 }
