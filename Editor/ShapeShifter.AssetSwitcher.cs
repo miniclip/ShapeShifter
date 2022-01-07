@@ -121,7 +121,7 @@ namespace Miniclip.ShapeShifter
 
                 // get all deleted meta files
                 IEnumerable<GitUtils.ChangedFileGitInfo> deletedMetasInGit = GitUtils.GetDeletedFiles()
-                    .Where(deletedMeta => deletedMeta.path.Contains(".meta"));
+                    .Where(deletedMeta => deletedMeta.path.Contains(".meta") && PathUtils.IsInternalPath(deletedMeta.path));
 
                 //Restore meta files and do not call AssetDatabase refresh to prevent from being deleted again
                 //Store in dictionary mapping guid to path, since AssetDatabase.GUIDToAssetPath will not work

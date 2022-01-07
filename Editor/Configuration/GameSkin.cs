@@ -2,38 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Miniclip.ShapeShifter.Utils;
-using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
     [Serializable]
     class GameSkin
     {
-        private string name;
+        internal string ExternalSkinsFolder { get; }
 
-        private string mainFolder;
-        private string internalSkinsFolder;
-        private string externalSkinsFolder;
+        internal string InternalSkinsFolder { get; }
 
-        internal DirectoryInfo mainFolderDirectoryInfo;
-
-        internal GameSkin(string name)
-        {
-            this.name = name ?? throw new ArgumentNullException(nameof(name));
-
-            mainFolder = GetGameFolderPath(name);
-            internalSkinsFolder = Path.Combine(GetGameFolderPath(name), ShapeShifter.InternalAssetsFolder);
-            externalSkinsFolder = Path.Combine(GetGameFolderPath(name), ShapeShifter.ExternalAssetsFolder);
-        }
-
-        internal string ExternalSkinsFolder => externalSkinsFolder;
-
-        internal string InternalSkinsFolder => internalSkinsFolder;
-
-        internal string MainFolder => mainFolder;
-
-        internal string Name => name;
+        internal string MainFolder { get; }
 
         internal DirectoryInfo MainFolderDirectoryInfo
         {
@@ -45,36 +24,24 @@ namespace Miniclip.ShapeShifter
                     return mainFolderDirectoryInfo;
                 }
 
-                mainFolderDirectoryInfo = new DirectoryInfo(mainFolder);
+                mainFolderDirectoryInfo = new DirectoryInfo(MainFolder);
                 return mainFolderDirectoryInfo;
             }
             set => mainFolderDirectoryInfo = value;
         }
 
-        private string GetGameFolderPath(string name) => Path.Combine(ShapeShifter.SkinsFolder.FullName, name);
+        internal string Name { get; }
 
-        internal List<AssetSkin> GetAssetSkins(SkinType skinType)
+        internal DirectoryInfo mainFolderDirectoryInfo;
+
+        internal GameSkin(string name)
         {
-            List<AssetSkin> assetSkins = new List<AssetSkin>();
-            if (Directory.Exists(internalSkinsFolder))
-            {
-                DirectoryInfo internalFolder = new DirectoryInfo(internalSkinsFolder);
-                foreach (DirectoryInfo directory in internalFolder.GetDirectories())
-                {
-                    assetSkins.Add(new AssetSkin(directory.Name, directory.FullName));
-                }
-            }
+            Name = name;
 
-            return assetSkins;
+            MainFolder = GetGameFolderPath(name);
+            InternalSkinsFolder = Path.Combine(MainFolder, ShapeShifter.InternalAssetsFolder);
+            ExternalSkinsFolder = Path.Combine(MainFolder, ShapeShifter.ExternalAssetsFolder);
         }
-
-        internal bool IsValid() =>
-            Directory.Exists(mainFolder)
-            && (HasInternalSkins() || HasExternalSkins());
-
-        internal bool HasExternalSkins() => Directory.Exists(externalSkinsFolder);
-
-        internal bool HasInternalSkins() => Directory.Exists(internalSkinsFolder);
 
         public bool HasGUID(string guid) => GetAssetSkins(SkinType.Internal).Any(assetSkin => assetSkin.Guid == guid);
 
@@ -86,51 +53,30 @@ namespace Miniclip.ShapeShifter
 
             return assetSkin;
         }
-    }
 
-    class AssetSkin
-    {
-        private string guid;
-        private string path;
+        private string GetGameFolderPath(string name) => Path.Combine(ShapeShifter.SkinsFolder.FullName, name);
 
-        public AssetSkin(string guid, string path)
+        internal List<AssetSkin> GetAssetSkins(SkinType skinType)
         {
-            Guid = guid;
-            Path = path;
-        }
-
-        internal string Guid
-        {
-            get => guid;
-            set => guid = value;
-        }
-
-        internal string Path
-        {
-            get => path;
-            set => path = value;
-        }
-
-        public bool IsValid() => !IOUtils.IsFolderEmpty(path);
-
-        public void Rename(string newName)
-        {
-            DirectoryInfo directoryInfo = new DirectoryInfo(path);
-            
-            int totalDirectories = directoryInfo.EnumerateDirectories().Count();
-            int totalFiles = directoryInfo.EnumerateFiles().Count();
-            
-            Debug.Log($"Directories: {totalDirectories} | Files: {totalFiles}");
-            
-            if (totalDirectories > 0)
+            List<AssetSkin> assetSkins = new List<AssetSkin>();
+            if (Directory.Exists(InternalSkinsFolder))
             {
-                Debug.Log("We should rename a folder and folder.meta");
+                DirectoryInfo internalFolder = new DirectoryInfo(InternalSkinsFolder);
+                foreach (DirectoryInfo directory in internalFolder.GetDirectories())
+                {
+                    assetSkins.Add(new AssetSkin(directory.Name, directory.FullName));
+                }
             }
-            else
-            {
-                Debug.Log("We should rename a file and file.meta");
-            }
-            
+
+            return assetSkins;
         }
+
+        internal bool IsValid() =>
+            Directory.Exists(MainFolder)
+            && (HasInternalSkins() || HasExternalSkins());
+
+        internal bool HasExternalSkins() => Directory.Exists(ExternalSkinsFolder);
+
+        internal bool HasInternalSkins() => Directory.Exists(InternalSkinsFolder);
     }
 }

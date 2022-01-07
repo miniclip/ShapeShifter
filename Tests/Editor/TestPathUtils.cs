@@ -48,7 +48,7 @@ namespace Miniclip.ShapeShifter.Tests
             var assetSkin = ShapeShifter.ActiveGameSkin.GetAssetSkin(guid);
             Assert.IsNotNull(assetSkin);
             
-            string assetSkinPath = assetSkin.Path;
+            string assetSkinPath = assetSkin.SkinnedFileContainerFullPath;
             
             Assert.IsFalse(string.IsNullOrEmpty(assetSkinPath));
             Assert.IsTrue(Path.IsPathRooted(assetSkinPath));

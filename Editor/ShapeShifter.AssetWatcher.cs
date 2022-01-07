@@ -54,19 +54,31 @@ namespace Miniclip.ShapeShifter
             if (!isSkinned)
                 return;
             
-            string guid = AssetDatabase.AssetPathToGUID(movedAsset);
+            RenameAssetSkins(movedAsset);
             
+            if (Configuration.ModifiedAssetPaths.Contains(movedAsset))
+            {
+                Configuration.ModifiedAssetPaths.Remove(movedAsset);
+            } 
+        }
+
+        private static void RenameAssetSkins(string assetPath)
+        {
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+
             foreach (string gameName in Configuration.GameNames)
             {
-                Debug.Log(gameName);
                 GameSkin gameSkin = new GameSkin(gameName);
 
                 var assetSkin = gameSkin.GetAssetSkin(guid);
-                
-                assetSkin.Rename(movedAsset);
+
+                assetSkin.Rename(assetPath);
+                assetSkin.Stage();
             }
+
+            GitUtils.ReplaceIgnoreEntry(guid, PathUtils.GetPathRelativeToRepositoryFolder(assetPath));
         }
-        
+
         private static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)
         {
             string[] parentFolders = assetPath.Split('/');

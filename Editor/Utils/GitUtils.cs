@@ -218,6 +218,28 @@ namespace Miniclip.ShapeShifter.Utils
             int index = gitIgnoreContent.FindIndex(line => line == ignoreIdentifier) + 1;
             return gitIgnoreContent[index];
         }
+        
+        public static void ReplaceIgnoreEntry(string guid, string newFullPath)
+        {
+            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
+            {
+                return;
+            }
+
+            string ignoreIdentifier = GenerateAssetIgnoreIdentifierFromGUID(guid);
+
+            int index = gitIgnoreContent.FindIndex(line => line == ignoreIdentifier) + 1;
+
+            if (index == -1)
+            {
+                ShapeShifterLogger.LogError($"Could not find guid {guid} in git ignore.");
+                return;
+            }
+            
+            gitIgnoreContent[index] = PathUtils.GetPathRelativeToRepositoryFolder(newFullPath);
+            
+            SetGitIgnoreContent(gitIgnoreContent);
+        }
 
         public static void DiscardChanges(string assetPath)
         {

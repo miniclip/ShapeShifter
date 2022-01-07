@@ -56,7 +56,7 @@ namespace Miniclip.ShapeShifter.Utils
         {
             if (!IsInternalPath(path))
             {
-                Debug.LogError($"Path is not from inside {ASSETS_FOLDER_NAME}");
+                Debug.LogError($"Path {path} is not from inside {ASSETS_FOLDER_NAME}");
                 return string.Empty;
             }
 
