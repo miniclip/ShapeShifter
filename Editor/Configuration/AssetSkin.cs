@@ -22,7 +22,7 @@ namespace Miniclip.ShapeShifter
         {
             if (PathUtils.IsInternalPath(newName))
             {
-                newName = Path.GetFileName(newName);
+                newName = Path.GetFileName(newName) ?? Path.GetDirectoryName(newName);
             }
 
             DirectoryInfo directoryInfo = new DirectoryInfo(SkinnedFileContainerFullPath);
@@ -35,7 +35,7 @@ namespace Miniclip.ShapeShifter
             if (totalDirectories > 0)
             {
                 string skinnedFolderFullPath = directoryInfo.GetDirectories().FirstOrDefault().FullName;
-                string oldName = Path.GetDirectoryName(skinnedFolderFullPath);
+                string oldName = new DirectoryInfo(skinnedFolderFullPath).Name;
 
                 newFullPath = skinnedFolderFullPath.Replace(oldName, newName);
 
