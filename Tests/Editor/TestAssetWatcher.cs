@@ -57,16 +57,21 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPathAfterRename = AssetDatabase.GUIDToAssetPath(guid);
             string fullAssetPathAfterRename = PathUtils.GetFullPath(assetPathAfterRename);
             Assert.IsTrue(assetPathBeforeRename != assetPathAfterRename, "New asset path should be different by now");
-
-            Assert.IsTrue(
-                ShapeShifter.Configuration.ModifiedAssetPaths.Contains(assetPathBeforeRename),
-                "Asset was modified and it is not showing in modified assets list"
-            );
-
+      
             string assetIgnorePathAfterRename =
-                GitUtils.GetIgnoredPathByGUID(AssetDatabase.AssetPathToGUID(assetPathBeforeRename));
+                GitUtils.GetIgnoredPathByGUID(guid);
 
             Assert.IsTrue(fullAssetPathAfterRename == PathUtils.GetFullPath(assetIgnorePathAfterRename));
+
+            foreach (string gameName in ShapeShifter.Configuration.GameNames)
+            {
+                GameSkin gameSkin = new GameSkin(gameName);
+                AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);
+
+                string skinnedAssetPath = Path.Combine(assetSkin.SkinnedFileContainerFullPath, Path.GetFileName(assetPathAfterRename));
+                Assert.IsTrue(File.Exists(skinnedAssetPath));
+                Assert.IsTrue(File.Exists(skinnedAssetPath+".meta"));
+            }
         }
     }
 }
