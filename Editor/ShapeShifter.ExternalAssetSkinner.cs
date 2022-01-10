@@ -12,7 +12,7 @@ namespace Miniclip.ShapeShifter {
 
     public partial class ShapeShifter {
 
-        private Editor externalConfigurationEditor;
+        private static Editor externalConfigurationEditor;
         private int selectedExternalAsset;
         private bool showExternalSkinner = true;
 
@@ -64,13 +64,6 @@ namespace Miniclip.ShapeShifter {
             Uri assetPathIdentifier = new Uri(absolutePath);
             Uri relativeToPathIdentifier = new Uri(relativeTo);
             return relativeToPathIdentifier.MakeRelativeUri(assetPathIdentifier).ToString();
-        }
-        
-        private void OnExternalAssetSkinnerEnable() {
-            this.externalConfigurationEditor = Editor.CreateEditor(
-                Configuration,
-                typeof(ShapeShifterExternalConfigurationEditor)
-            );
         }
         
         private void OnExternalAssetSkinnerGUI() {

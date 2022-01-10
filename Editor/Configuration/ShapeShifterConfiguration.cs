@@ -7,7 +7,7 @@ namespace Miniclip.ShapeShifter
     {
         //TODO: turn these lists into serializable HashSets 
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private List<string> gameNames = new List<string>();
         internal List<string> GameNames
         {
@@ -15,11 +15,11 @@ namespace Miniclip.ShapeShifter
             set => this.gameNames = value;
         }
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private List<string> skinnedExternalAssetPaths = new List<string>();
         public List<string> SkinnedExternalAssetPaths => this.skinnedExternalAssetPaths;
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         private List<string> modifiedAssetPaths = new List<string>();
 
         public List<string> ModifiedAssetPaths => modifiedAssetPaths;

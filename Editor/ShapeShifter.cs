@@ -36,7 +36,7 @@ namespace Miniclip.ShapeShifter
             }
             set => configuration = value;
         }
-
+        
         private static Editor defaultConfigurationEditor;
         private bool showConfiguration = false;
 
@@ -78,19 +78,7 @@ namespace Miniclip.ShapeShifter
         }
 
         private static string GenerateAssetKey(string game, string guid) => game + ":" + guid;
-
-        private void OnEnable()
-        {
-            if (Configuration == null)
-            {
-                Close();
-                return;
-            }
-
-            OnAssetSkinnerEnable();
-            OnExternalAssetSkinnerEnable();
-        }
-
+        
         internal static void InitializeShapeShifterCore()
         {
             ShapeShifterLogger.Log("Setting up");
@@ -143,6 +131,11 @@ namespace Miniclip.ShapeShifter
                 configuration,
                 typeof(ShapeShifterConfigurationEditor)
             );
+            
+            externalConfigurationEditor = Editor.CreateEditor(
+                Configuration,
+                typeof(ShapeShifterExternalConfigurationEditor)
+            );
 
             AssetDatabase.Refresh();
 
@@ -168,17 +161,28 @@ namespace Miniclip.ShapeShifter
         {
             if (configuration == null)
             {
-                Close();
+                using (new GUILayout.VerticalScope())
+                {
+                    GUILayout.Label("Shapeshifter configuration not found.");
+
+                    if (GUILayout.Button("Try To Fix"))
+                    {
+                        InitialiseConfiguration();
+                    }
+                    
+                    Repaint();
+                    return;
+                }
             }
 
             using (new GUILayout.VerticalScope())
             {
                 showConfiguration = EditorGUILayout.Foldout(showConfiguration, "Configuration");
 
-                if (showConfiguration && defaultConfigurationEditor != null)
+                if (showConfiguration && defaultConfigurationEditor != null && externalConfigurationEditor != null)
                 {
                     defaultConfigurationEditor.OnInspectorGUI();
-
+                    
                     // TODO: hide this when it's no longer necessary, as direct access to this list may cause issues
                     externalConfigurationEditor.OnInspectorGUI();
                 }

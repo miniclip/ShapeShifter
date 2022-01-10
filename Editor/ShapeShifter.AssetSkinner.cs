@@ -31,10 +31,6 @@ namespace Miniclip.ShapeShifter {
             {".xml", "TextAsset Icon"},
         };
         
-        private void OnAssetSkinnerEnable()
-        {
-        }
-
 #region GUI
         
         private void OnAssetSkinnerGUI() {

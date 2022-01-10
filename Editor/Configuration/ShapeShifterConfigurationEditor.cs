@@ -46,7 +46,6 @@ namespace Miniclip.ShapeShifter {
             this.serializedObject.Update();
             this.gameNamesList.DoLayoutList();
             this.serializedObject.ApplyModifiedProperties();
-            DrawDefaultInspector ();
         }
     }
 }
