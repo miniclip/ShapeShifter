@@ -33,9 +33,26 @@ namespace Miniclip.ShapeShifter.Tests
         }
 
         [Test]
-        public void TestRenamingAsset()
+        public void TestRenameSkinnedSprite()
         {
-            TextAsset textAsset = TestUtils.GetAsset<TextAsset>(TestUtils.TextFileAssetName);
+            TestRenameFlow(TestUtils.SpriteAssetName);
+        }
+        
+        [Test]
+        public void TestRenameSkinnedTextFile()
+        {
+            TestRenameFlow(TestUtils.TextFileAssetName);
+        }
+
+        [Test]
+        public void TestRenameSkinnedFolder()
+        {
+            TestRenameFlow(TestUtils.FolderAssetName);
+        }
+
+        private static void TestRenameFlow(string nameOfResourceToTest)
+        {
+            Object textAsset = TestUtils.GetAsset<Object>(nameOfResourceToTest);
             string assetPathBeforeRename = AssetDatabase.GetAssetPath(textAsset);
             string guid = AssetDatabase.AssetPathToGUID(assetPathBeforeRename);
             string fullAssetPathBeforeRename = PathUtils.GetFullPath(assetPathBeforeRename);
@@ -57,7 +74,7 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPathAfterRename = AssetDatabase.GUIDToAssetPath(guid);
             string fullAssetPathAfterRename = PathUtils.GetFullPath(assetPathAfterRename);
             Assert.IsTrue(assetPathBeforeRename != assetPathAfterRename, "New asset path should be different by now");
-      
+
             string assetIgnorePathAfterRename =
                 GitUtils.GetIgnoredPathByGUID(guid);
 
@@ -68,12 +85,24 @@ namespace Miniclip.ShapeShifter.Tests
                 GameSkin gameSkin = new GameSkin(gameName);
                 AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);
 
-                string skinnedAssetPath = Path.Combine(assetSkin.SkinnedFileContainerFullPath, Path.GetFileName(assetPathAfterRename));
-                Assert.IsTrue(File.Exists(skinnedAssetPath));
-                Assert.IsTrue(File.Exists(skinnedAssetPath+".meta"));
+                string skinnedAssetPath = Path.Combine(
+                    assetSkin.SkinnedFileContainerFullPath,
+                    Path.GetFileName(assetPathAfterRename)
+                );
+
+                if (PathUtils.IsDirectory(skinnedAssetPath))
+                {
+                    Assert.IsTrue(Directory.Exists(skinnedAssetPath), "Renamed Asset doesn't exist");
+                }
+                else
+                {
+                    Assert.IsTrue(File.Exists(skinnedAssetPath), "Renamed Asset doesn't exist");
+                }
+
+                Assert.IsTrue(File.Exists(skinnedAssetPath + ".meta"));
             }
 
-            AssetDatabase.RenameAsset(assetPathAfterRename, TestUtils.TextFileAssetName);
+            AssetDatabase.RenameAsset(assetPathAfterRename, nameOfResourceToTest);
         }
     }
 }

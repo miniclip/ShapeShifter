@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using UnityEditor;
 using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Utils
@@ -16,6 +15,12 @@ namespace Miniclip.ShapeShifter.Utils
         {
             string[] folders = path.Split(Path.DirectorySeparatorChar);
             return folders.Contains(ASSETS_FOLDER_NAME);
+        }
+
+        internal static bool IsDirectory(string path)
+        {
+            FileAttributes fa = File.GetAttributes(path);
+            return (fa & FileAttributes.Directory) != 0;
         }
 
         internal static bool IsPathRelativeToAssets(string path) =>
@@ -101,13 +106,11 @@ namespace Miniclip.ShapeShifter.Utils
                     split.GetRange(indexOfRelativeTo, split.Count - indexOfRelativeTo)
                 );
             }
-            else
-            {
-                return string.Join(
-                    Path.DirectorySeparatorChar.ToString(),
-                    split.GetRange(indexOfRelativeTo + 1, split.Count - indexOfRelativeTo - 1)
-                );
-            }
+
+            return string.Join(
+                Path.DirectorySeparatorChar.ToString(),
+                split.GetRange(indexOfRelativeTo + 1, split.Count - indexOfRelativeTo - 1)
+            );
         }
 
         internal static string GetFullPath(string path)
