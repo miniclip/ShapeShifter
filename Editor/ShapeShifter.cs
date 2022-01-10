@@ -187,21 +187,9 @@ namespace Miniclip.ShapeShifter
                 OnAssetSkinnerGUI();
                 OnExternalAssetSkinnerGUI();
 
-                if (GUILayout.Button("Check for missing assets"))
+                if (GUILayout.Button("Restore missing assets"))
                 {
                     RestoreMissingAssets();
-                }
-                
-                if (GUILayout.Button("Rename"))
-                {
-                    var selected = Selection.GetFiltered<Object>(SelectionMode.Assets).FirstOrDefault();
-                    var path = AssetDatabase.GetAssetPath(selected);
-                    if (selected != null)
-                    {
-                        AssetDatabase.RenameAsset(path, "testRename");
-                        Debug.Log(AssetDatabase.AssetPathToGUID(path));
-                        // AssetDatabase.SaveAssets();
-                    }
                 }
 
                 GUILayout.FlexibleSpace();
