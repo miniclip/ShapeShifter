@@ -20,7 +20,7 @@ namespace Miniclip.ShapeShifter
             {
                 string newName = movedAssets[index];
                 string oldName = movedFromAssetPaths[index];
-                ShapeShifter.OnMovedAsset(newName, oldName);
+                ShapeShifter.OnAssetRenamed(newName, oldName);
             }
 
             foreach (string deletedAsset in deletedAssets)

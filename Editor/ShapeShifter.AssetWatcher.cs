@@ -44,7 +44,7 @@ namespace Miniclip.ShapeShifter
             }
         }
 
-        public static void OnMovedAsset(string newName, string oldName)
+        public static void OnAssetRenamed(string newName, string oldName)
         {
             if (configuration == null)
                 return;
