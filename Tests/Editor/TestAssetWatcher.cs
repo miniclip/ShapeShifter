@@ -86,7 +86,7 @@ namespace Miniclip.ShapeShifter.Tests
                 AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);
 
                 string skinnedAssetPath = Path.Combine(
-                    assetSkin.SkinnedFileContainerFullPath,
+                    assetSkin.FolderPath,
                     Path.GetFileName(assetPathAfterRename)
                 );
 

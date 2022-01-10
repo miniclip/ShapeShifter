@@ -87,7 +87,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             ShapeShifter.SwitchToGame(0, true);
 
-            string skinPath = Path.Combine(ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).SkinnedFileContainerFullPath, TestUtils.FolderAssetName);
+            string skinPath = Path.Combine(ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath, TestUtils.FolderAssetName);
 
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(fullAssetPath) == 3, "Incorrect number of files in folder before folder modification");
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 3, "Skinned folder does not have same number of files as original");
@@ -108,7 +108,7 @@ namespace Miniclip.ShapeShifter.Tests
             
             ShapeShifter.SwitchToGame(1);
             
-            skinPath = Path.Combine(ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).SkinnedFileContainerFullPath, TestUtils.FolderAssetName);
+            skinPath = Path.Combine(ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath, TestUtils.FolderAssetName);
 
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(fullAssetPath) == 3, "Expected to have 3 files after switching to unmodified skinned folder");
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 3, "Skinned folder should still have the original file amount");

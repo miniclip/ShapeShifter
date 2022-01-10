@@ -6,17 +6,17 @@ namespace Miniclip.ShapeShifter
 {
     class AssetSkin
     {
-        public AssetSkin(string guid, string skinnedFileContainerFullPath)
+        public AssetSkin(string guid, string folderPath)
         {
             Guid = guid;
-            SkinnedFileContainerFullPath = skinnedFileContainerFullPath;
+            FolderPath = folderPath;
         }
 
         internal string Guid { get; set; }
 
-        internal string SkinnedFileContainerFullPath { get; set; }
+        internal string FolderPath { get; set; }
 
-        public bool IsValid() => !IOUtils.IsFolderEmpty(SkinnedFileContainerFullPath);
+        public bool IsValid() => !IOUtils.IsFolderEmpty(FolderPath);
 
         public void Rename(string newName)
         {
@@ -25,7 +25,7 @@ namespace Miniclip.ShapeShifter
                 newName = Path.GetFileName(newName) ?? Path.GetDirectoryName(newName);
             }
 
-            DirectoryInfo directoryInfo = new DirectoryInfo(SkinnedFileContainerFullPath);
+            DirectoryInfo directoryInfo = new DirectoryInfo(FolderPath);
 
             int totalDirectories = directoryInfo.EnumerateDirectories().Count();
             int totalFiles = directoryInfo.EnumerateFiles().Count();
@@ -56,12 +56,12 @@ namespace Miniclip.ShapeShifter
                 return;
             }
 
-            ShapeShifterLogger.LogError($"Empty skin contents on {SkinnedFileContainerFullPath}");
+            ShapeShifterLogger.LogError($"Empty skin contents on {FolderPath}");
         }
 
         public void Stage()
         {
-            GitUtils.Stage(SkinnedFileContainerFullPath);
+            GitUtils.Stage(FolderPath);
         }
     }
 }
