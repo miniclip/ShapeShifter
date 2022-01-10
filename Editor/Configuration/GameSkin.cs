@@ -78,5 +78,11 @@ namespace Miniclip.ShapeShifter
         internal bool HasExternalSkins() => Directory.Exists(ExternalSkinsFolder);
 
         internal bool HasInternalSkins() => Directory.Exists(InternalSkinsFolder);
+
+        internal void DeleteFolder()
+        {
+            if(Directory.Exists(MainFolder))
+                Directory.Delete(MainFolder, true);
+        }
     }
 }

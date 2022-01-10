@@ -72,6 +72,8 @@ namespace Miniclip.ShapeShifter.Tests
                 Assert.IsTrue(File.Exists(skinnedAssetPath));
                 Assert.IsTrue(File.Exists(skinnedAssetPath+".meta"));
             }
+
+            AssetDatabase.RenameAsset(assetPathAfterRename, TestUtils.TextFileAssetName);
         }
     }
 }

@@ -61,16 +61,16 @@ namespace Miniclip.ShapeShifter.Tests
 
             string textGame0 = File.ReadAllText(assetFullPath);
             Assert.IsTrue(
-                string.Equals(textGame0, "Game0", StringComparison.Ordinal),
-                "Text file content should be Game0"
+                string.Equals(textGame0, TestUtils.TestGameNames[0], StringComparison.Ordinal),
+                $"Text file content should be {TestUtils.TestGameNames[0]}"
             );
 
             ShapeShifter.SwitchToGame(1, true);
 
             string textGame1 = File.ReadAllText(assetFullPath);
             Assert.IsTrue(
-                string.Equals(textGame1, "Game1", StringComparison.Ordinal),
-                "Text file content should be Game1"
+                string.Equals(textGame1, TestUtils.TestGameNames[1], StringComparison.Ordinal),
+                $"Text file content should be {TestUtils.TestGameNames[1]}"
             );
         }
 

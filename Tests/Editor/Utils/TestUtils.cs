@@ -16,6 +16,11 @@ namespace Miniclip.ShapeShifter.Tests
         internal static string TextFileAssetName = "shapeshifter.test.textfile";
         internal static string FolderAssetName = "shapeshifter.test.folder";
         
+        internal static string[] TestGameNames = {
+            "Test0",
+            "Test1",
+        };
+        
         private static List<string> cachedGameNames;
         
         internal static string GetAssetPath(string name)
@@ -53,9 +58,7 @@ namespace Miniclip.ShapeShifter.Tests
             
             cachedGameNames = new List<string>(ShapeShifter.Configuration.GameNames);
             ShapeShifter.Configuration.GameNames.Clear();
-            ShapeShifter.Configuration.GameNames.Add("Game0");
-            ShapeShifter.Configuration.GameNames.Add("Game1");
-
+            ShapeShifter.Configuration.GameNames = new List<string>(TestGameNames);
         }
 
         private static void CopyAllTestResourcesFromPackagesToAssetsFolder()
@@ -70,9 +73,8 @@ namespace Miniclip.ShapeShifter.Tests
         private static void CopyResourceFromPackagesToAssetsFolder(string assetName)
         {
             string packageAssetPath = GetPackageAssetPath(assetName);
-            string source = Path.GetFullPath(packageAssetPath);
-            string destination = Path.Combine(Path.GetFullPath(TempFolderName), Path.GetFileName(packageAssetPath));
-            FileUtil.CopyFileOrDirectory(source, destination);
+            string destination = Path.Combine(TempFolderName, Path.GetFileName(packageAssetPath));
+            AssetDatabase.CopyAsset(packageAssetPath, destination);
         }
 
         internal static void TearDown()
@@ -95,6 +97,18 @@ namespace Miniclip.ShapeShifter.Tests
             
             FileUtil.DeleteFileOrDirectory(TempFolderName);
             FileUtil.DeleteFileOrDirectory(TempFolderName + ".meta");
+
+            foreach (string configurationGameName in ShapeShifter.Configuration.GameNames)
+            {
+                if (!configurationGameName.Contains("Test"))
+                {
+                    continue;
+                }
+                
+                GameSkin gameSkin = new GameSkin(configurationGameName);
+                gameSkin.DeleteFolder();
+            }
+            
             GitUtils.Stage(TempFolderName);
             AssetDatabase.Refresh();
             ShapeShifter.Configuration.GameNames = cachedGameNames;
