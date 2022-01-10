@@ -44,22 +44,25 @@ namespace Miniclip.ShapeShifter
             }
         }
 
-        public static void OnMovedAsset(string movedAsset)
+        public static void OnMovedAsset(string newName, string oldName)
         {
             if (configuration == null)
                 return;
 
-            bool isSkinned = IsSkinned(movedAsset);
+            bool isSkinned = IsSkinned(newName);
 
             if (!isSkinned)
                 return;
             
-            RenameAssetSkins(movedAsset);
+            RenameAssetSkins(newName);
             
-            if (Configuration.ModifiedAssetPaths.Contains(movedAsset))
+            if (Configuration.ModifiedAssetPaths.Contains(newName))
             {
-                Configuration.ModifiedAssetPaths.Remove(movedAsset);
+                Configuration.ModifiedAssetPaths.Remove(newName);
             } 
+            
+            GitUtils.Stage(newName+".meta");
+            GitUtils.Stage(oldName+".meta");
         }
 
         private static void RenameAssetSkins(string assetPath)
