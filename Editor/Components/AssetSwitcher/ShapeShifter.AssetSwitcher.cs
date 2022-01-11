@@ -362,7 +362,7 @@ namespace Miniclip.ShapeShifter
 
                 PerformOperationOnPath(
                     gameFolderPath,
-                    InternalAssetsFolder,
+                    SharedInfo.InternalAssetsFolder,
                     internalAssetOperation,
                     description,
                     progressBarStep,
@@ -371,7 +371,7 @@ namespace Miniclip.ShapeShifter
 
                 PerformOperationOnPath(
                     gameFolderPath,
-                    ExternalAssetsFolder,
+                    SharedInfo.ExternalAssetsFolder,
                     externalAssetOperation,
                     description,
                     progressBarStep,

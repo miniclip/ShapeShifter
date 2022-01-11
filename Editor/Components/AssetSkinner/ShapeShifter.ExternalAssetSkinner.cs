@@ -27,7 +27,7 @@ namespace Miniclip.ShapeShifter {
                     string assetPath = Path.Combine(
                         SkinsFolder.FullName,
                         game,
-                        ExternalAssetsFolder,
+                        SharedInfo.ExternalAssetsFolder,
                         key,
                         Path.GetFileName(relativePath)
                     );
@@ -135,7 +135,7 @@ namespace Miniclip.ShapeShifter {
                 string assetFolder = Path.Combine(
                     SkinsFolder.FullName,
                     game,
-                    ExternalAssetsFolder,
+                    SharedInfo.ExternalAssetsFolder,
                     key
                 );
             
@@ -182,7 +182,7 @@ namespace Miniclip.ShapeShifter {
                 string assetFolder = Path.Combine(
                     SkinsFolder.FullName,
                     game, 
-                    ExternalAssetsFolder,
+                    SharedInfo.ExternalAssetsFolder,
                     key
                 );
                 
