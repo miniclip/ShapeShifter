@@ -2,10 +2,11 @@
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Utils;
+using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
 
-namespace Miniclip.ShapeShifter
+namespace Miniclip.ShapeShifter.Skinner
 {
     public static class AssetSkinner
     {
@@ -21,7 +22,7 @@ namespace Miniclip.ShapeShifter
                 string assetFolder = Path.Combine(
                     SharedInfo.SkinsFolder.FullName,
                     game,
-                    SharedInfo.InternalAssetsFolder,
+                    SharedInfo.INTERNAL_ASSETS_FOLDER,
                     guid
                 );
 
@@ -61,7 +62,7 @@ namespace Miniclip.ShapeShifter
                 string assetFolder = Path.Combine(
                     SharedInfo.SkinsFolder.FullName,
                     game,
-                    SharedInfo.InternalAssetsFolder,
+                    SharedInfo.INTERNAL_ASSETS_FOLDER,
                     guid
                 );
 
@@ -105,7 +106,7 @@ namespace Miniclip.ShapeShifter
             string assetFolder = Path.Combine(
                 SharedInfo.SkinsFolder.FullName,
                 game,
-                SharedInfo.InternalAssetsFolder,
+                SharedInfo.INTERNAL_ASSETS_FOLDER,
                 guid
             );
 

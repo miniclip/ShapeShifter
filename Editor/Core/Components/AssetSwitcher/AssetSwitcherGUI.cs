@@ -2,7 +2,7 @@ using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
 
-namespace Miniclip.ShapeShifter
+namespace Miniclip.ShapeShifter.Switcher
 {
     public static class AssetSwitcherGUI
     {

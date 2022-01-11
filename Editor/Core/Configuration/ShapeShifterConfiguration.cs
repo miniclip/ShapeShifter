@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;

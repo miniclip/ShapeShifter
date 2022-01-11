@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Reflection;
+using Miniclip.ShapeShifter.Skinner;
+using Miniclip.ShapeShifter.Switcher;
+using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
 

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using NUnit.Framework;
 using UnityEditor;

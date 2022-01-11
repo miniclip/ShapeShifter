@@ -4,11 +4,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
 
-namespace Miniclip.ShapeShifter
+namespace Miniclip.ShapeShifter.Switcher
 {
     public static class AssetSwitcher
     {
@@ -268,7 +269,7 @@ namespace Miniclip.ShapeShifter
 
                 PerformOperationOnPath(
                     gameFolderPath,
-                    SharedInfo.InternalAssetsFolder,
+                    SharedInfo.INTERNAL_ASSETS_FOLDER,
                     internalAssetOperation,
                     description,
                     progressBarStep,
@@ -277,7 +278,7 @@ namespace Miniclip.ShapeShifter
 
                 PerformOperationOnPath(
                     gameFolderPath,
-                    SharedInfo.ExternalAssetsFolder,
+                    SharedInfo.EXTERNAL_ASSETS_FOLDER,
                     externalAssetOperation,
                     description,
                     progressBarStep,

@@ -7,12 +7,12 @@ namespace Miniclip.ShapeShifter
 {
     static class SharedInfo
     {
-        private static readonly string SHAPESHIFTER_SKINS_FOLDER_NAME = "Skins";
+        private const string SHAPESHIFTER_SKINS_FOLDER_NAME = "Skins";
 
-        private static readonly string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
+        private const string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
 
-        internal static readonly string ExternalAssetsFolder = "external";
-        internal static readonly string InternalAssetsFolder = "internal";
+        internal const string EXTERNAL_ASSETS_FOLDER = "external";
+        internal const string INTERNAL_ASSETS_FOLDER = "internal";
 
         private static DirectoryInfo skinsFolder;
 

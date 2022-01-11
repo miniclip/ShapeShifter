@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
 using Miniclip.ShapeShifter.Utils;
+using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
 
-namespace Miniclip.ShapeShifter
+namespace Miniclip.ShapeShifter.Skinner
 {
     public class AssetSkinnerGUI
     {
@@ -160,7 +161,7 @@ namespace Miniclip.ShapeShifter
                     string skinnedPath = Path.Combine(
                         SharedInfo.SkinsFolder.FullName,
                         game,
-                        SharedInfo.InternalAssetsFolder,
+                        SharedInfo.INTERNAL_ASSETS_FOLDER,
                         guid,
                         Path.GetFileName(assetPath)
                     );

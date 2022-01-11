@@ -2,7 +2,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace Miniclip.ShapeShifter
+namespace Miniclip.ShapeShifter.Skinner
 {
     public static class ExternalAssetSkinnerGUI
     {
@@ -22,7 +22,7 @@ namespace Miniclip.ShapeShifter
                     string assetPath = Path.Combine(
                         SharedInfo.SkinsFolder.FullName,
                         game,
-                        SharedInfo.ExternalAssetsFolder,
+                        SharedInfo.EXTERNAL_ASSETS_FOLDER,
                         key,
                         Path.GetFileName(relativePath)
                     );

@@ -1,4 +1,5 @@
 using Miniclip.ShapeShifter;
+using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 

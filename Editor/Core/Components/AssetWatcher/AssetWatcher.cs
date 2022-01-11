@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
 
-namespace Miniclip.ShapeShifter
+namespace Miniclip.ShapeShifter.Watcher
 {
     public class AssetWatcher : AssetPostprocessor
     {
