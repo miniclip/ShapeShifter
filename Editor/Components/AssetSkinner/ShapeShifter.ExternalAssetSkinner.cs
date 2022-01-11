@@ -22,7 +22,7 @@ namespace Miniclip.ShapeShifter {
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
             
             using (new GUILayout.HorizontalScope(boxStyle)) {
-                foreach (string game in Configuration.GameNames) {
+                foreach (string game in ShapeShifterConfiguration.Instance.GameNames) {
                     string key = this.GenerateKeyFromRelativePath(relativePath);
                     string assetPath = Path.Combine(
                         SkinsFolder.FullName,
@@ -80,18 +80,18 @@ namespace Miniclip.ShapeShifter {
             GUIStyle buttonStyle = GUI.skin.GetStyle("Button");
 
             using (new GUILayout.VerticalScope(boxStyle)) {
-                int count = Configuration.SkinnedExternalAssetPaths.Count;
+                int count = ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Count;
                 
                 if (count > 0) {
                     this.selectedExternalAsset = GUILayout.SelectionGrid(
                         this.selectedExternalAsset,
-                        Configuration.SkinnedExternalAssetPaths.ToArray(),
+                        ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.ToArray(),
                         2,
                         buttonStyle
                     );
 
                     if (this.selectedExternalAsset >= 0 && this.selectedExternalAsset < count) {
-                        string relativePath = Configuration.SkinnedExternalAssetPaths[this.selectedExternalAsset];
+                        string relativePath = ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths[this.selectedExternalAsset];
                         this.DrawSkinnedExternalAssetSection(relativePath);
                     }
                 }
@@ -128,7 +128,7 @@ namespace Miniclip.ShapeShifter {
         private void RemoveExternalSkins(string relativePath) {
             string key = this.GenerateKeyFromRelativePath(relativePath);
             
-            foreach (string game in Configuration.GameNames) {
+            foreach (string game in ShapeShifterConfiguration.Instance.GameNames) {
                 dirtyAssets.Remove(key);
                 previewPerAsset.Remove(key);
             
@@ -142,7 +142,7 @@ namespace Miniclip.ShapeShifter {
                 Directory.Delete(assetFolder, true);                
             }
 
-            Configuration.SkinnedExternalAssetPaths.Remove(relativePath);
+            ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Remove(relativePath);
         }
 
         private void SkinExternalFile() {
@@ -159,7 +159,7 @@ namespace Miniclip.ShapeShifter {
 
             string relativeAssetPath = this.GetRelativeURIPath(absoluteAssetPath, Application.dataPath);
             
-            if (Configuration.SkinnedExternalAssetPaths.Contains(relativeAssetPath)) {
+            if (ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Contains(relativeAssetPath)) {
                 EditorUtility.DisplayDialog(
                     "Shape Shifter",
                     $"Could not skin: {relativeAssetPath}. It was already skinned.",
@@ -169,7 +169,7 @@ namespace Miniclip.ShapeShifter {
                 return;
             }
             
-            Configuration.SkinnedExternalAssetPaths.Add(relativeAssetPath);
+            ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Add(relativeAssetPath);
             
             // even though it's an "external" file, it still might be a Unity file (ex: ProjectSettings), so it's
             // still important to make sure any pending changes are saved before generating copies
@@ -178,7 +178,7 @@ namespace Miniclip.ShapeShifter {
             string origin = absoluteAssetPath;
             string key = this.GenerateKeyFromRelativePath(relativeAssetPath);
             
-            foreach (string game in Configuration.GameNames) {
+            foreach (string game in ShapeShifterConfiguration.Instance.GameNames) {
                 string assetFolder = Path.Combine(
                     SkinsFolder.FullName,
                     game, 

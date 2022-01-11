@@ -10,21 +10,12 @@ namespace Miniclip.ShapeShifter
     {
 #region Internal
         
-        public enum ModificationType
-        {
-            IMPORT = 0,
-            RENAME = 1,
-            DELETE = 2
-        }
-        
         public static void OnImportedAsset(string modifiedAssetPath)
         {
-            if (configuration == null)
-                return;
 
             bool isSkinned = IsSkinned(modifiedAssetPath);
 
-            List<string> configurationModifiedAssetPaths = Configuration.ModifiedAssetPaths;
+            List<string> configurationModifiedAssetPaths = ShapeShifterConfiguration.Instance.ModifiedAssetPaths;
 
             if (isSkinned && !configurationModifiedAssetPaths.Contains(modifiedAssetPath))
             {
@@ -46,8 +37,6 @@ namespace Miniclip.ShapeShifter
 
         public static void OnAssetRenamed(string newName, string oldName)
         {
-            if (configuration == null)
-                return;
 
             bool isSkinned = IsSkinned(newName);
 
@@ -56,9 +45,9 @@ namespace Miniclip.ShapeShifter
             
             RenameAssetSkins(newName);
             
-            if (Configuration.ModifiedAssetPaths.Contains(newName))
+            if (ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Contains(newName))
             {
-                Configuration.ModifiedAssetPaths.Remove(newName);
+                ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Remove(newName);
             } 
             
             GitUtils.Stage(newName+".meta");
@@ -69,7 +58,7 @@ namespace Miniclip.ShapeShifter
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-            foreach (string gameName in Configuration.GameNames)
+            foreach (string gameName in ShapeShifterConfiguration.Instance.GameNames)
             {
                 GameSkin gameSkin = new GameSkin(gameName);
 

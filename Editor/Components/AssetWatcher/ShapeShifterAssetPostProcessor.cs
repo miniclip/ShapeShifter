@@ -9,6 +9,9 @@ namespace Miniclip.ShapeShifter
             string[] movedAssets,
             string[] movedFromAssetPaths)
         {
+            if (ShapeShifterConfiguration.Instance == null)
+                return;
+            
             //changed
             foreach (string importedAsset in importedAssets)
             {

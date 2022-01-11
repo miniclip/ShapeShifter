@@ -11,25 +11,6 @@ namespace Miniclip.ShapeShifter
     public partial class ShapeShifter : EditorWindow
     {
         
-        internal static readonly string ExternalAssetsFolder = "external";
-        internal static readonly string InternalAssetsFolder = "internal";
-
-        private static ShapeShifterConfiguration configuration;
-
-        public static ShapeShifterConfiguration Configuration
-        {
-            get
-            {
-                if (configuration != null)
-                {
-                    return configuration;
-                }
-
-                return configuration;
-            }
-            set => configuration = value;
-        }
-        
         private static DirectoryInfo skinsFolder;
 
         public static DirectoryInfo SkinsFolder
@@ -67,7 +48,7 @@ namespace Miniclip.ShapeShifter
 
         public static void SaveChanges()
         {
-            if (Configuration.ModifiedAssetPaths.Count > 0)
+            if (ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Count > 0)
             {
                 OverwriteSelectedSkin(ActiveGame);
             }

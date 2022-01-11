@@ -252,7 +252,7 @@ namespace Miniclip.ShapeShifter
         {
             this.showSwitcher = EditorGUILayout.Foldout(this.showSwitcher, "Asset Switcher");
 
-            if (!this.showSwitcher || Configuration.GameNames.Count == 0)
+            if (!this.showSwitcher || ShapeShifterConfiguration.Instance.GameNames.Count == 0)
             {
                 return;
             }
@@ -274,7 +274,7 @@ namespace Miniclip.ShapeShifter
 
                 highlightedGame = GUILayout.SelectionGrid(
                     highlightedGame,
-                    Configuration.GameNames.ToArray(),
+                    ShapeShifterConfiguration.Instance.GameNames.ToArray(),
                     2,
                     buttonStyle
                 );
@@ -303,7 +303,7 @@ namespace Miniclip.ShapeShifter
 
         internal static void OverwriteSelectedSkin(int selected, bool forceOverwrite = false)
         {
-            Configuration.ModifiedAssetPaths.Clear();
+            ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Clear();
 
             SavePendingChanges();
 
@@ -394,7 +394,7 @@ namespace Miniclip.ShapeShifter
 
         private static string GetGameName(int selected)
         {
-            return Configuration.GameNames[selected];
+            return ShapeShifterConfiguration.Instance.GameNames[selected];
         }
 
         private static string GetGameFolderPath(int selected)
@@ -448,7 +448,7 @@ namespace Miniclip.ShapeShifter
 
         internal static void SwitchToGame(int gameToSwitchTo, bool forceSwitch = false)
         {
-            if (Configuration.ModifiedAssetPaths.Count > 0 && !forceSwitch)
+            if (ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Count > 0 && !forceSwitch)
             {
                 int choice = EditorUtility.DisplayDialogComplex(
                     "Shape Shifter",
@@ -480,7 +480,7 @@ namespace Miniclip.ShapeShifter
                 CopyFromSkinnedExternalToOrigin
             );
             ActiveGame = gameToSwitchTo;
-            Configuration.ModifiedAssetPaths.Clear();
+            ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Clear();
         }
 
         private static void CopyIfMissingInternal(DirectoryInfo directory)

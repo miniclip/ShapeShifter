@@ -56,9 +56,9 @@ namespace Miniclip.ShapeShifter.Tests
 
             AssetDatabase.Refresh();
             
-            cachedGameNames = new List<string>(ShapeShifter.Configuration.GameNames);
-            ShapeShifter.Configuration.GameNames.Clear();
-            ShapeShifter.Configuration.GameNames = new List<string>(TestGameNames);
+            cachedGameNames = new List<string>(ShapeShifterConfiguration.Instance.GameNames);
+            ShapeShifterConfiguration.Instance.GameNames.Clear();
+            ShapeShifterConfiguration.Instance.GameNames = new List<string>(TestGameNames);
         }
 
         private static void CopyAllTestResourcesFromPackagesToAssetsFolder()
@@ -98,7 +98,7 @@ namespace Miniclip.ShapeShifter.Tests
             FileUtil.DeleteFileOrDirectory(TempFolderName);
             FileUtil.DeleteFileOrDirectory(TempFolderName + ".meta");
 
-            foreach (string configurationGameName in ShapeShifter.Configuration.GameNames)
+            foreach (string configurationGameName in ShapeShifterConfiguration.Instance.GameNames)
             {
                 if (!configurationGameName.Contains("Test"))
                 {
@@ -111,7 +111,7 @@ namespace Miniclip.ShapeShifter.Tests
             
             GitUtils.Stage(TempFolderName);
             AssetDatabase.Refresh();
-            ShapeShifter.Configuration.GameNames = cachedGameNames;
+            ShapeShifterConfiguration.Instance.GameNames = cachedGameNames;
         }
     }
 }
