@@ -4,13 +4,13 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Utils
 {
-    public class ShapeShifterEditorPrefs
+    public static class ShapeShifterEditorPrefs
     {
         private const string SHAPESHIFTER_KEY = "shapeshifter";
 
         private static string UniqueProjectID => Path.GetFullPath(Application.dataPath);
 
-        private static string GetProjectSpecificKey(string key) => UniqueProjectID + "_shapeshifter_" + key;
+        private static string GetProjectSpecificKey(string key) => $"{UniqueProjectID}_{SHAPESHIFTER_KEY}_{key}";
 
         [MenuItem("Window/Shape Shifter/Clear Editor Prefs", false, 71)]
         public static void OpenShapeShifter() => EditorPrefs.DeleteAll();

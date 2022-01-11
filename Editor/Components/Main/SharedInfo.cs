@@ -7,7 +7,6 @@ namespace Miniclip.ShapeShifter
 {
     static class SharedInfo
     {
-        internal static readonly string SHAPESHIFTER_NAME = "ShapeShifter";
         private static readonly string SHAPESHIFTER_SKINS_FOLDER_NAME = "Skins";
 
         private static readonly string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";

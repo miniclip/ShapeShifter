@@ -14,7 +14,7 @@ namespace Miniclip.ShapeShifter
     {
         private static Dictionary<string, string> missingGuidsToPathDictionary = new Dictionary<string, string>();
 
-        private static string ExtractGUIDFromMetaFile(string path)
+        private static string ExtractGuidFromMetaFile(string path)
         {
             if (Path.GetExtension(path) != ".meta")
             {
@@ -28,6 +28,9 @@ namespace Miniclip.ShapeShifter
                 {
                     var line = reader.ReadLine();
 
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+                    
                     if (!line.StartsWith("guid"))
                         continue;
 
@@ -69,7 +72,6 @@ namespace Miniclip.ShapeShifter
                     if (!File.Exists(PathUtils.GetFullPath(assetPath)))
                     {
                         missingAssets.Add(guid);
-                        continue;
                     }
                 }
 
@@ -88,13 +90,13 @@ namespace Miniclip.ShapeShifter
                     //need to recover deleted meta to check its contents
                     GitUtils.DiscardChanges(metaFullPath);
 
-                    string metaGUID = ExtractGUIDFromMetaFile(metaFullPath);
+                    string metaGuid = ExtractGuidFromMetaFile(metaFullPath);
 
-                    string fullpath = metaFullPath.Replace(".meta", "");
+                    string fullPath = metaFullPath.Replace(".meta", "");
 
-                    if (SharedInfo.ActiveGameSkin.HasGUID(metaGUID))
+                    if (SharedInfo.ActiveGameSkin.HasGuid(metaGuid))
                     {
-                        missingGuidsToPathDictionary.Add(metaGUID, PathUtils.GetPathRelativeToAssetsFolder(fullpath));
+                        missingGuidsToPathDictionary.Add(metaGuid, PathUtils.GetPathRelativeToAssetsFolder(fullPath));
                     }
                     else
                     {

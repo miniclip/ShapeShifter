@@ -14,6 +14,8 @@ namespace Miniclip.ShapeShifter
 
         internal string MainFolder { get; }
 
+        private DirectoryInfo mainFolderDirectoryInfo;
+
         internal DirectoryInfo MainFolderDirectoryInfo
         {
             get
@@ -32,7 +34,6 @@ namespace Miniclip.ShapeShifter
 
         internal string Name { get; }
 
-        internal DirectoryInfo mainFolderDirectoryInfo;
 
         internal GameSkin(string name)
         {
@@ -43,7 +44,7 @@ namespace Miniclip.ShapeShifter
             ExternalSkinsFolder = Path.Combine(MainFolder, SharedInfo.ExternalAssetsFolder);
         }
 
-        public bool HasGUID(string guid) => GetAssetSkins().Any(assetSkin => assetSkin.Guid == guid);
+        public bool HasGuid(string guid) => GetAssetSkins().Any(assetSkin => assetSkin.Guid == guid);
 
         public AssetSkin GetAssetSkin(string guid)
         {
@@ -82,7 +83,9 @@ namespace Miniclip.ShapeShifter
         internal void DeleteFolder()
         {
             if (Directory.Exists(MainFolder))
+            {
                 Directory.Delete(MainFolder, true);
+            }
         }
     }
 }

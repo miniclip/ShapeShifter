@@ -8,9 +8,9 @@ namespace Miniclip.ShapeShifter
 {
     public class ShapeShifterConfiguration : ScriptableObject
     {
-        public Editor DefaultConfigurationEditor { get; set; }
+        public Editor DefaultConfigurationEditor { get; private set; }
 
-        public Editor ExternalConfigurationEditor { get; set; }
+        public Editor ExternalConfigurationEditor { get; private set; }
 
         //TODO: turn these lists into serializable HashSets 
 
@@ -36,8 +36,8 @@ namespace Miniclip.ShapeShifter
             set => gameNames = value;
         }
 
-        private static readonly string ConfigurationResource = $"{SharedInfo.SHAPESHIFTER_NAME}Configuration.asset";
-        private static readonly string ConfigurationResourceFolderPath = "Assets/Editor Default Resources/";
+        private const string CONFIGURATION_RESOURCE = "ShapeShifterConfiguration.asset";
+        private const string CONFIGURATION_RESOURCE_FOLDER_PATH = "Assets/Editor Default Resources/";
 
         internal static void Initialise()
         {
@@ -47,12 +47,12 @@ namespace Miniclip.ShapeShifter
             }
 
             Instance = (ShapeShifterConfiguration)EditorGUIUtility.Load(
-                ConfigurationResource
+                CONFIGURATION_RESOURCE
             );
 
             string configurationPath = Path.Combine(
-                ConfigurationResourceFolderPath,
-                ConfigurationResource
+                CONFIGURATION_RESOURCE_FOLDER_PATH,
+                CONFIGURATION_RESOURCE
             );
 
             if (Instance == null && File.Exists(configurationPath))
@@ -64,14 +64,14 @@ namespace Miniclip.ShapeShifter
             {
                 Instance = CreateInstance<ShapeShifterConfiguration>();
 
-                if (!AssetDatabase.IsValidFolder(ConfigurationResourceFolderPath))
+                if (!AssetDatabase.IsValidFolder(CONFIGURATION_RESOURCE_FOLDER_PATH))
                 {
                     AssetDatabase.CreateFolder("Assets", "Editor Default Resources");
                 }
 
                 AssetDatabase.CreateAsset(
                     Instance,
-                    ConfigurationResourceFolderPath + ConfigurationResource
+                    CONFIGURATION_RESOURCE_FOLDER_PATH + CONFIGURATION_RESOURCE
                 );
 
                 EditorUtility.SetDirty(Instance);
@@ -92,7 +92,7 @@ namespace Miniclip.ShapeShifter
             if (Instance.GameNames.Count == 0)
             {
                 ShapeShifterLogger.Log(
-                    "Shapeshifter has no configured games, creating a default one and making it active"
+                    "ShapeShifter has no configured games, creating a default one and making it active"
                 );
                 Instance.GameNames.Add("Default");
                 AssetSwitcher.SwitchToGame(0);

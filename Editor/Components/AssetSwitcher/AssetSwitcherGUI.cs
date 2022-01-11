@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
-    public class AssetSwitcherGUI
+    public static class AssetSwitcherGUI
     {
         private static int highlightedGame;
 

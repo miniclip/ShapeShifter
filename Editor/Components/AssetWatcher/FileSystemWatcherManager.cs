@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Miniclip.ShapeShifter
 {
-    class FileSystemWatcherManager
+    static class FileSystemWatcherManager
     {
         private static readonly Dictionary<string, FileSystemWatcher> pathToFileSystemWatcherDict =
             new Dictionary<string, FileSystemWatcher>();

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
-    public class ExternalAssetSkinnerGUI
+    public static class ExternalAssetSkinnerGUI
     {
         private static int selectedExternalAsset;
 

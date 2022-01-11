@@ -7,9 +7,9 @@ namespace Miniclip.ShapeShifter
 {
     class ShapeShifterEditorWindow : EditorWindow
     {
-        private bool showConfiguration = false;
+        private bool showConfiguration;
 
-        [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, (int)'G')]
+        [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, 'G')]
         public static void OpenShapeShifter()
         {
             ShowNextToInspector(true);

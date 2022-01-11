@@ -2,7 +2,7 @@ using UnityEditor;
 
 namespace Miniclip.ShapeShifter.Utils
 {
-    internal class ShapeShifterUtils
+    internal static class ShapeShifterUtils
     {
         internal static string GenerateUniqueAssetSkinKey(string game, string guid) => game + ":" + guid;
 
