@@ -48,7 +48,10 @@ namespace Miniclip.ShapeShifter
                     AssetSwitcher.SwitchToGame(highlightedGame);
                 }
 
-                if (GUILayout.Button($"Overwrite all {ShapeShifterUtils.GetGameName(highlightedGame)} skins", buttonStyle))
+                if (GUILayout.Button(
+                        $"Overwrite all {ShapeShifterUtils.GetGameName(highlightedGame)} skins",
+                        buttonStyle
+                    ))
                 {
                     if (EditorUtility.DisplayDialog(
                             "ShapeShifter",

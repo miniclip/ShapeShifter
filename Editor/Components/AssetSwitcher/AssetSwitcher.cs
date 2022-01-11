@@ -47,7 +47,7 @@ namespace Miniclip.ShapeShifter
             {
                 EditorUtility.DisplayProgressBar("ShapeShifter", "Checking for missing assets", 0.5f);
 
-                List<AssetSkin> assetSkins = SharedInfo.ActiveGameSkin.GetAssetSkins(SkinType.Internal);
+                List<AssetSkin> assetSkins = SharedInfo.ActiveGameSkin.GetAssetSkins();
 
                 foreach (AssetSkin assetSkin in assetSkins)
                 {
@@ -295,7 +295,7 @@ namespace Miniclip.ShapeShifter
 
             EditorUtility.ClearProgressBar();
         }
-        
+
         private static string GetGameFolderPath(int selected)
         {
             return Path.Combine(SharedInfo.SkinsFolder.FullName, ShapeShifterUtils.GetGameName(selected));

@@ -9,12 +9,12 @@ namespace Miniclip.ShapeShifter
     {
         private bool showConfiguration = false;
 
-        [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, (int) 'G')]
+        [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, (int)'G')]
         public static void OpenShapeShifter()
         {
             ShowNextToInspector(true);
         }
-        
+
         private static void ShowNextToInspector(bool focus = false)
         {
             Assembly editorAssembly = typeof(Editor).Assembly;
@@ -26,7 +26,7 @@ namespace Miniclip.ShapeShifter
                 inspectorWindowType
             );
         }
-        
+
         private void OnGUI()
         {
             if (ShapeShifterConfiguration.Instance == null)
@@ -39,7 +39,7 @@ namespace Miniclip.ShapeShifter
                     {
                         ShapeShifterConfiguration.Initialise();
                     }
-                    
+
                     Repaint();
                     return;
                 }
@@ -49,10 +49,12 @@ namespace Miniclip.ShapeShifter
             {
                 showConfiguration = EditorGUILayout.Foldout(showConfiguration, "Configuration");
 
-                if (showConfiguration && ShapeShifterConfiguration.Instance.DefaultConfigurationEditor != null && ShapeShifterConfiguration.Instance.ExternalConfigurationEditor != null)
+                if (showConfiguration
+                    && ShapeShifterConfiguration.Instance.DefaultConfigurationEditor != null
+                    && ShapeShifterConfiguration.Instance.ExternalConfigurationEditor != null)
                 {
                     ShapeShifterConfiguration.Instance.DefaultConfigurationEditor.OnInspectorGUI();
-                    
+
                     // TODO: hide this when it's no longer necessary, as direct access to this list may cause issues
                     ShapeShifterConfiguration.Instance.ExternalConfigurationEditor.OnInspectorGUI();
                 }
@@ -60,7 +62,7 @@ namespace Miniclip.ShapeShifter
                 AssetSwitcherGUI.OnGUI();
                 AssetSkinnerGUI.OnGUI();
                 ExternalAssetSkinnerGUI.OnGUI();
-                
+
                 if (GUILayout.Button("Restore missing assets"))
                 {
                     AssetSwitcher.RestoreMissingAssets();
@@ -72,7 +74,8 @@ namespace Miniclip.ShapeShifter
             Repaint();
         }
 
-        private void OnSelectionChange() {
+        private void OnSelectionChange()
+        {
             SharedInfo.DirtyAssets.Clear();
             SharedInfo.CachedPreviewPerAssetDict.Clear();
             AssetWatcher.ClearAllWatchedPaths();

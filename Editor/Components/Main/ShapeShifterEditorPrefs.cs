@@ -1,9 +1,3 @@
-// Decompiled with JetBrains decompiler
-// Type: Miniclip.ShapeShifter.Utils.ShapeShifterEditorPrefs
-// Assembly: MUShapeShifter.Editor, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: 823D6AC0-B8BC-4CA3-8882-C67921F772A0
-// Assembly location: /Users/joao.vieira/Work/ACPT/mutestautomationci/MUTA/Library/ScriptAssemblies/MUShapeShifter.Editor.dll
-
 using System.IO;
 using UnityEditor;
 using UnityEngine;

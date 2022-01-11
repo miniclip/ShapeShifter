@@ -15,7 +15,7 @@ namespace Miniclip.ShapeShifter.Utils
             // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save
             EditorApplication.ExecuteMenuItem("File/Save Project");
         }
-        
+
         internal static void PushChangesToActiveSkin()
         {
             if (ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Count > 0)

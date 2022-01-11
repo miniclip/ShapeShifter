@@ -43,11 +43,11 @@ namespace Miniclip.ShapeShifter
             ExternalSkinsFolder = Path.Combine(MainFolder, SharedInfo.ExternalAssetsFolder);
         }
 
-        public bool HasGUID(string guid) => GetAssetSkins(SkinType.Internal).Any(assetSkin => assetSkin.Guid == guid);
+        public bool HasGUID(string guid) => GetAssetSkins().Any(assetSkin => assetSkin.Guid == guid);
 
         public AssetSkin GetAssetSkin(string guid)
         {
-            List<AssetSkin> existing = GetAssetSkins(SkinType.Internal);
+            List<AssetSkin> existing = GetAssetSkins();
 
             AssetSkin assetSkin = existing.FirstOrDefault(s => s.Guid == guid);
 
@@ -56,7 +56,7 @@ namespace Miniclip.ShapeShifter
 
         private string GetGameFolderPath(string name) => Path.Combine(SharedInfo.SkinsFolder.FullName, name);
 
-        internal List<AssetSkin> GetAssetSkins(SkinType skinType)
+        internal List<AssetSkin> GetAssetSkins()
         {
             List<AssetSkin> assetSkins = new List<AssetSkin>();
             if (Directory.Exists(InternalSkinsFolder))
@@ -81,7 +81,7 @@ namespace Miniclip.ShapeShifter
 
         internal void DeleteFolder()
         {
-            if(Directory.Exists(MainFolder))
+            if (Directory.Exists(MainFolder))
                 Directory.Delete(MainFolder, true);
         }
     }

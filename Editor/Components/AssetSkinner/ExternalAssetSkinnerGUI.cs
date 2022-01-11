@@ -10,11 +10,14 @@ namespace Miniclip.ShapeShifter
 
         private static bool showExternalSkinner = true;
 
-        private static void DrawSkinnedExternalAssetSection(string relativePath) {
+        private static void DrawSkinnedExternalAssetSection(string relativePath)
+        {
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
-            
-            using (new GUILayout.HorizontalScope(boxStyle)) {
-                foreach (string game in ShapeShifterConfiguration.Instance.GameNames) {
+
+            using (new GUILayout.HorizontalScope(boxStyle))
+            {
+                foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
+                {
                     string key = ExternalAssetSkinner.GenerateKeyFromRelativePath(relativePath);
                     string assetPath = Path.Combine(
                         SharedInfo.SkinsFolder.FullName,
@@ -31,8 +34,9 @@ namespace Miniclip.ShapeShifter
 
             Color oldColor = GUI.backgroundColor;
             GUI.backgroundColor = Color.red;
-                
-            if (GUILayout.Button("Remove skins")) {
+
+            if (GUILayout.Button("Remove skins"))
+            {
                 ExternalAssetSkinner.RemoveExternalSkins(relativePath);
             }
 
