@@ -9,7 +9,7 @@ namespace Miniclip.ShapeShifter
     {
         private bool showConfiguration = false;
 
-        [MenuItem("Window/Shape Shifter2/Open ShapeShifter Window", false, (int) 'G')]
+        [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, (int) 'G')]
         public static void OpenShapeShifter()
         {
             ShowNextToInspector(true);
@@ -59,7 +59,7 @@ namespace Miniclip.ShapeShifter
 
                 // OnAssetSwitcherGUI();
                 AssetSkinnerGUI.OnGUI();
-                // OnExternalAssetSkinnerGUI();
+                ExternalAssetSkinnerGUI.OnGUI();
                 //
                 // if (GUILayout.Button("Restore missing assets"))
                 // {

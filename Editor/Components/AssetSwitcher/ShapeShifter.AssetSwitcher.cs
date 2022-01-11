@@ -168,7 +168,7 @@ namespace Miniclip.ShapeShifter
 
         private static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory)
         {
-            string relativePath = GenerateRelativePathFromKey(directory.Name);
+            string relativePath = ExternalAssetSkinner.GenerateRelativePathFromKey(directory.Name);
             string origin = Path.Combine(Application.dataPath, relativePath);
             string target = Path.Combine(directory.FullName, Path.GetFileName(origin));
             IOUtils.CopyFile(origin, target);
@@ -176,7 +176,7 @@ namespace Miniclip.ShapeShifter
 
         private static void CopyFromSkinnedExternalToOrigin(DirectoryInfo directory)
         {
-            string relativePath = GenerateRelativePathFromKey(directory.Name);
+            string relativePath = ExternalAssetSkinner.GenerateRelativePathFromKey(directory.Name);
             string target = Path.Combine(Application.dataPath, relativePath);
             string searchPattern = Path.GetFileName(target);
             FileInfo origin = directory.GetFiles(searchPattern)[0];
