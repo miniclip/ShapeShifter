@@ -26,16 +26,16 @@ namespace Miniclip.ShapeShifter.Tests
 
             AssetSkinner.SkinAsset(assetPath);
 
-            ShapeShifter.SwitchToGame(1, true);
-            Assert.IsTrue(ShapeShifter.ActiveGame == 1, "Active game should be 1");
+            AssetSwitcher.SwitchToGame(1, true);
+            Assert.IsTrue(SharedInfo.ActiveGame == 1, "Active game should be 1");
 
             string textAfter = File.ReadAllText(assetFullPath);
             Assert.IsTrue(string.Equals(textBefore, textAfter, StringComparison.Ordinal));
 
-            ShapeShifter.SwitchToGame(0, true);
-            Assert.IsTrue(ShapeShifter.ActiveGame == 0, "Active game should be 0");
+            AssetSwitcher.SwitchToGame(0, true);
+            Assert.IsTrue(SharedInfo.ActiveGame == 0, "Active game should be 0");
 
-            File.WriteAllText(assetFullPath, ShapeShifter.ActiveGameSkin.Name);
+            File.WriteAllText(assetFullPath, SharedInfo.ActiveGameSkin.Name);
 
             textAfter = File.ReadAllText(assetFullPath);
             Assert.IsFalse(
@@ -43,11 +43,11 @@ namespace Miniclip.ShapeShifter.Tests
                 "Text file content should still be the same"
             );
 
-            ShapeShifter.OverwriteSelectedSkin(0, true);
+            AssetSwitcher.OverwriteSelectedSkin(0, true);
 
-            ShapeShifter.SwitchToGame(1, true);
+            AssetSwitcher.SwitchToGame(1, true);
 
-            File.WriteAllText(assetFullPath, ShapeShifter.ActiveGameSkin.Name);
+            File.WriteAllText(assetFullPath, SharedInfo.ActiveGameSkin.Name);
 
             textAfter = File.ReadAllText(assetFullPath);
             Assert.IsFalse(
@@ -55,9 +55,9 @@ namespace Miniclip.ShapeShifter.Tests
                 "Text file content should not be the same"
             );
 
-            ShapeShifter.OverwriteSelectedSkin(1, true);
+            AssetSwitcher.OverwriteSelectedSkin(1, true);
 
-            ShapeShifter.SwitchToGame(0, true);
+            AssetSwitcher.SwitchToGame(0, true);
 
             string textGame0 = File.ReadAllText(assetFullPath);
             Assert.IsTrue(
@@ -65,7 +65,7 @@ namespace Miniclip.ShapeShifter.Tests
                 $"Text file content should be {TestUtils.TestGameNames[0]}"
             );
 
-            ShapeShifter.SwitchToGame(1, true);
+            AssetSwitcher.SwitchToGame(1, true);
 
             string textGame1 = File.ReadAllText(assetFullPath);
             Assert.IsTrue(
@@ -85,9 +85,9 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsTrue(AssetSkinner.IsSkinned(assetPath), "Folder was not skinned");
 
-            ShapeShifter.SwitchToGame(0, true);
+            AssetSwitcher.SwitchToGame(0, true);
 
-            string skinPath = Path.Combine(ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath, TestUtils.FolderAssetName);
+            string skinPath = Path.Combine(SharedInfo.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath, TestUtils.FolderAssetName);
 
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(fullAssetPath) == 3, "Incorrect number of files in folder before folder modification");
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 3, "Skinned folder does not have same number of files as original");
@@ -102,13 +102,13 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(fullAssetPath) == 2, "Expected to have 1 less file after deleting one");
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 3, "Skinned folder should still have the original file amount");
 
-            ShapeShifter.OverwriteSelectedSkin(0);
+            AssetSwitcher.OverwriteSelectedSkin(0);
             
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 2, "Skinned folder should have 2 files only after overwrite");
             
-            ShapeShifter.SwitchToGame(1);
+            AssetSwitcher.SwitchToGame(1);
             
-            skinPath = Path.Combine(ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath, TestUtils.FolderAssetName);
+            skinPath = Path.Combine(SharedInfo.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath, TestUtils.FolderAssetName);
 
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(fullAssetPath) == 3, "Expected to have 3 files after switching to unmodified skinned folder");
             Assert.IsTrue(PathUtils.GetAssetCountInFolder(skinPath) == 3, "Skinned folder should still have the original file amount");

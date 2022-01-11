@@ -23,7 +23,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsFalse(File.Exists(fullAssetPath));
 
-            ShapeShifter.RestoreMissingAssets();
+            AssetSwitcher.RestoreMissingAssets();
 
             Assert.IsTrue(File.Exists(fullAssetPath));
         }
@@ -46,7 +46,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsFalse(Directory.Exists(fullAssetPath));
 
-            ShapeShifter.RestoreMissingAssets();
+            AssetSwitcher.RestoreMissingAssets();
 
             Assert.IsTrue(Directory.Exists(fullAssetPath), "Folder should have been restored");
         }

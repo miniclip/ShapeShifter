@@ -6,6 +6,8 @@ namespace Miniclip.ShapeShifter.Utils
     {
         internal static string GenerateUniqueAssetSkinKey(string game, string guid) => game + ":" + guid;
 
+        internal static string GetGameName(int index) => ShapeShifterConfiguration.Instance.GameNames[index];
+
         internal static void SavePendingChanges()
         {
             AssetDatabase.SaveAssets();
@@ -18,7 +20,7 @@ namespace Miniclip.ShapeShifter.Utils
         {
             if (ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Count > 0)
             {
-                ShapeShifter.OverwriteSelectedSkin(ShapeShifter.ActiveGame);
+                AssetSwitcher.OverwriteSelectedSkin(SharedInfo.ActiveGame);
             }
         }
     }

@@ -95,7 +95,7 @@ namespace Miniclip.ShapeShifter
                     "Shapeshifter has no configured games, creating a default one and making it active"
                 );
                 Instance.GameNames.Add("Default");
-                ShapeShifter.SwitchToGame(0);
+                AssetSwitcher.SwitchToGame(0);
                 EditorUtility.SetDirty(Instance);
             }
 

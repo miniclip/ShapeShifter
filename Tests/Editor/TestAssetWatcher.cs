@@ -22,7 +22,7 @@ namespace Miniclip.ShapeShifter.Tests
                 "Asset was just skinned now, it should not be in the modified assets list"
             );
 
-            File.WriteAllText(fullAssetPath, ShapeShifter.ActiveGameSkin.Name);
+            File.WriteAllText(fullAssetPath, SharedInfo.ActiveGameSkin.Name);
 
             AssetDatabase.Refresh();
 

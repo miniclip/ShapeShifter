@@ -10,9 +10,11 @@ namespace Miniclip.ShapeShifter
         internal static readonly string SHAPESHIFTER_NAME = "ShapeShifter";
         private static readonly string SHAPESHIFTER_SKINS_FOLDER_NAME = "Skins";
 
+        private static readonly string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
+
         internal static readonly string ExternalAssetsFolder = "external";
         internal static readonly string InternalAssetsFolder = "internal";
-        
+
         private static DirectoryInfo skinsFolder;
 
         internal static DirectoryInfo SkinsFolder
@@ -31,8 +33,49 @@ namespace Miniclip.ShapeShifter
         }
 
         internal static HashSet<string> DirtyAssets { get; set; } = new HashSet<string>();
-        
+
         internal static Dictionary<string, Texture2D> CachedPreviewPerAssetDict = new Dictionary<string, Texture2D>();
 
+        internal static string ActiveGameName => ShapeShifterUtils.GetGameName(ActiveGame);
+
+        public static int ActiveGame
+        {
+            get
+            {
+                if (!ShapeShifterEditorPrefs.HasKey(ACTIVE_GAME_PLAYER_PREFS_KEY))
+                {
+                    ShapeShifterLogger.Log(
+                        "Could not find any active game on EditorPrefs, setting by default game 0"
+                    );
+                    ActiveGame = 0;
+                }
+
+                return ShapeShifterEditorPrefs.GetInt(ACTIVE_GAME_PLAYER_PREFS_KEY);
+            }
+            set
+            {
+                ShapeShifterLogger.Log(
+                    $"Setting active game on EditorPrefs: {value}"
+                );
+                ShapeShifterEditorPrefs.SetInt(ACTIVE_GAME_PLAYER_PREFS_KEY, value);
+            }
+        }
+
+        private static GameSkin activeGameSkin;
+
+        internal static GameSkin ActiveGameSkin
+        {
+            get
+            {
+                if (activeGameSkin != null && activeGameSkin.Name == ActiveGameName)
+                {
+                    return activeGameSkin;
+                }
+
+                activeGameSkin = new GameSkin(ActiveGameName);
+
+                return activeGameSkin;
+            }
+        }
     }
 }

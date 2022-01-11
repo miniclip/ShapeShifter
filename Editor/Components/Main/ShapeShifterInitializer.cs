@@ -16,7 +16,7 @@ public class ShapeShifterInitializer
         ShapeShifterLogger.Log("Setting up");
 
         ShapeShifterConfiguration.Initialise();
-        ShapeShifter.RestoreMissingAssets();
+        AssetSwitcher.RestoreMissingAssets();
     }
 
     private static void EditorApplicationOnQuitting()
