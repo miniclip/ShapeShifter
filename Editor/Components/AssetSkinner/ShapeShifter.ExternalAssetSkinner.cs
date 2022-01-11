@@ -25,7 +25,7 @@ namespace Miniclip.ShapeShifter {
                 foreach (string game in ShapeShifterConfiguration.Instance.GameNames) {
                     string key = this.GenerateKeyFromRelativePath(relativePath);
                     string assetPath = Path.Combine(
-                        SkinsFolder.FullName,
+                        SharedInfo.SkinsFolder.FullName,
                         game,
                         SharedInfo.ExternalAssetsFolder,
                         key,
@@ -133,7 +133,7 @@ namespace Miniclip.ShapeShifter {
                 previewPerAsset.Remove(key);
             
                 string assetFolder = Path.Combine(
-                    SkinsFolder.FullName,
+                    SharedInfo.SkinsFolder.FullName,
                     game,
                     SharedInfo.ExternalAssetsFolder,
                     key
@@ -180,7 +180,7 @@ namespace Miniclip.ShapeShifter {
             
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames) {
                 string assetFolder = Path.Combine(
-                    SkinsFolder.FullName,
+                    SharedInfo.SkinsFolder.FullName,
                     game, 
                     SharedInfo.ExternalAssetsFolder,
                     key

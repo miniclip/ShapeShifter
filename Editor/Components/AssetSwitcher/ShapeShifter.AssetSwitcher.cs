@@ -399,7 +399,7 @@ namespace Miniclip.ShapeShifter
 
         private static string GetGameFolderPath(int selected)
         {
-            return Path.Combine(SkinsFolder.FullName, GetGameName(selected));
+            return Path.Combine(SharedInfo.SkinsFolder.FullName, GetGameName(selected));
         }
 
         private static void PerformOperationOnPath(string gameFolderPath,

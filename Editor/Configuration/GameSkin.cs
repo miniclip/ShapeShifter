@@ -54,7 +54,7 @@ namespace Miniclip.ShapeShifter
             return assetSkin;
         }
 
-        private string GetGameFolderPath(string name) => Path.Combine(ShapeShifter.SkinsFolder.FullName, name);
+        private string GetGameFolderPath(string name) => Path.Combine(SharedInfo.SkinsFolder.FullName, name);
 
         internal List<AssetSkin> GetAssetSkins(SkinType skinType)
         {
