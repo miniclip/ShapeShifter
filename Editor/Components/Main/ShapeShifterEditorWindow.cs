@@ -60,16 +60,22 @@ namespace Miniclip.ShapeShifter
                 AssetSwitcherGUI.OnGUI();
                 AssetSkinnerGUI.OnGUI();
                 ExternalAssetSkinnerGUI.OnGUI();
-                //
-                // if (GUILayout.Button("Restore missing assets"))
-                // {
-                //     RestoreMissingAssets();
-                // }
+                
+                if (GUILayout.Button("Restore missing assets"))
+                {
+                    AssetSwitcher.RestoreMissingAssets();
+                }
 
                 GUILayout.FlexibleSpace();
             }
 
             Repaint();
+        }
+
+        private void OnSelectionChange() {
+            SharedInfo.DirtyAssets.Clear();
+            SharedInfo.CachedPreviewPerAssetDict.Clear();
+            AssetWatcher.ClearAllWatchedPaths();
         }
     }
 }

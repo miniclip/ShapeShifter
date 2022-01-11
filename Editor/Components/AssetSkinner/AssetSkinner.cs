@@ -1,30 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
-namespace Miniclip.ShapeShifter {
-   
-    public static class AssetSkinner {
-        
-        
-        private static void OnSelectionChange() {
-            SharedInfo.DirtyAssets.Clear();
-            SharedInfo.CachedPreviewPerAssetDict.Clear();
-            AssetWatcher.ClearAllWatchedPaths();
-        }
-
-        public static void RemoveSkins(string assetPath) {
-            foreach (string game in ShapeShifterConfiguration.Instance.GameNames) {
+namespace Miniclip.ShapeShifter
+{
+    public static class AssetSkinner
+    {
+        public static void RemoveSkins(string assetPath)
+        {
+            foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
+            {
                 string guid = AssetDatabase.AssetPathToGUID(assetPath);
                 string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
                 SharedInfo.DirtyAssets.Remove(key);
                 SharedInfo.CachedPreviewPerAssetDict.Remove(key);
-                
+
                 string assetFolder = Path.Combine(
                     SharedInfo.SkinsFolder.FullName,
                     game,
@@ -36,6 +29,7 @@ namespace Miniclip.ShapeShifter {
                 Directory.Delete(assetFolder, true);
                 GitUtils.Stage(assetFolder);
             }
+
             GitUtils.Track(assetPath);
         }
 
@@ -84,45 +78,46 @@ namespace Miniclip.ShapeShifter {
                 {
                     DirectoryInfo targetFolder = Directory.CreateDirectory(target);
                     IOUtils.CopyFolder(new DirectoryInfo(origin), targetFolder);
-                    IOUtils.CopyFile(origin+".meta", target+".meta");
-
+                    IOUtils.CopyFile(origin + ".meta", target + ".meta");
                 }
                 else
                 {
-                    
                     IOUtils.CopyFile(origin, target);
-                    IOUtils.CopyFile(origin+".meta", target+".meta");
+                    IOUtils.CopyFile(origin + ".meta", target + ".meta");
                 }
+
                 GitUtils.Stage(assetFolder);
             }
-            
+
             GitUtils.Untrack(assetPath, true);
         }
-        
-        public static bool IsSkinned(string assetPath) => ShapeShifterConfiguration.Instance.GameNames.Any(game => IsSkinned(assetPath, game));
+
+        public static bool IsSkinned(string assetPath) =>
+            ShapeShifterConfiguration.Instance.GameNames.Any(game => IsSkinned(assetPath, game));
 
         private static bool IsSkinned(string assetPath, string game)
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
-            
+
             if (string.IsNullOrEmpty(guid))
                 return false;
-            
+
             string assetFolder = Path.Combine(
                 SharedInfo.SkinsFolder.FullName,
-                game, 
+                game,
                 SharedInfo.InternalAssetsFolder,
                 guid
             );
 
             return Directory.Exists(assetFolder) && !IOUtils.IsFolderEmpty(assetFolder);
         }
-        
-        private static void OnDisable() {
+
+        private static void OnDisable()
+        {
             SharedInfo.DirtyAssets.Clear();
             SharedInfo.CachedPreviewPerAssetDict.Clear();
         }
-        
+
         private static IEnumerable<string> GetEligibleAssetPaths(Object[] assets)
         {
             IEnumerable<string> assetPaths =
@@ -132,7 +127,7 @@ namespace Miniclip.ShapeShifter {
             RemoveAlreadySkinnedAssets(ref assetPaths);
             return assetPaths;
         }
-        
+
         private static void RemoveEmptyAssetPaths(ref IEnumerable<string> assetPaths) =>
             assetPaths = assetPaths.Where(assetPath => !string.IsNullOrEmpty(assetPath));
 
