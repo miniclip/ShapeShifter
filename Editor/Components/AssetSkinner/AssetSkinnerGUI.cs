@@ -192,7 +192,7 @@ namespace Miniclip.ShapeShifter
                         texturePreview = new Texture2D(0, 0);
                         texturePreview.LoadImage(File.ReadAllBytes(assetPath));
                         string skinFolder = Directory.GetParent(assetPath).FullName;
-                        ShapeShifter.StartWatchingFolder(skinFolder);
+                        AssetWatcher.StartWatchingFolder(skinFolder);
                     }
                     else
                     {

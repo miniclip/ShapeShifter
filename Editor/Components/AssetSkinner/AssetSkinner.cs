@@ -15,7 +15,7 @@ namespace Miniclip.ShapeShifter {
         private static void OnSelectionChange() {
             SharedInfo.DirtyAssets.Clear();
             SharedInfo.CachedPreviewPerAssetDict.Clear();
-            ShapeShifter.ClearAllWatchedPaths();
+            AssetWatcher.ClearAllWatchedPaths();
         }
 
         public static void RemoveSkins(string assetPath) {
@@ -32,7 +32,7 @@ namespace Miniclip.ShapeShifter {
                     guid
                 );
 
-                ShapeShifter.StopWatchingFolder(assetFolder);
+                AssetWatcher.StopWatchingFolder(assetFolder);
                 Directory.Delete(assetFolder, true);
                 GitUtils.Stage(assetFolder);
             }
