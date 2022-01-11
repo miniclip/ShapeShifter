@@ -9,12 +9,12 @@ using Object = UnityEngine.Object;
 
 namespace Miniclip.ShapeShifter {
    
-    public partial class ShapeShifter {
-        private Vector2 scrollPosition;
-        private bool showSkinner = true;
+    public static class AssetSkinner {
+        
+        private static Vector2 scrollPosition;
+        private static bool showSkinner = true;
 
-        private static HashSet<string> dirtyAssets = new HashSet<string>();
-        private static Dictionary<string, Texture2D> previewPerAsset = new Dictionary<string, Texture2D>();
+        internal static Dictionary<string, Texture2D> PreviewPerAsset = new Dictionary<string, Texture2D>();
         
         private static readonly string defaultIcon = "WelcomeScreen.AssetStoreLogo";
         private static readonly string errorIcon = "console.erroricon";
@@ -32,11 +32,10 @@ namespace Miniclip.ShapeShifter {
         };
         
 #region GUI
-        
-        private void OnAssetSkinnerGUI() {
-            this.showSkinner = EditorGUILayout.Foldout(this.showSkinner, "Asset Skinner");
+        public static void OnAssetSkinnerGUI() {
+            showSkinner = EditorGUILayout.Foldout(showSkinner, "Asset Skinner");
 
-            if (! this.showSkinner) {
+            if (! showSkinner) {
                 return;
             }
 
@@ -56,11 +55,11 @@ namespace Miniclip.ShapeShifter {
                 }
                 else
                 {
-                    this.scrollPosition = GUILayout.BeginScrollView(this.scrollPosition);
+                    scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
                     foreach (Object asset in supportedAssets)
                     {
-                        this.DrawAssetSection(asset);
+                        DrawAssetSection(asset);
                     }
 
                     GUILayout.EndScrollView();
@@ -68,7 +67,7 @@ namespace Miniclip.ShapeShifter {
             }
         }
         
-        private void DrawAssetSection(Object asset) {
+        private static void DrawAssetSection(Object asset) {
             EditorGUILayout.InspectorTitlebar(true, asset);
             
             string path = AssetDatabase.GetAssetPath(asset);
@@ -78,15 +77,15 @@ namespace Miniclip.ShapeShifter {
             Color oldColor = GUI.backgroundColor;
             
             if (skinned) {
-                this.DrawSkinnedAssetSection(path);
+                DrawSkinnedAssetSection(path);
             } else {
-                this.DrawUnskinnedAssetSection(path);
+                DrawUnskinnedAssetSection(path);
             }
             
             GUI.backgroundColor = oldColor;
         }
 
-        private void DrawAssetPreview(string key, string game, string path) {
+        internal static void DrawAssetPreview(string key, string game, string path) {
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
             
             using (new GUILayout.VerticalScope(boxStyle)) {
@@ -94,7 +93,7 @@ namespace Miniclip.ShapeShifter {
                 buttonWidth -= 20; // to account for a possible scrollbar or some extra padding 
 
                 bool clicked = false;
-                if (previewPerAsset.TryGetValue(key, out Texture2D previewImage))
+                if (PreviewPerAsset.TryGetValue(key, out Texture2D previewImage))
                 {
                     clicked = GUILayout.Button(
                         previewImage,
@@ -124,7 +123,7 @@ namespace Miniclip.ShapeShifter {
             }
         }
 
-        private void DrawSkinnedAssetSection(string assetPath) {
+        private static void DrawSkinnedAssetSection(string assetPath) {
             GUIStyle boxStyle = GUI.skin.GetStyle("Box");
             
             using (new GUILayout.HorizontalScope(boxStyle)) {
@@ -139,8 +138,8 @@ namespace Miniclip.ShapeShifter {
                     );
 
                     string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
-                    this.GenerateAssetPreview(key, skinnedPath);
-                    this.DrawAssetPreview(key, game, skinnedPath);
+                    GenerateAssetPreview(key, skinnedPath);
+                    DrawAssetPreview(key, game, skinnedPath);
                 }
             }
 
@@ -151,19 +150,19 @@ namespace Miniclip.ShapeShifter {
             }        
         }
 
-        private void DrawUnskinnedAssetSection(string assetPath) {
+        private static void DrawUnskinnedAssetSection(string assetPath) {
             GUI.backgroundColor = Color.green;
                 
             if (GUILayout.Button("Skin it!")) {
-                ShapeShifter.SkinAsset(assetPath);
+                SkinAsset(assetPath);
             }
         }
-        
-        private void GenerateAssetPreview(string key, string assetPath)
+
+        internal static void GenerateAssetPreview(string key, string assetPath)
         {
-            if (dirtyAssets.Contains(key) || !previewPerAsset.ContainsKey(key))
+            if (SharedInfo.DirtyAssets.Contains(key) || !PreviewPerAsset.ContainsKey(key))
             {
-                dirtyAssets.Remove(key);
+                SharedInfo.DirtyAssets.Remove(key);
 
                 Texture2D texturePreview = EditorGUIUtility.FindTexture(errorIcon);
                 if (Directory.Exists(assetPath))
@@ -183,7 +182,7 @@ namespace Miniclip.ShapeShifter {
                         texturePreview = new Texture2D(0, 0);
                         texturePreview.LoadImage(File.ReadAllBytes(assetPath));
                         string skinFolder = Directory.GetParent(assetPath).FullName;
-                        StartWatchingFolder(skinFolder);
+                        ShapeShifter.StartWatchingFolder(skinFolder);
                     }
                     else
                     {
@@ -198,7 +197,7 @@ namespace Miniclip.ShapeShifter {
                     }
                 }
 
-                previewPerAsset[key] = texturePreview;
+                PreviewPerAsset[key] = texturePreview;
             }
         }
         
@@ -206,18 +205,18 @@ namespace Miniclip.ShapeShifter {
 
         
         
-        private void OnSelectionChange() {
-            dirtyAssets.Clear();
-            previewPerAsset.Clear();
-            ClearAllWatchedPaths();
+        private static void OnSelectionChange() {
+            SharedInfo.DirtyAssets.Clear();
+            PreviewPerAsset.Clear();
+            ShapeShifter.ClearAllWatchedPaths();
         }
 
         public static void RemoveSkins(string assetPath) {
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames) {
                 string guid = AssetDatabase.AssetPathToGUID(assetPath);
                 string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
-                dirtyAssets.Remove(key);
-                previewPerAsset.Remove(key);
+                SharedInfo.DirtyAssets.Remove(key);
+                PreviewPerAsset.Remove(key);
                 
                 string assetFolder = Path.Combine(
                     SharedInfo.SkinsFolder.FullName,
@@ -226,14 +225,14 @@ namespace Miniclip.ShapeShifter {
                     guid
                 );
 
-                StopWatchingFolder(assetFolder);
+                ShapeShifter.StopWatchingFolder(assetFolder);
                 Directory.Delete(assetFolder, true);
                 GitUtils.Stage(assetFolder);
             }
             GitUtils.Track(assetPath);
         }
 
-        private void SkinAssets(string[] assetPaths, bool saveFirst = true)
+        private static void SkinAssets(string[] assetPaths, bool saveFirst = true)
         {
             if (saveFirst)
             {
@@ -312,13 +311,13 @@ namespace Miniclip.ShapeShifter {
             return Directory.Exists(assetFolder) && !IOUtils.IsFolderEmpty(assetFolder);
         }
         
-        private void OnDisable() {
-            dirtyAssets.Clear();
-            previewPerAsset.Clear();
+        private static void OnDisable() {
+            SharedInfo.DirtyAssets.Clear();
+            PreviewPerAsset.Clear();
         }
         
         
-        private IEnumerable<string> GetEligibleAssetPaths(Object[] assets)
+        private static IEnumerable<string> GetEligibleAssetPaths(Object[] assets)
         {
             IEnumerable<string> assetPaths =
                 assets.Select(AssetDatabase.GetAssetPath);
@@ -331,13 +330,13 @@ namespace Miniclip.ShapeShifter {
         private static bool IsValidImageFormat(string extension) =>
             extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp";
 
-        private void RemoveEmptyAssetPaths(ref IEnumerable<string> assetPaths) =>
+        private static void RemoveEmptyAssetPaths(ref IEnumerable<string> assetPaths) =>
             assetPaths = assetPaths.Where(assetPath => !string.IsNullOrEmpty(assetPath));
 
-        private void RemoveDuplicatedAssetPaths(ref IEnumerable<string> assetPaths) =>
+        private static void RemoveDuplicatedAssetPaths(ref IEnumerable<string> assetPaths) =>
             assetPaths = assetPaths.Distinct();
 
-        private void RemoveAlreadySkinnedAssets(ref IEnumerable<string> assetPaths) =>
+        private static void RemoveAlreadySkinnedAssets(ref IEnumerable<string> assetPaths) =>
             assetPaths = assetPaths.Where(assetPath => !IsSkinned(assetPath));
     }
 }

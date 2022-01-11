@@ -14,8 +14,8 @@ namespace Miniclip.ShapeShifter.Tests
         public void TestSkinSprite()
         {
             Sprite squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
-            ShapeShifter.SkinAsset(AssetDatabase.GetAssetPath(squareSprite));
-            Assert.IsTrue(ShapeShifter.IsSkinned(AssetDatabase.GetAssetPath(squareSprite)), "Asset should be skinned");
+            AssetSkinner.SkinAsset(AssetDatabase.GetAssetPath(squareSprite));
+            Assert.IsTrue(AssetSkinner.IsSkinned(AssetDatabase.GetAssetPath(squareSprite)), "Asset should be skinned");
         }
 
         [Test]
@@ -28,9 +28,9 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPath = AssetDatabase.GetAssetPath(folderAsset);
             string fullAssetPath = PathUtils.GetFullPath(assetPath);
             
-            ShapeShifter.SkinAsset(assetPath);
+            AssetSkinner.SkinAsset(assetPath);
             
-            Assert.IsTrue(ShapeShifter.IsSkinned(assetPath));
+            Assert.IsTrue(AssetSkinner.IsSkinned(assetPath));
             
             DirectoryInfo directoryInfo = new DirectoryInfo(fullAssetPath);
 
@@ -46,7 +46,7 @@ namespace Miniclip.ShapeShifter.Tests
         public void TestGitIgnoreAfterSkinningOperations()
         {
             Sprite squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
-            ShapeShifter.SkinAsset(AssetDatabase.GetAssetPath(squareSprite));
+            AssetSkinner.SkinAsset(AssetDatabase.GetAssetPath(squareSprite));
             string assetPath = AssetDatabase.GetAssetPath(squareSprite);
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             
@@ -55,7 +55,7 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(ignoredPath == PathUtils.GetPathRelativeToRepositoryFolder(assetPath), $"Asset path {assetPath} is different from {ignoredPath}");
             Assert.IsTrue(PathUtils.GetFullPath(ignoredPath) == PathUtils.GetFullPath(assetPath), $"Asset path {assetPath} is different from {ignoredPath}");
             
-            ShapeShifter.RemoveSkins(assetPath);
+            AssetSkinner.RemoveSkins(assetPath);
             Assert.IsTrue(!GitUtils.IsIgnored(guid), "GUID should not be in git ignore");
         }
         

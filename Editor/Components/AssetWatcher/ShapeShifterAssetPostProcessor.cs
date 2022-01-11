@@ -28,7 +28,7 @@ namespace Miniclip.ShapeShifter
 
             foreach (string deletedAsset in deletedAssets)
             {
-                if (ShapeShifter.IsSkinned(deletedAsset))
+                if (AssetSkinner.IsSkinned(deletedAsset))
                 {
                     ShapeShifterLogger.LogWarning(
                         "You deleted an asset that currently has skins. Shapeshifter will recover it the next chance it has."

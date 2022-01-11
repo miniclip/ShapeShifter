@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using Miniclip.ShapeShifter.Utils;
 using UnityEngine;
 
@@ -11,11 +12,7 @@ namespace Miniclip.ShapeShifter
 
         internal static readonly string ExternalAssetsFolder = "external";
         internal static readonly string InternalAssetsFolder = "internal";
-
-        internal static ShapeShifterConfiguration Configuration { get; private set; }
-
-        public static void SetConfiguration(ShapeShifterConfiguration configuration) => Configuration = configuration;
-
+        
         private static DirectoryInfo skinsFolder;
 
         internal static DirectoryInfo SkinsFolder
@@ -32,5 +29,7 @@ namespace Miniclip.ShapeShifter
             }
             set => skinsFolder = value;
         }
+
+        internal static HashSet<string> DirtyAssets { get; set; } = new HashSet<string>();
     }
 }

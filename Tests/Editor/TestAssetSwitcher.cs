@@ -22,9 +22,9 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsNotNull(testAsset, "Text asset not found");
             Assert.IsNotEmpty(assetPath, "Text asset path is empty");
-            Assert.IsTrue(!ShapeShifter.IsSkinned(assetPath));
+            Assert.IsTrue(!AssetSkinner.IsSkinned(assetPath));
 
-            ShapeShifter.SkinAsset(assetPath);
+            AssetSkinner.SkinAsset(assetPath);
 
             ShapeShifter.SwitchToGame(1, true);
             Assert.IsTrue(ShapeShifter.ActiveGame == 1, "Active game should be 1");
@@ -81,9 +81,9 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPath = AssetDatabase.GetAssetPath(folderAsset);
             string fullAssetPath = PathUtils.GetFullPath(assetPath);
 
-            ShapeShifter.SkinAsset(assetPath);
+            AssetSkinner.SkinAsset(assetPath);
 
-            Assert.IsTrue(ShapeShifter.IsSkinned(assetPath), "Folder was not skinned");
+            Assert.IsTrue(AssetSkinner.IsSkinned(assetPath), "Folder was not skinned");
 
             ShapeShifter.SwitchToGame(0, true);
 

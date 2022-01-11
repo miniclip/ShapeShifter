@@ -13,7 +13,7 @@ namespace Miniclip.ShapeShifter
         public static void OnImportedAsset(string modifiedAssetPath)
         {
 
-            bool isSkinned = IsSkinned(modifiedAssetPath);
+            bool isSkinned = AssetSkinner.IsSkinned(modifiedAssetPath);
 
             List<string> configurationModifiedAssetPaths = ShapeShifterConfiguration.Instance.ModifiedAssetPaths;
 
@@ -38,7 +38,7 @@ namespace Miniclip.ShapeShifter
         public static void OnAssetRenamed(string newName, string oldName)
         {
 
-            bool isSkinned = IsSkinned(newName);
+            bool isSkinned = AssetSkinner.IsSkinned(newName);
 
             if (!isSkinned)
                 return;
@@ -79,7 +79,7 @@ namespace Miniclip.ShapeShifter
             {
                 string parentFolder = string.Join("/", parentFolders, 0, index);
 
-                if (IsSkinned(parentFolder))
+                if (AssetSkinner.IsSkinned(parentFolder))
                 {
                     skinnedParentFolderPath = parentFolder;
                     return true;
@@ -92,22 +92,22 @@ namespace Miniclip.ShapeShifter
 #endregion
 
 #region External
-        private void StartWatchingFolder(string pathToWatch) =>
+        internal static void StartWatchingFolder(string pathToWatch) =>
             FileSystemWatcherManager.AddPathToWatchlist(pathToWatch, OnFileChanged);
 
-        private static void StopWatchingFolder(string pathToUnwatch) =>
+        internal static void StopWatchingFolder(string pathToUnwatch) =>
             FileSystemWatcherManager.RemovePathFromWatchlist(pathToUnwatch);
 
-        private void ClearAllWatchedPaths() => FileSystemWatcherManager.RemoveAllPathsFromWatchlist();
+        internal static void ClearAllWatchedPaths() => FileSystemWatcherManager.RemoveAllPathsFromWatchlist();
 
-        private void OnFileChanged(object sender, FileSystemEventArgs args)
+        private static void OnFileChanged(object sender, FileSystemEventArgs args)
         {
             DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
             string game = assetDirectory.Parent.Parent.Name;
             string guid = assetDirectory.Name;
             string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
 
-            dirtyAssets.Add(key);
+            SharedInfo.DirtyAssets.Add(key);
         }
 #endregion
         

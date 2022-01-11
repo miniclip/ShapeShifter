@@ -79,19 +79,19 @@ namespace Miniclip.ShapeShifter.Tests
 
         internal static void TearDown()
         {
-            if (ShapeShifter.IsSkinned(GetAssetPath(SpriteAssetName)))
+            if (AssetSkinner.IsSkinned(GetAssetPath(SpriteAssetName)))
             {
-                ShapeShifter.RemoveSkins(GetAssetPath(SpriteAssetName));
+                AssetSkinner.RemoveSkins(GetAssetPath(SpriteAssetName));
             }
 
-            if (ShapeShifter.IsSkinned(GetAssetPath(TextFileAssetName)))
+            if (AssetSkinner.IsSkinned(GetAssetPath(TextFileAssetName)))
             {
-                ShapeShifter.RemoveSkins(GetAssetPath(TextFileAssetName));
+                AssetSkinner.RemoveSkins(GetAssetPath(TextFileAssetName));
             }
 
-            if (ShapeShifter.IsSkinned(GetAssetPath(FolderAssetName)))
+            if (AssetSkinner.IsSkinned(GetAssetPath(FolderAssetName)))
             {
-                ShapeShifter.RemoveSkins(GetAssetPath(FolderAssetName));
+                AssetSkinner.RemoveSkins(GetAssetPath(FolderAssetName));
             }
 
             

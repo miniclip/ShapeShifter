@@ -37,11 +37,11 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPath = AssetDatabase.GetAssetPath(squareSprite);
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-            Assert.IsFalse(ShapeShifter.IsSkinned(assetPath), "Asset should not be skinned");
+            Assert.IsFalse(AssetSkinner.IsSkinned(assetPath), "Asset should not be skinned");
             
-            ShapeShifter.SkinAsset(assetPath);
+            AssetSkinner.SkinAsset(assetPath);
             
-            Assert.IsTrue(ShapeShifter.IsSkinned(assetPath), "Asset should be skinned");
+            Assert.IsTrue(AssetSkinner.IsSkinned(assetPath), "Asset should be skinned");
             Assert.IsTrue(ShapeShifter.ActiveGameSkin.HasGUID(guid), "Active Game skin should have this GUID.");
             Assert.IsTrue(PathUtils.IsPathRelativeToAssets(assetPath));
             

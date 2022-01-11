@@ -15,7 +15,7 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPath = AssetDatabase.GetAssetPath(textAsset);
             string fullAssetPath = PathUtils.GetFullPath(assetPath);
 
-            ShapeShifter.SkinAsset(assetPath);
+            AssetSkinner.SkinAsset(assetPath);
 
             Assert.IsTrue(
                 !ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Contains(assetPath),
@@ -57,9 +57,9 @@ namespace Miniclip.ShapeShifter.Tests
             string guid = AssetDatabase.AssetPathToGUID(assetPathBeforeRename);
             string fullAssetPathBeforeRename = PathUtils.GetFullPath(assetPathBeforeRename);
 
-            ShapeShifter.SkinAsset(assetPathBeforeRename);
+            AssetSkinner.SkinAsset(assetPathBeforeRename);
 
-            Assert.IsTrue(ShapeShifter.IsSkinned(assetPathBeforeRename));
+            Assert.IsTrue(AssetSkinner.IsSkinned(assetPathBeforeRename));
 
             string assetIgnoredPathBeforeRename =
                 GitUtils.GetIgnoredPathByGUID(AssetDatabase.AssetPathToGUID(assetPathBeforeRename));

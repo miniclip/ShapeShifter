@@ -32,8 +32,8 @@ namespace Miniclip.ShapeShifter {
                         Path.GetFileName(relativePath)
                     );
 
-                    this.GenerateAssetPreview(key, assetPath);
-                    this.DrawAssetPreview(key, game, assetPath);
+                    AssetSkinner.GenerateAssetPreview(key, assetPath);
+                    AssetSkinner.DrawAssetPreview(key, game, assetPath);
                 }
             }
 
@@ -129,8 +129,8 @@ namespace Miniclip.ShapeShifter {
             string key = this.GenerateKeyFromRelativePath(relativePath);
             
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames) {
-                dirtyAssets.Remove(key);
-                previewPerAsset.Remove(key);
+                SharedInfo.DirtyAssets.Remove(key);
+                AssetSkinner.PreviewPerAsset.Remove(key);
             
                 string assetFolder = Path.Combine(
                     SharedInfo.SkinsFolder.FullName,

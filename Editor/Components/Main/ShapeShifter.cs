@@ -1,14 +1,10 @@
 using System;
-using System.IO;
-using System.Reflection;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
-using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
-    [Serializable]
-    public partial class ShapeShifter : EditorWindow
+    public partial class ShapeShifter
     {
         internal static void InitializeShapeShifterCore()
         {

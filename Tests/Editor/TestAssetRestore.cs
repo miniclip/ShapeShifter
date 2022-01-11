@@ -16,7 +16,7 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPath = AssetDatabase.GetAssetPath(asset);
             string fullAssetPath = PathUtils.GetFullPath(assetPath);
 
-            ShapeShifter.SkinAsset(assetPath);
+            AssetSkinner.SkinAsset(assetPath);
             Assert.IsTrue(File.Exists(fullAssetPath));
 
             FileUtil.DeleteFileOrDirectory(fullAssetPath);
@@ -38,7 +38,7 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPath = AssetDatabase.GetAssetPath(folderAsset);
             string fullAssetPath = PathUtils.GetFullPath(assetPath);
             
-            ShapeShifter.SkinAsset(assetPath);
+            AssetSkinner.SkinAsset(assetPath);
             
             Assert.IsTrue(Directory.Exists(fullAssetPath));
 
