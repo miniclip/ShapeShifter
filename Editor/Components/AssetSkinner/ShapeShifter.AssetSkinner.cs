@@ -138,7 +138,7 @@ namespace Miniclip.ShapeShifter {
                         Path.GetFileName(assetPath)
                     );
 
-                    string key = GenerateAssetKey(game, guid);
+                    string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
                     this.GenerateAssetPreview(key, skinnedPath);
                     this.DrawAssetPreview(key, game, skinnedPath);
                 }
@@ -215,7 +215,7 @@ namespace Miniclip.ShapeShifter {
         public static void RemoveSkins(string assetPath) {
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames) {
                 string guid = AssetDatabase.AssetPathToGUID(assetPath);
-                string key = GenerateAssetKey(game, guid);
+                string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
                 dirtyAssets.Remove(key);
                 previewPerAsset.Remove(key);
                 
@@ -237,7 +237,7 @@ namespace Miniclip.ShapeShifter {
         {
             if (saveFirst)
             {
-                SavePendingChanges();
+                ShapeShifterUtils.SavePendingChanges();
             }
 
             foreach (string assetPath in assetPaths)
@@ -251,7 +251,7 @@ namespace Miniclip.ShapeShifter {
             if (saveFirst)
             {
                 // make sure any pending changes are saved before generating copies
-                SavePendingChanges();
+                ShapeShifterUtils.SavePendingChanges();
             }
 
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames)

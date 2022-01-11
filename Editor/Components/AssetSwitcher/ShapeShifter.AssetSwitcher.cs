@@ -305,7 +305,7 @@ namespace Miniclip.ShapeShifter
         {
             ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Clear();
 
-            SavePendingChanges();
+            ShapeShifterUtils.SavePendingChanges();
 
             string game = GetGameName(selected);
 

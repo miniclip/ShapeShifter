@@ -104,7 +104,9 @@ namespace Miniclip.ShapeShifter
         {
             DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
             string game = assetDirectory.Parent.Parent.Name;
-            string key = GenerateAssetKey(game, assetDirectory.Name);
+            string guid = assetDirectory.Name;
+            string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
+
             dirtyAssets.Add(key);
         }
 #endregion

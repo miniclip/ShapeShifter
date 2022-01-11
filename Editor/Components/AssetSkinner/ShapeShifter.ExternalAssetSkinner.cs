@@ -173,7 +173,7 @@ namespace Miniclip.ShapeShifter {
             
             // even though it's an "external" file, it still might be a Unity file (ex: ProjectSettings), so it's
             // still important to make sure any pending changes are saved before generating copies
-            SavePendingChanges();
+            ShapeShifterUtils.SavePendingChanges();
 
             string origin = absoluteAssetPath;
             string key = this.GenerateKeyFromRelativePath(relativeAssetPath);

@@ -28,8 +28,6 @@ namespace Miniclip.ShapeShifter
             set => skinsFolder = value;
         }
         
-        private static string GenerateAssetKey(string game, string guid) => game + ":" + guid;
-        
         internal static void InitializeShapeShifterCore()
         {
             ShapeShifterLogger.Log("Setting up");
@@ -38,20 +36,5 @@ namespace Miniclip.ShapeShifter
             RestoreMissingAssets();
         }
         
-        private static void SavePendingChanges()
-        {
-            AssetDatabase.SaveAssets();
-
-            // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save
-            EditorApplication.ExecuteMenuItem("File/Save Project");
-        }
-
-        public static void SaveChanges()
-        {
-            if (ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Count > 0)
-            {
-                OverwriteSelectedSkin(ActiveGame);
-            }
-        }
     }
 }
