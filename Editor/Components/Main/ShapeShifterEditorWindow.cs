@@ -58,7 +58,7 @@ namespace Miniclip.ShapeShifter
                 }
 
                 // OnAssetSwitcherGUI();
-                AssetSkinner.OnAssetSkinnerGUI();
+                AssetSkinnerGUI.OnGUI();
                 // OnExternalAssetSkinnerGUI();
                 //
                 // if (GUILayout.Button("Restore missing assets"))

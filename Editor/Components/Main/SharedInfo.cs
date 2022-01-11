@@ -31,5 +31,8 @@ namespace Miniclip.ShapeShifter
         }
 
         internal static HashSet<string> DirtyAssets { get; set; } = new HashSet<string>();
+        
+        internal static Dictionary<string, Texture2D> CachedPreviewPerAssetDict = new Dictionary<string, Texture2D>();
+
     }
 }

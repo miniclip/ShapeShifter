@@ -13,7 +13,10 @@ public class ShapeShifterInitializer
 
     private static void Init()
     {
-        ShapeShifter.InitializeShapeShifterCore();
+        ShapeShifterLogger.Log("Setting up");
+
+        ShapeShifterConfiguration.Initialise();
+        ShapeShifter.RestoreMissingAssets();
     }
 
     private static void EditorApplicationOnQuitting()
