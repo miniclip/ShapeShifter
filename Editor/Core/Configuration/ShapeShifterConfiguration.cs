@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
@@ -34,7 +35,14 @@ namespace Miniclip.ShapeShifter
         internal List<string> GameNames
         {
             get => gameNames;
-            set => gameNames = value;
+            set
+            {
+                gameNames = value;
+                foreach (string gameName in gameNames)
+                {
+                    AssetSkinner.CreateGameSkinFolder(gameName);
+                }
+            }
         }
 
         private const string CONFIGURATION_RESOURCE = "ShapeShifterConfiguration.asset";

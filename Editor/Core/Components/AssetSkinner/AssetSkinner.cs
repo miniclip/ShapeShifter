@@ -137,5 +137,12 @@ namespace Miniclip.ShapeShifter.Skinner
 
         private static void RemoveAlreadySkinnedAssets(ref IEnumerable<string> assetPaths) =>
             assetPaths = assetPaths.Where(assetPath => !IsSkinned(assetPath));
+
+        internal static void CreateGameSkinFolder(string gameName)
+        {
+            GameSkin gameSkin = new GameSkin(gameName);
+            
+            IOUtils.TryCreateDirectory(gameSkin.MainFolder);
+        }
     }
 }
