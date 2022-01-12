@@ -31,7 +31,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                     if (string.IsNullOrEmpty(line))
                         continue;
-                    
+
                     if (!line.StartsWith("guid"))
                         continue;
 
@@ -205,6 +205,11 @@ namespace Miniclip.ShapeShifter.Switcher
                 IOUtils.CopyFile(origin, target);
                 IOUtils.CopyFile(origin + ".meta", target + ".meta");
             }
+
+            string game = skinDirectory.Parent.Parent.Name;
+            string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
+
+            SharedInfo.DirtyAssets.Add(key);
         }
 
         internal static void OverwriteSelectedSkin(int selected, bool forceOverwrite = false)
