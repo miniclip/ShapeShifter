@@ -71,6 +71,16 @@ namespace Miniclip.ShapeShifter
                     AssetSwitcher.RestoreMissingAssets();
                 }
 
+                if (GUILayout.Button("Remove all skins"))
+                {
+                    var assetSkins = SharedInfo.ActiveGameSkin.GetAssetSkins();
+                    foreach (AssetSkin assetSkin in assetSkins)
+                    {
+                        var assetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
+                        AssetSkinner.RemoveSkins(assetPath);
+                    }
+                }
+                
                 GUILayout.FlexibleSpace();
             }
 

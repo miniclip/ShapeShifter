@@ -17,12 +17,5 @@ namespace Miniclip.ShapeShifter.Utils
             EditorApplication.ExecuteMenuItem("File/Save Project");
         }
 
-        internal static void PushChangesToActiveSkin()
-        {
-            if (ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Count > 0)
-            {
-                AssetSwitcher.OverwriteSelectedSkin(SharedInfo.ActiveGame);
-            }
-        }
     }
 }

@@ -18,8 +18,8 @@ namespace Miniclip.ShapeShifter.Tests
 
             AssetSkinner.SkinAsset(assetPath);
 
-            Assert.IsTrue(
-                !ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Contains(assetPath),
+            Assert.IsFalse(
+                ShapeShifterConfiguration.Instance.HasUnsavedChanges,
                 "Asset was just skinned now, it should not be in the modified assets list"
             );
 
@@ -28,7 +28,7 @@ namespace Miniclip.ShapeShifter.Tests
             AssetDatabase.Refresh();
 
             Assert.IsTrue(
-                ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Contains(assetPath),
+                ShapeShifterConfiguration.Instance.HasUnsavedChanges,
                 "Asset was modified and it is not showing in modified assets list"
             );
         }
@@ -38,7 +38,7 @@ namespace Miniclip.ShapeShifter.Tests
         {
             TestRenameFlow(TestUtils.SpriteAssetName);
         }
-        
+
         [Test]
         public void TestRenameSkinnedTextFile()
         {

@@ -214,8 +214,6 @@ namespace Miniclip.ShapeShifter.Switcher
 
         internal static void OverwriteSelectedSkin(int selected, bool forceOverwrite = false)
         {
-            ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Clear();
-
             ShapeShifterUtils.SavePendingChanges();
 
             string game = ShapeShifterUtils.GetGameName(selected);
@@ -247,6 +245,8 @@ namespace Miniclip.ShapeShifter.Switcher
                 CopyFromUnityToSkins,
                 CopyFromOriginToSkinnedExternal
             );
+
+            ShapeShifterConfiguration.Instance.HasUnsavedChanges = false;
         }
 
         private static void PerformCopiesWithTracking(int selected,
@@ -355,7 +355,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
         internal static void SwitchToGame(int gameToSwitchTo, bool forceSwitch = false)
         {
-            if (ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Count > 0 && !forceSwitch)
+            if (ShapeShifterConfiguration.Instance.HasUnsavedChanges && !forceSwitch)
             {
                 int choice = EditorUtility.DisplayDialogComplex(
                     "Shape Shifter",
@@ -387,7 +387,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 CopyFromSkinnedExternalToOrigin
             );
             SharedInfo.ActiveGame = gameToSwitchTo;
-            ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Clear();
+            ShapeShifterConfiguration.Instance.HasUnsavedChanges = false;
         }
 
         private static void CopyIfMissingInternal(DirectoryInfo directory)

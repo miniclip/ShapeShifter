@@ -7,12 +7,39 @@ namespace Miniclip.ShapeShifter
     [CustomEditor(typeof(ShapeShifterConfiguration))]
     public class ShapeShifterConfigurationEditor : Editor
     {
-        private SerializedProperty gameNamesProperty;
         private ReorderableList gameNamesList;
+        private SerializedProperty gameNamesProperty;
+        private SerializedProperty hasUnsavedChangesProperty;
+
+        private void OnEnable()
+        {
+            gameNamesProperty = serializedObject.FindProperty("gameNames");
+            gameNamesList = new ReorderableList(
+                serializedObject,
+                gameNamesProperty,
+                true,
+                true,
+                true,
+                true
+            );
+
+            gameNamesList.drawElementCallback = DrawGameNamesElement;
+            gameNamesList.drawHeaderCallback = DrawGameNamesHeader;
+
+            hasUnsavedChangesProperty = serializedObject.FindProperty("hasUnsavedChanges");
+        }
+
+        public override void OnInspectorGUI()
+        {
+            serializedObject.Update();
+            gameNamesList.DoLayoutList();
+            EditorGUILayout.PropertyField(hasUnsavedChangesProperty);
+            serializedObject.ApplyModifiedProperties();
+        }
 
         private void DrawGameNamesElement(Rect rect, int index, bool isActive, bool isFocused)
         {
-            SerializedProperty element = this.gameNamesList.serializedProperty.GetArrayElementAtIndex(index);
+            SerializedProperty element = gameNamesList.serializedProperty.GetArrayElementAtIndex(index);
             element.stringValue = EditorGUI.TextField(
                 new Rect(
                     rect.x,
@@ -27,30 +54,6 @@ namespace Miniclip.ShapeShifter
         private void DrawGameNamesHeader(Rect rect)
         {
             EditorGUI.LabelField(rect, "Game names:");
-        }
-
-        private void OnEnable()
-        {
-            this.gameNamesProperty = this.serializedObject.FindProperty("gameNames");
-
-            this.gameNamesList = new ReorderableList(
-                this.serializedObject,
-                this.gameNamesProperty,
-                true,
-                true,
-                true,
-                true
-            );
-
-            this.gameNamesList.drawElementCallback = this.DrawGameNamesElement;
-            this.gameNamesList.drawHeaderCallback = this.DrawGameNamesHeader;
-        }
-
-        public override void OnInspectorGUI()
-        {
-            this.serializedObject.Update();
-            this.gameNamesList.DoLayoutList();
-            this.serializedObject.ApplyModifiedProperties();
         }
     }
 }

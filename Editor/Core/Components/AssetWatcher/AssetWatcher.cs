@@ -9,18 +9,17 @@ namespace Miniclip.ShapeShifter.Watcher
 {
     public class AssetWatcher : AssetPostprocessor
     {
-        
         private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets,
             string[] movedAssets,
             string[] movedFromAssetPaths)
         {
             if (ShapeShifterConfiguration.Instance == null)
                 return;
-            
+
             //changed
             foreach (string importedAsset in importedAssets)
             {
-                OnImportedAsset(importedAsset);
+                OnModifiedAsset(importedAsset);
             }
 
             //renamed
@@ -33,67 +32,48 @@ namespace Miniclip.ShapeShifter.Watcher
 
             foreach (string deletedAsset in deletedAssets)
             {
-                if (AssetSkinner.IsSkinned(deletedAsset))
+                OnModifiedAsset(deletedAsset);
+            }
+        }
+
+#region Internal
+        private static void OnModifiedAsset(string modifiedAssetPath)
+        {
+            if (AssetSkinner.IsSkinned(modifiedAssetPath))
+            {
+                ShapeShifterConfiguration.Instance.HasUnsavedChanges = true;
+            }
+            else
+            {
+                if (TryGetParentSkinnedFolder(modifiedAssetPath, out string skinnedFolderPath))
                 {
-                    ShapeShifterLogger.LogWarning(
-                        "You deleted an asset that currently has skins. Shapeshifter will recover it the next chance it has."
-                    );
+                    ShapeShifterConfiguration.Instance.HasUnsavedChanges = true;
                 }
             }
         }
-        
-#region Internal
-        
-        public static void OnImportedAsset(string modifiedAssetPath)
+
+        private static void OnAssetRenamed(string newName, string oldName)
         {
-
-            bool isSkinned = AssetSkinner.IsSkinned(modifiedAssetPath);
-
-            List<string> configurationModifiedAssetPaths = ShapeShifterConfiguration.Instance.ModifiedAssetPaths;
-
-            if (isSkinned && !configurationModifiedAssetPaths.Contains(modifiedAssetPath))
-            {
-                configurationModifiedAssetPaths.Add(modifiedAssetPath);
-                return;
-            }
-
-            if (configurationModifiedAssetPaths.Contains(modifiedAssetPath))
-            {
-                configurationModifiedAssetPaths.Remove(modifiedAssetPath);
-                return;
-            }
-
-            if (TryGetParentSkinnedFolder(modifiedAssetPath, out string skinnedFolderPath))
-            {
-                OnImportedAsset(skinnedFolderPath);
-            }
-        }
-
-        public static void OnAssetRenamed(string newName, string oldName)
-        {
-
             bool isSkinned = AssetSkinner.IsSkinned(newName);
 
             if (!isSkinned)
                 return;
-            
+
             RenameAssetSkins(newName);
-            
-            if (ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Contains(newName))
-            {
-                ShapeShifterConfiguration.Instance.ModifiedAssetPaths.Remove(newName);
-            } 
-            
-            GitUtils.Stage(newName+".meta");
-            GitUtils.Stage(oldName+".meta");
+
+            ShapeShifterConfiguration.Instance.HasUnsavedChanges = true;
+
+            GitUtils.Stage(newName + ".meta");
+            GitUtils.Stage(oldName + ".meta");
         }
 
         private static void RenameAssetSkins(string assetPath)
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-            foreach (string gameName in ShapeShifterConfiguration.Instance.GameNames)
+            for (int index = 0; index < ShapeShifterConfiguration.Instance.GameNames.Count; index++)
             {
+                string gameName = ShapeShifterConfiguration.Instance.GameNames[index];
                 GameSkin gameSkin = new GameSkin(gameName);
 
                 var assetSkin = gameSkin.GetAssetSkin(guid);
@@ -144,6 +124,5 @@ namespace Miniclip.ShapeShifter.Watcher
             SharedInfo.DirtyAssets.Add(key);
         }
 #endregion
-        
     }
 }

@@ -15,18 +15,15 @@ namespace Miniclip.ShapeShifter
         public Editor ExternalConfigurationEditor { get; private set; }
 
         //TODO: turn these lists into serializable HashSets 
-
+        
         [SerializeField]
         [HideInInspector]
         private List<string> gameNames = new List<string>();
 
         [SerializeField]
-        [HideInInspector]
-        private List<string> modifiedAssetPaths = new List<string>();
-
-        public List<string> ModifiedAssetPaths => modifiedAssetPaths;
-
-        [SerializeField]
+        private bool hasUnsavedChanges;
+        
+        [SerializeField]     
         [HideInInspector]
         private List<string> skinnedExternalAssetPaths = new List<string>();
         public List<string> SkinnedExternalAssetPaths => skinnedExternalAssetPaths;
@@ -43,6 +40,12 @@ namespace Miniclip.ShapeShifter
                     AssetSkinner.CreateGameSkinFolder(gameName);
                 }
             }
+        }
+
+        public bool HasUnsavedChanges
+        {
+            get => hasUnsavedChanges;
+            set => hasUnsavedChanges = value;
         }
 
         private const string CONFIGURATION_RESOURCE = "ShapeShifterConfiguration.asset";
