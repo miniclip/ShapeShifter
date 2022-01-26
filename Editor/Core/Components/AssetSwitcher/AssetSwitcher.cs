@@ -332,10 +332,31 @@ namespace Miniclip.ShapeShifter.Switcher
             }
         }
 
+        [MenuItem("Window/Shape Shifter/Refresh All Assets", false, 72)]
         private static void RefreshAllAssets()
         {
+#if UNITY_2020
+            throw new NotImplementedException("// TODO: Replace this in Unity 2020 with PackageManager.Client.Resolve");
+#else
+            if (HasAnyPackageRelatedSkin())
+                ForceUnityToLoseAndRegainFocus();
+#endif
+
+            AssetDatabase.Refresh();
+        }
+
+        private static bool HasAnyPackageRelatedSkin()
+        {
+            bool isManifestSkinned = ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Any(
+                externalAssetPath => externalAssetPath.Contains("manifest.json")
+            );
+
+            return isManifestSkinned;
+        }
+
+        private static void ForceUnityToLoseAndRegainFocus()
+        {
             // Force Unity to lose and regain focus, so it resolves any new changes on the packages
-            // TODO: Replace this in Unity 2020 with PackageManager.Client.Resolve
             Process process = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -349,8 +370,6 @@ namespace Miniclip.ShapeShifter.Switcher
             };
 
             process.Start();
-
-            AssetDatabase.Refresh();
         }
 
         internal static void SwitchToGame(int gameToSwitchTo, bool forceSwitch = false)
