@@ -30,7 +30,7 @@ namespace Miniclip.ShapeShifter.Switcher
                     alignment = TextAnchor.MiddleCenter
                 };
 
-                string currentGame = SharedInfo.ActiveGameName;
+                string currentGame = ShapeShifter.ActiveGameName;
 
                 GUILayout.Box($"Current game: {currentGame}", titleStyle);
 

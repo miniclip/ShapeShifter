@@ -134,7 +134,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             if (IsPathRelativeToSkins(path))
             {
-                return Path.Combine(SharedInfo.SkinsFolder.Parent.FullName, path);
+                return Path.Combine(ShapeShifter.SkinsFolder.Parent.FullName, path);
             }
 
             return string.Empty;

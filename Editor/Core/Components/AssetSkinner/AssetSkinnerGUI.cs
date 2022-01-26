@@ -118,7 +118,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 buttonWidth -= 20; // to account for a possible scrollbar or some extra padding 
 
                 bool clicked = false;
-                if (SharedInfo.CachedPreviewPerAssetDict.TryGetValue(key, out Texture2D previewImage))
+                if (ShapeShifter.CachedPreviewPerAssetDict.TryGetValue(key, out Texture2D previewImage))
                 {
                     clicked = GUILayout.Button(
                         previewImage,
@@ -159,9 +159,9 @@ namespace Miniclip.ShapeShifter.Skinner
                 {
                     string guid = AssetDatabase.AssetPathToGUID(assetPath);
                     string skinnedPath = Path.Combine(
-                        SharedInfo.SkinsFolder.FullName,
+                        ShapeShifter.SkinsFolder.FullName,
                         game,
-                        SharedInfo.INTERNAL_ASSETS_FOLDER,
+                        ShapeShifter.INTERNAL_ASSETS_FOLDER,
                         guid,
                         Path.GetFileName(assetPath)
                     );
@@ -192,9 +192,9 @@ namespace Miniclip.ShapeShifter.Skinner
 
         internal static void GenerateAssetPreview(string key, string assetPath)
         {
-            if (SharedInfo.DirtyAssets.Contains(key) || !SharedInfo.CachedPreviewPerAssetDict.ContainsKey(key))
+            if (ShapeShifter.DirtyAssets.Contains(key) || !ShapeShifter.CachedPreviewPerAssetDict.ContainsKey(key))
             {
-                SharedInfo.DirtyAssets.Remove(key);
+                ShapeShifter.DirtyAssets.Remove(key);
 
                 Texture2D texturePreview = EditorGUIUtility.FindTexture(errorIcon);
                 if (Directory.Exists(assetPath))
@@ -229,7 +229,7 @@ namespace Miniclip.ShapeShifter.Skinner
                     }
                 }
 
-                SharedInfo.CachedPreviewPerAssetDict[key] = texturePreview;
+                ShapeShifter.CachedPreviewPerAssetDict[key] = texturePreview;
             }
         }
 

@@ -20,9 +20,9 @@ namespace Miniclip.ShapeShifter.Skinner
                 {
                     string key = ExternalAssetSkinner.GenerateKeyFromRelativePath(relativePath);
                     string assetPath = Path.Combine(
-                        SharedInfo.SkinsFolder.FullName,
+                        ShapeShifter.SkinsFolder.FullName,
                         game,
-                        SharedInfo.EXTERNAL_ASSETS_FOLDER,
+                        ShapeShifter.EXTERNAL_ASSETS_FOLDER,
                         key,
                         Path.GetFileName(relativePath)
                     );

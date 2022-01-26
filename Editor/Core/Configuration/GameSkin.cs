@@ -40,8 +40,8 @@ namespace Miniclip.ShapeShifter
             Name = name;
 
             MainFolder = GetGameFolderPath(name);
-            InternalSkinsFolder = Path.Combine(MainFolder, SharedInfo.INTERNAL_ASSETS_FOLDER);
-            ExternalSkinsFolder = Path.Combine(MainFolder, SharedInfo.EXTERNAL_ASSETS_FOLDER);
+            InternalSkinsFolder = Path.Combine(MainFolder, ShapeShifter.INTERNAL_ASSETS_FOLDER);
+            ExternalSkinsFolder = Path.Combine(MainFolder, ShapeShifter.EXTERNAL_ASSETS_FOLDER);
         }
 
         public bool HasGuid(string guid) => GetAssetSkins().Any(assetSkin => assetSkin.Guid == guid);
@@ -55,7 +55,7 @@ namespace Miniclip.ShapeShifter
             return assetSkin;
         }
 
-        private string GetGameFolderPath(string name) => Path.Combine(SharedInfo.SkinsFolder.FullName, name);
+        private string GetGameFolderPath(string name) => Path.Combine(ShapeShifter.SkinsFolder.FullName, name);
 
         internal List<AssetSkin> GetAssetSkins()
         {

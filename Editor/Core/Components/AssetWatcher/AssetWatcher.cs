@@ -121,7 +121,7 @@ namespace Miniclip.ShapeShifter.Watcher
             string guid = assetDirectory.Name;
             string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
 
-            SharedInfo.DirtyAssets.Add(key);
+            ShapeShifter.DirtyAssets.Add(key);
         }
 #endregion
     }

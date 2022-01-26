@@ -47,11 +47,11 @@ namespace Miniclip.ShapeShifter.Switcher
             missingGuidsToPathDictionary.Clear();
             List<string> missingAssets = new List<string>();
             Stopwatch stopwatch = Stopwatch.StartNew();
-            if (SharedInfo.ActiveGameSkin.HasInternalSkins())
+            if (ShapeShifter.ActiveGameSkin.HasInternalSkins())
             {
                 EditorUtility.DisplayProgressBar("ShapeShifter", "Checking for missing assets", 0.5f);
 
-                List<AssetSkin> assetSkins = SharedInfo.ActiveGameSkin.GetAssetSkins();
+                List<AssetSkin> assetSkins = ShapeShifter.ActiveGameSkin.GetAssetSkins();
 
                 foreach (AssetSkin assetSkin in assetSkins)
                 {
@@ -95,7 +95,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                     string fullPath = metaFullPath.Replace(".meta", "");
 
-                    if (SharedInfo.ActiveGameSkin.HasGuid(metaGuid))
+                    if (ShapeShifter.ActiveGameSkin.HasGuid(metaGuid))
                     {
                         missingGuidsToPathDictionary.Add(metaGuid, PathUtils.GetPathRelativeToAssetsFolder(fullPath));
                     }
@@ -107,7 +107,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
 
                 PerformCopiesWithTracking(
-                    SharedInfo.ActiveGame,
+                    ShapeShifter.ActiveGame,
                     "Add missing skins",
                     CopyIfMissingInternal,
                     CopyFromSkinnedExternalToOrigin
@@ -209,7 +209,7 @@ namespace Miniclip.ShapeShifter.Switcher
             string game = skinDirectory.Parent.Parent.Name;
             string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
 
-            SharedInfo.DirtyAssets.Add(key);
+            ShapeShifter.DirtyAssets.Add(key);
         }
 
         internal static void OverwriteSelectedSkin(int selected, bool forceOverwrite = false)
@@ -218,12 +218,12 @@ namespace Miniclip.ShapeShifter.Switcher
 
             string game = ShapeShifterUtils.GetGameName(selected);
 
-            if (SharedInfo.ActiveGameName != game)
+            if (ShapeShifter.ActiveGameName != game)
             {
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.Append($"This will overwrite the {game} skins with the current assets. ");
 
-                stringBuilder.Append($"The last asset switch was to {SharedInfo.ActiveGameName}");
+                stringBuilder.Append($"The last asset switch was to {ShapeShifter.ActiveGameName}");
 
                 stringBuilder.Append(" Are you sure?");
 
@@ -274,7 +274,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                 PerformOperationOnPath(
                     gameFolderPath,
-                    SharedInfo.INTERNAL_ASSETS_FOLDER,
+                    ShapeShifter.INTERNAL_ASSETS_FOLDER,
                     internalAssetOperation,
                     description,
                     progressBarStep,
@@ -283,7 +283,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                 PerformOperationOnPath(
                     gameFolderPath,
-                    SharedInfo.EXTERNAL_ASSETS_FOLDER,
+                    ShapeShifter.EXTERNAL_ASSETS_FOLDER,
                     externalAssetOperation,
                     description,
                     progressBarStep,
@@ -306,7 +306,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
         private static string GetGameFolderPath(int selected)
         {
-            return Path.Combine(SharedInfo.SkinsFolder.FullName, ShapeShifterUtils.GetGameName(selected));
+            return Path.Combine(ShapeShifter.SkinsFolder.FullName, ShapeShifterUtils.GetGameName(selected));
         }
 
         private static void PerformOperationOnPath(string gameFolderPath,
@@ -360,7 +360,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 int choice = EditorUtility.DisplayDialogComplex(
                     "Shape Shifter",
                     $"There are unsaved changes in your skinned assets. You should make sure to save them into your Active Game folder",
-                    $"Save changes to {SharedInfo.ActiveGameName} and switch to {ShapeShifterUtils.GetGameName(gameToSwitchTo)}.",
+                    $"Save changes to {ShapeShifter.ActiveGameName} and switch to {ShapeShifterUtils.GetGameName(gameToSwitchTo)}.",
                     "Cancel Switch",
                     $"Discard changes and switch to {ShapeShifterUtils.GetGameName(gameToSwitchTo)}"
                 );
@@ -368,7 +368,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 switch (choice)
                 {
                     case 0:
-                        OverwriteSelectedSkin(SharedInfo.ActiveGame);
+                        OverwriteSelectedSkin(ShapeShifter.ActiveGame);
                         break;
 
                     case 1:
@@ -386,7 +386,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 CopyFromSkinsToUnity,
                 CopyFromSkinnedExternalToOrigin
             );
-            SharedInfo.ActiveGame = gameToSwitchTo;
+            ShapeShifter.ActiveGame = gameToSwitchTo;
             ShapeShifterConfiguration.Instance.HasUnsavedChanges = false;
         }
 

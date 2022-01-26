@@ -16,13 +16,13 @@ namespace Miniclip.ShapeShifter.Skinner
             {
                 string guid = AssetDatabase.AssetPathToGUID(assetPath);
                 string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
-                SharedInfo.DirtyAssets.Remove(key);
-                SharedInfo.CachedPreviewPerAssetDict.Remove(key);
+                ShapeShifter.DirtyAssets.Remove(key);
+                ShapeShifter.CachedPreviewPerAssetDict.Remove(key);
 
                 string assetFolder = Path.Combine(
-                    SharedInfo.SkinsFolder.FullName,
+                    ShapeShifter.SkinsFolder.FullName,
                     game,
-                    SharedInfo.INTERNAL_ASSETS_FOLDER,
+                    ShapeShifter.INTERNAL_ASSETS_FOLDER,
                     guid
                 );
 
@@ -60,9 +60,9 @@ namespace Miniclip.ShapeShifter.Skinner
                 string origin = assetPath;
                 string guid = AssetDatabase.AssetPathToGUID(origin);
                 string assetFolder = Path.Combine(
-                    SharedInfo.SkinsFolder.FullName,
+                    ShapeShifter.SkinsFolder.FullName,
                     game,
-                    SharedInfo.INTERNAL_ASSETS_FOLDER,
+                    ShapeShifter.INTERNAL_ASSETS_FOLDER,
                     guid
                 );
 
@@ -104,9 +104,9 @@ namespace Miniclip.ShapeShifter.Skinner
                 return false;
 
             string assetFolder = Path.Combine(
-                SharedInfo.SkinsFolder.FullName,
+                ShapeShifter.SkinsFolder.FullName,
                 game,
-                SharedInfo.INTERNAL_ASSETS_FOLDER,
+                ShapeShifter.INTERNAL_ASSETS_FOLDER,
                 guid
             );
 
@@ -115,8 +115,8 @@ namespace Miniclip.ShapeShifter.Skinner
 
         private static void OnDisable()
         {
-            SharedInfo.DirtyAssets.Clear();
-            SharedInfo.CachedPreviewPerAssetDict.Clear();
+            ShapeShifter.DirtyAssets.Clear();
+            ShapeShifter.CachedPreviewPerAssetDict.Clear();
         }
 
         private static IEnumerable<string> GetEligibleAssetPaths(Object[] assets)

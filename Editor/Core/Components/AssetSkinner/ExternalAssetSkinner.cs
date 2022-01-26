@@ -66,13 +66,13 @@ namespace Miniclip.ShapeShifter.Skinner
 
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
             {
-                SharedInfo.DirtyAssets.Remove(key);
-                SharedInfo.CachedPreviewPerAssetDict.Remove(key);
+                ShapeShifter.DirtyAssets.Remove(key);
+                ShapeShifter.CachedPreviewPerAssetDict.Remove(key);
 
                 string assetFolder = Path.Combine(
-                    SharedInfo.SkinsFolder.FullName,
+                    ShapeShifter.SkinsFolder.FullName,
                     game,
-                    SharedInfo.EXTERNAL_ASSETS_FOLDER,
+                    ShapeShifter.EXTERNAL_ASSETS_FOLDER,
                     key
                 );
 
@@ -123,9 +123,9 @@ namespace Miniclip.ShapeShifter.Skinner
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
             {
                 string assetFolder = Path.Combine(
-                    SharedInfo.SkinsFolder.FullName,
+                    ShapeShifter.SkinsFolder.FullName,
                     game,
-                    SharedInfo.EXTERNAL_ASSETS_FOLDER,
+                    ShapeShifter.EXTERNAL_ASSETS_FOLDER,
                     key
                 );
 

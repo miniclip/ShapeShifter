@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
-    static class SharedInfo
+    static class ShapeShifter
     {
         private const string SHAPESHIFTER_SKINS_FOLDER_NAME = "Skins";
 
@@ -18,6 +18,7 @@ namespace Miniclip.ShapeShifter
 
         internal static DirectoryInfo SkinsFolder
         {
+            
             get
             {
                 if (skinsFolder == null)

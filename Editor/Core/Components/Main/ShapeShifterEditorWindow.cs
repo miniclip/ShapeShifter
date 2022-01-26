@@ -73,7 +73,7 @@ namespace Miniclip.ShapeShifter
 
                 if (GUILayout.Button("Remove all skins"))
                 {
-                    var assetSkins = SharedInfo.ActiveGameSkin.GetAssetSkins();
+                    var assetSkins = ShapeShifter.ActiveGameSkin.GetAssetSkins();
                     foreach (AssetSkin assetSkin in assetSkins)
                     {
                         var assetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
@@ -89,8 +89,8 @@ namespace Miniclip.ShapeShifter
 
         private void OnSelectionChange()
         {
-            SharedInfo.DirtyAssets.Clear();
-            SharedInfo.CachedPreviewPerAssetDict.Clear();
+            ShapeShifter.DirtyAssets.Clear();
+            ShapeShifter.CachedPreviewPerAssetDict.Clear();
             AssetWatcher.ClearAllWatchedPaths();
         }
     }

@@ -39,7 +39,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             ShapeShifterUtils.SavePendingChanges();
             string skinnedFileFullPath = Path.Combine(
-                SharedInfo.ActiveGameSkin.GetAssetSkin(guid).FolderPath,
+                ShapeShifter.ActiveGameSkin.GetAssetSkin(guid).FolderPath,
                 Path.GetFileName(assetPath)
             );
             string skinnedText = File.ReadAllText(skinnedFileFullPath);
@@ -64,7 +64,7 @@ namespace Miniclip.ShapeShifter.Tests
             AssetSwitcher.SwitchToGame(0, true);
 
             string skinPath = Path.Combine(
-                SharedInfo.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath,
+                ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath,
                 TestUtils.FolderAssetName
             );
 
@@ -103,7 +103,7 @@ namespace Miniclip.ShapeShifter.Tests
             AssetSwitcher.SwitchToGame(1);
 
             skinPath = Path.Combine(
-                SharedInfo.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath,
+                ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath,
                 TestUtils.FolderAssetName
             );
 

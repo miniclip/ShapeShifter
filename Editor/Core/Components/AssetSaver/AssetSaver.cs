@@ -12,11 +12,11 @@ namespace Miniclip.ShapeShifter.Saver
         [UsedImplicitly]
         public static void OnWillSaveAssets(string[] files)
         {
-            if (!isSaving && (SharedInfo.ActiveGameSkin.HasExternalSkins() || CanSave))
+            if (!isSaving && (ShapeShifter.ActiveGameSkin.HasExternalSkins() || CanSave))
             {
-                ShapeShifterLogger.Log($"Pushing changes to {SharedInfo.ActiveGameName} skin folder");
+                ShapeShifterLogger.Log($"Pushing changes to {ShapeShifter.ActiveGameName} skin folder");
                 isSaving = true;
-                AssetSwitcher.OverwriteSelectedSkin(SharedInfo.ActiveGame);
+                AssetSwitcher.OverwriteSelectedSkin(ShapeShifter.ActiveGame);
                 isSaving = false;
             }
         }
