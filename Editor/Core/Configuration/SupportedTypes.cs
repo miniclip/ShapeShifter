@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEditor.Animations;
 using UnityEngine;
@@ -9,22 +11,36 @@ namespace Miniclip.ShapeShifter
 {
     public static class SupportedTypes
     {
-        private static readonly Type[] Types =
+        private static readonly Type[] typesSupported =
         {
             typeof(AnimationClip),
             typeof(AnimatorController),
             typeof(DefaultAsset),
             typeof(GameObject),
-            typeof(MonoScript),
             typeof(SceneAsset),
             typeof(ScriptableObject),
             typeof(Texture2D),
             typeof(TextAsset)
         };
 
-        public static bool IsSupported(Object asset)
+        private static readonly Type[] typesForbidden =
+        {
+            typeof(MonoScript),
+        };
+        
+        public static bool IsSupported(Object asset, out string reason)
         {
             Type assetType = asset.GetType();
+
+            string path = AssetDatabase.GetAssetPath(asset);
+
+            reason = "Asset type is supported by shapeshifter.";
+
+            if (PathUtils.IsPathRelativeToPackages(path))
+            {
+                reason = "Shapeshifter still can't handle skinning package contents";
+                return false;
+            }
 
             if (assetType == typeof(DefaultAsset))
             {
@@ -34,30 +50,29 @@ namespace Miniclip.ShapeShifter
                 }
             }
 
-            foreach (Type supportedType in Types)
+            if (typesForbidden.Any(
+                    typeForbidden => assetType == typeForbidden || assetType.IsSubclassOf(typeForbidden)
+                ))
             {
-                if (assetType == supportedType || assetType.IsSubclassOf(supportedType))
-                {
-                    return true;
-                }
+                reason = $"{assetType.Name} type is not skinnable.";
+                return false;
             }
-
-            return false;
+            
+            return typesSupported.Any(typeSupported => assetType == typeSupported || assetType.IsSubclassOf(typeSupported));
         }
 
-        public static List<Object> GetSupportedAssetsFromArray(this Object[] assets)
+        public static List<(Object asset, bool isSupported, string reason)> GetAssetsSupportInfo(this Object[] assets)
         {
-            List<Object> supportedAssets = new List<Object>(assets.Length);
+            List<(Object, bool, string)> assetsSupportInfo = new List<(Object, bool, string)>(assets.Length);
 
             foreach (Object asset in assets)
             {
-                if (SupportedTypes.IsSupported(asset))
-                {
-                    supportedAssets.Add(asset);
-                }
+                var isSupported = IsSupported(asset, out string reason);
+
+                assetsSupportInfo.Add((asset, isSupported, reason));
             }
 
-            return supportedAssets;
+            return assetsSupportInfo;
         }
     }
 }

@@ -65,24 +65,31 @@ namespace Miniclip.ShapeShifter.Skinner
 
                 Object[] assets = Selection.GetFiltered<Object>(SelectionMode.Assets);
 
-                List<Object> supportedAssets = assets.GetSupportedAssetsFromArray();
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-                if (supportedAssets.Count == 0)
+                foreach (var assetSupportInfo in assets.GetAssetsSupportInfo())
                 {
-                    GUILayout.Label("None.");
-                }
-                else
-                {
-                    scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-
-                    foreach (Object asset in supportedAssets)
+                    if (assetSupportInfo.isSupported)
                     {
-                        DrawAssetSection(asset);
+                        DrawAssetSection(assetSupportInfo.asset);
                     }
-
-                    GUILayout.EndScrollView();
+                    else
+                    {
+                        DrawUnsupportedAssetSection(assetSupportInfo);
+                    }
                 }
+
+                GUILayout.EndScrollView();
             }
+        }
+
+        private static void DrawUnsupportedAssetSection((Object asset, bool isSupported, string reason) assetSupportInfo)
+        {
+            EditorGUILayout.InspectorTitlebar(true, assetSupportInfo.asset);
+            Color oldColor = GUI.backgroundColor;
+            GUI.backgroundColor = Color.grey;
+            GUILayout.Label($"Not supported: {assetSupportInfo.reason}");
+            GUI.backgroundColor = oldColor;
         }
 
         private static void DrawAssetSection(Object asset)
