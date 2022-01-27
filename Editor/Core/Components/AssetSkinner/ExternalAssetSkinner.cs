@@ -60,6 +60,14 @@ namespace Miniclip.ShapeShifter.Skinner
             return assetPath;
         }
 
+        public static void RemoveAllExternalSkins()
+        {
+            foreach (string path in ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths)
+            {
+                RemoveExternalSkins(path);
+            }
+        }
+
         internal static void RemoveExternalSkins(string relativePath)
         {
             string key = GenerateKeyFromRelativePath(relativePath);

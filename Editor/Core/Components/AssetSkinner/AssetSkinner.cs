@@ -34,6 +34,16 @@ namespace Miniclip.ShapeShifter.Skinner
             GitUtils.Track(assetPath);
         }
 
+        internal static void RemoveAllInternalSkins()
+        {
+            List<AssetSkin> assetSkins = ShapeShifter.ActiveGameSkin.GetAssetSkins();
+            foreach (AssetSkin assetSkin in assetSkins)
+            {
+                var assetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
+                RemoveSkins(assetPath);
+            }
+        }
+        
         private static void SkinAssets(string[] assetPaths, bool saveFirst = true)
         {
             if (saveFirst)
