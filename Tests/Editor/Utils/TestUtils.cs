@@ -60,6 +60,7 @@ namespace Miniclip.ShapeShifter.Tests
             cachedGameNames = new List<string>(ShapeShifterConfiguration.Instance.GameNames);
             ShapeShifterConfiguration.Instance.GameNames.Clear();
             ShapeShifterConfiguration.Instance.GameNames = new List<string>(TestGameNames);
+            ShapeShifterConfiguration.Instance.HasUnsavedChanges = false;
         }
 
         private static void CopyAllTestResourcesFromPackagesToAssetsFolder()

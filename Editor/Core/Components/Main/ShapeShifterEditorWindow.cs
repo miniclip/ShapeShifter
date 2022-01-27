@@ -71,20 +71,39 @@ namespace Miniclip.ShapeShifter
                     AssetSwitcher.RestoreMissingAssets();
                 }
 
-                if (GUILayout.Button("Remove all skins"))
-                {
-                    var assetSkins = ShapeShifter.ActiveGameSkin.GetAssetSkins();
-                    foreach (AssetSkin assetSkin in assetSkins)
-                    {
-                        var assetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
-                        AssetSkinner.RemoveSkins(assetPath);
-                    }
-                }
-                
                 GUILayout.FlexibleSpace();
+
+                OnDangerousOperationsGUI();
             }
 
             Repaint();
+        }
+
+        private static void OnDangerousOperationsGUI()
+        {
+            if (!ShapeShifter.ActiveGameSkin.HasInternalSkins() && !ShapeShifter.ActiveGameSkin.HasExternalSkins())
+            {
+                return;
+            }
+
+            GUILayout.Label("Dangerous Operations");
+
+            AssetSwitcherGUI.OnOverwriteAllSkinsGUI();
+
+            OnRemoveAllSkinsGUI();
+        }
+
+        private static void OnRemoveAllSkinsGUI()
+        {
+            Color backgroundColor = GUI.backgroundColor;
+            GUI.backgroundColor = Color.red;
+            if (GUILayout.Button("Remove all skins"))
+            {
+                AssetSkinner.RemoveAllInternalSkins();
+                ExternalAssetSkinner.RemoveAllExternalSkins();
+            }
+
+            GUI.backgroundColor = backgroundColor;
         }
 
         private void OnSelectionChange()

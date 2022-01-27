@@ -19,13 +19,9 @@ namespace Miniclip.ShapeShifter.Switcher
                 return;
             }
 
-            GUIStyle boxStyle = GUI.skin.GetStyle("Box");
-            GUIStyle buttonStyle = GUI.skin.GetStyle("Button");
-            GUIStyle labelStyle = GUI.skin.GetStyle("Label");
-
-            using (new GUILayout.VerticalScope(boxStyle))
+            using (new GUILayout.VerticalScope(StyleUtils.BoxStyle))
             {
-                GUIStyle titleStyle = new GUIStyle(labelStyle)
+                GUIStyle titleStyle = new GUIStyle(StyleUtils.LabelStyle)
                 {
                     alignment = TextAnchor.MiddleCenter
                 };
@@ -38,32 +34,41 @@ namespace Miniclip.ShapeShifter.Switcher
                     highlightedGame,
                     ShapeShifterConfiguration.Instance.GameNames.ToArray(),
                     2,
-                    buttonStyle
+                    StyleUtils.ButtonStyle
                 );
 
                 GUILayout.Space(10.0f);
 
-                if (GUILayout.Button("Switch!", buttonStyle))
+                if (GUILayout.Button("Switch!", StyleUtils.ButtonStyle))
                 {
                     AssetSwitcher.SwitchToGame(highlightedGame);
                 }
+            }
+        }
 
-                if (GUILayout.Button(
-                        $"Overwrite all {ShapeShifterUtils.GetGameName(highlightedGame)} skins",
-                        buttonStyle
+        internal static void OnOverwriteAllSkinsGUI()
+        {
+            Color backgroundColor = GUI.backgroundColor;
+
+            GUI.backgroundColor = Color.red;
+
+            if (GUILayout.Button(
+                    $"Overwrite all {ShapeShifterUtils.GetGameName(highlightedGame)} skins",
+                    StyleUtils.ButtonStyle
+                ))
+            {
+                if (EditorUtility.DisplayDialog(
+                        "ShapeShifter",
+                        $"This will overwrite you current {ShapeShifterUtils.GetGameName(highlightedGame)} assets with the assets currently inside unity. Are you sure?",
+                        "Yes, overwrite it.",
+                        "Nevermind"
                     ))
                 {
-                    if (EditorUtility.DisplayDialog(
-                            "ShapeShifter",
-                            $"This will overwrite you current {ShapeShifterUtils.GetGameName(highlightedGame)} assets with the assets currently inside unity. Are you sure?",
-                            "Yes, overwrite it.",
-                            "Nevermind"
-                        ))
-                    {
-                        AssetSwitcher.OverwriteSelectedSkin(highlightedGame);
-                    }
+                    AssetSwitcher.OverwriteSelectedSkin(highlightedGame);
                 }
             }
+
+            GUI.backgroundColor = backgroundColor;
         }
     }
 }

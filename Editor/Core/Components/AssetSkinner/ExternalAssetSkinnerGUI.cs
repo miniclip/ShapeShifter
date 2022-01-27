@@ -1,4 +1,5 @@
 using System.IO;
+using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
         private static void DrawSkinnedExternalAssetSection(string relativePath)
         {
-            GUIStyle boxStyle = GUI.skin.GetStyle("Box");
+            GUIStyle boxStyle = StyleUtils.BoxStyle;
 
             using (new GUILayout.HorizontalScope(boxStyle))
             {
@@ -55,8 +56,8 @@ namespace Miniclip.ShapeShifter.Skinner
                 return;
             }
 
-            GUIStyle boxStyle = GUI.skin.GetStyle("Box");
-            GUIStyle buttonStyle = GUI.skin.GetStyle("Button");
+            GUIStyle boxStyle = StyleUtils.BoxStyle;
+            GUIStyle buttonStyle = StyleUtils.ButtonStyle;
 
             using (new GUILayout.VerticalScope(boxStyle))
             {

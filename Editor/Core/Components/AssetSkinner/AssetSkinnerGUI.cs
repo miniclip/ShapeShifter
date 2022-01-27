@@ -57,7 +57,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 return;
             }
 
-            GUIStyle boxStyle = GUI.skin.GetStyle("Box");
+            GUIStyle boxStyle = StyleUtils.BoxStyle;
 
             using (new GUILayout.VerticalScope(boxStyle))
             {
@@ -83,7 +83,8 @@ namespace Miniclip.ShapeShifter.Skinner
             }
         }
 
-        private static void DrawUnsupportedAssetSection((Object asset, bool isSupported, string reason) assetSupportInfo)
+        private static void DrawUnsupportedAssetSection(
+            (Object asset, bool isSupported, string reason) assetSupportInfo)
         {
             EditorGUILayout.InspectorTitlebar(true, assetSupportInfo.asset);
             Color oldColor = GUI.backgroundColor;
@@ -116,7 +117,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
         internal static void DrawAssetPreview(string key, string game, string path)
         {
-            GUIStyle boxStyle = GUI.skin.GetStyle("Box");
+            GUIStyle boxStyle = StyleUtils.BoxStyle;
 
             using (new GUILayout.VerticalScope(boxStyle))
             {
@@ -158,7 +159,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
         private static void DrawSkinnedAssetSection(string assetPath)
         {
-            GUIStyle boxStyle = GUI.skin.GetStyle("Box");
+            GUIStyle boxStyle = StyleUtils.BoxStyle;
 
             using (new GUILayout.HorizontalScope(boxStyle))
             {
@@ -239,6 +240,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 ShapeShifter.CachedPreviewPerAssetDict[key] = texturePreview;
             }
         }
+        
 
         private static bool IsValidImageFormat(string extension) =>
             extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp";
