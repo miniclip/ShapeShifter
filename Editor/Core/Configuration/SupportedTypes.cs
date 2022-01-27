@@ -20,15 +20,15 @@ namespace Miniclip.ShapeShifter
             typeof(SceneAsset),
             typeof(ScriptableObject),
             typeof(Texture2D),
-            typeof(TextAsset)
+            typeof(TextAsset),
         };
 
         private static readonly Type[] typesForbidden =
         {
             typeof(MonoScript),
         };
-        
-        public static bool IsSupported(Object asset, out string reason)
+
+        private static bool IsSupported(Object asset, out string reason)
         {
             Type assetType = asset.GetType();
 
@@ -57,8 +57,10 @@ namespace Miniclip.ShapeShifter
                 reason = $"{assetType.Name} type is not skinnable.";
                 return false;
             }
-            
-            return typesSupported.Any(typeSupported => assetType == typeSupported || assetType.IsSubclassOf(typeSupported));
+
+            return typesSupported.Any(
+                typeSupported => assetType == typeSupported || assetType.IsSubclassOf(typeSupported)
+            );
         }
 
         public static List<(Object asset, bool isSupported, string reason)> GetAssetsSupportInfo(this Object[] assets)
