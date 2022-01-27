@@ -71,15 +71,14 @@ namespace Miniclip.ShapeShifter
 
             return assetSkins;
         }
+        
+        internal bool HasExternalSkins() => DoesFolderExistAndHaveFiles(ExternalSkinsFolder);
 
-        internal bool IsValid() =>
-            Directory.Exists(MainFolder)
-            && (HasInternalSkins() || HasExternalSkins());
+        internal bool HasInternalSkins() => DoesFolderExistAndHaveFiles(InternalSkinsFolder);
 
-        internal bool HasExternalSkins() => Directory.Exists(ExternalSkinsFolder);
+        private bool DoesFolderExistAndHaveFiles(string path) => Directory.Exists(path) && Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories).Any();
 
-        internal bool HasInternalSkins() => Directory.Exists(InternalSkinsFolder);
-
+        
         internal void DeleteFolder()
         {
             if (Directory.Exists(MainFolder))
