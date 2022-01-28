@@ -164,6 +164,27 @@ namespace Miniclip.ShapeShifter.Utils
             SetGitIgnoreContent(gitIgnoreContent);
         }
 
+        [MenuItem("Window/Shape Shifter/Remove all git ignore entries")]
+        public static void RemoveAllShapeshifterEntriesFromGitIgnore()
+        {
+            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
+            {
+                return;
+            }
+            for (int index = gitIgnoreContent.Count - 1; index >= 0; index--)
+            {
+                string line = gitIgnoreContent[index];
+
+                if (line.Contains(GIT_IGNORE_SHAPESHIFTER_LABEL))
+                {
+                    gitIgnoreContent.RemoveAt(index+1);
+                    gitIgnoreContent.RemoveAt(index);
+                }
+            }
+            
+            SetGitIgnoreContent(gitIgnoreContent);
+        }
+        
         private static bool TryGetGitIgnoreLines(out List<string> gitIgnoreContent)
         {
             string gitIgnorePath = GitIgnorePath();
