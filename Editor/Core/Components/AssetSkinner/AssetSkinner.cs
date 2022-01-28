@@ -100,7 +100,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 GitUtils.Stage(assetFolder);
             }
 
-            GitUtils.Untrack(assetPath, true);
+            GitUtils.Untrack(assetPath);
         }
 
         public static bool IsSkinned(string assetPath) =>

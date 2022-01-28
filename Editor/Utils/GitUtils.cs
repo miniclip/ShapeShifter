@@ -6,7 +6,6 @@ using System.Linq;
 using Miniclip.ShapeShifter.Extensions;
 using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Utils
 {
@@ -96,23 +95,9 @@ namespace Miniclip.ShapeShifter.Utils
             Stage(assetPath);
         }
 
-        internal static void Untrack(string assetPath, bool addToGitIgnore = false)
+        internal static void Untrack(string assetPath)
         {
-            string fullFilePath = PathUtils.GetFullPath(assetPath);
-
-            if (IsTracked(fullFilePath))
-            {
-                RunGitCommand($"rm -r --cached {fullFilePath}");
-            }
-            else if (CanUnstage(fullFilePath))
-            {
-                UnStage(fullFilePath);
-            }
-
-            if (addToGitIgnore)
-            {
-                AddToGitIgnore(assetPath);
-            }
+            AddToGitIgnore(assetPath);
         }
 
         private static void AddToGitIgnore(string assetPath)
@@ -239,7 +224,7 @@ namespace Miniclip.ShapeShifter.Utils
             int index = gitIgnoreContent.FindIndex(line => line == ignoreIdentifier) + 1;
             return gitIgnoreContent[index];
         }
-        
+
         public static void ReplaceIgnoreEntry(string guid, string newFullPath)
         {
             if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
@@ -256,9 +241,9 @@ namespace Miniclip.ShapeShifter.Utils
                 ShapeShifterLogger.LogError($"Could not find guid {guid} in git ignore.");
                 return;
             }
-            
+
             gitIgnoreContent[index] = PathUtils.GetPathRelativeToRepositoryFolder(newFullPath);
-            
+
             SetGitIgnoreContent(gitIgnoreContent);
         }
 
@@ -323,12 +308,10 @@ namespace Miniclip.ShapeShifter.Utils
                 {
                     return output;
                 }
-                else
-                {
-                    throw new InvalidOperationException(
-                        $"Failed to run git {arguments}: Exit Code: {exitCode.ToString()}"
-                    );
-                }
+
+                throw new InvalidOperationException(
+                    $"Failed to run git {arguments}: Exit Code: {exitCode.ToString()}"
+                );
             }
         }
 
