@@ -133,6 +133,7 @@ namespace Miniclip.ShapeShifter.Skinner
                         GUILayout.Width(buttonWidth),
                         GUILayout.MaxHeight(buttonWidth)
                     );
+                    DropAreaGUI();
                 }
                 else
                 {
@@ -154,6 +155,52 @@ namespace Miniclip.ShapeShifter.Skinner
                     GUILayout.Label(game);
                     GUILayout.FlexibleSpace();
                 }
+
+                Event m_Event = Event.current;
+
+                if (m_Event.type == EventType.MouseDown)
+                {
+                    Debug.Log("Mouse Down.");
+                }
+
+                if (m_Event.type == EventType.MouseDrag)
+                {
+                    Debug.Log("Mouse Dragged.");
+                }
+
+                if (m_Event.type == EventType.MouseUp)
+                {
+                    Debug.Log("Mouse Up.");
+                }
+            }
+        }
+
+        public static void DropAreaGUI()
+        {
+            Event evt = Event.current;
+            Rect drop_area = GUILayoutUtility.GetRect(0.0f, 50.0f, GUILayout.ExpandWidth(true));
+            GUI.Box(drop_area, "Add Trigger");
+
+            switch (evt.type)
+            {
+                case EventType.DragUpdated:
+                case EventType.DragPerform:
+                    if (!drop_area.Contains(evt.mousePosition))
+                        return;
+
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
+
+                    if (evt.type == EventType.DragPerform)
+                    {
+                        DragAndDrop.AcceptDrag();
+
+                        foreach (string dragged_paths in DragAndDrop.paths)
+                        {
+                            Debug.Log(dragged_paths);
+                        }
+                    }
+
+                    break;
             }
         }
 
@@ -240,7 +287,6 @@ namespace Miniclip.ShapeShifter.Skinner
                 ShapeShifter.CachedPreviewPerAssetDict[key] = texturePreview;
             }
         }
-        
 
         private static bool IsValidImageFormat(string extension) =>
             extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp";
