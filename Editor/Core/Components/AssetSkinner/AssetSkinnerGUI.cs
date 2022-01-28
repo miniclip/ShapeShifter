@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Miniclip.ShapeShifter.Skinner
 {
@@ -126,6 +128,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 buttonWidth -= 20; // to account for a possible scrollbar or some extra padding 
 
                 bool clicked = false;
+                EditorGUILayout.PrefixLabel(game);
                 if (ShapeShifter.CachedPreviewPerAssetDict.TryGetValue(key, out Texture2D previewImage))
                 {
                     clicked = GUILayout.Button(
@@ -133,7 +136,20 @@ namespace Miniclip.ShapeShifter.Skinner
                         GUILayout.Width(buttonWidth),
                         GUILayout.MaxHeight(buttonWidth)
                     );
-                    DropAreaGUI();
+
+                    if (DropAreaGUI(out string replacementFilePath))
+                    {
+                        if (Path.GetExtension(replacementFilePath) == Path.GetExtension(path)
+                            && !PathUtils.IsDirectory(replacementFilePath))
+                        {
+                            FileUtil.DeleteFileOrDirectory(path);
+                            FileUtil.CopyFileOrDirectory(replacementFilePath, path);
+                        }
+                        else
+                        {
+                            ShapeShifterLogger.LogWarning("Unable to perform drag and drop replacement.");
+                        }
+                    }
                 }
                 else
                 {
@@ -148,45 +164,21 @@ namespace Miniclip.ShapeShifter.Skinner
                 {
                     EditorUtility.RevealInFinder(path);
                 }
-
-                using (new GUILayout.HorizontalScope(boxStyle))
-                {
-                    GUILayout.FlexibleSpace();
-                    GUILayout.Label(game);
-                    GUILayout.FlexibleSpace();
-                }
-
-                Event m_Event = Event.current;
-
-                if (m_Event.type == EventType.MouseDown)
-                {
-                    Debug.Log("Mouse Down.");
-                }
-
-                if (m_Event.type == EventType.MouseDrag)
-                {
-                    Debug.Log("Mouse Dragged.");
-                }
-
-                if (m_Event.type == EventType.MouseUp)
-                {
-                    Debug.Log("Mouse Up.");
-                }
             }
         }
 
-        public static void DropAreaGUI()
+        private static bool DropAreaGUI(out string filepath)
         {
             Event evt = Event.current;
-            Rect drop_area = GUILayoutUtility.GetRect(0.0f, 50.0f, GUILayout.ExpandWidth(true));
-            GUI.Box(drop_area, "Add Trigger");
-
+            Rect dropAreaRect = GUILayoutUtility.GetRect(0.0f, 50.0f, GUILayout.ExpandWidth(true));
+            GUI.Box(dropAreaRect, "Drag file here to replace");
+            filepath = String.Empty;
             switch (evt.type)
             {
                 case EventType.DragUpdated:
                 case EventType.DragPerform:
-                    if (!drop_area.Contains(evt.mousePosition))
-                        return;
+                    if (!dropAreaRect.Contains(evt.mousePosition))
+                        return false;
 
                     DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
 
@@ -194,14 +186,17 @@ namespace Miniclip.ShapeShifter.Skinner
                     {
                         DragAndDrop.AcceptDrag();
 
-                        foreach (string dragged_paths in DragAndDrop.paths)
+                        foreach (string dragged_path in DragAndDrop.paths)
                         {
-                            Debug.Log(dragged_paths);
+                            filepath = dragged_path;
+                            return true;
                         }
                     }
 
                     break;
             }
+
+            return false;
         }
 
         private static void DrawSkinnedAssetSection(string assetPath)
