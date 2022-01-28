@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Miniclip.ShapeShifter.Skinner
 {
@@ -16,7 +14,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
         private static readonly string defaultIcon = "WelcomeScreen.AssetStoreLogo";
         private static readonly string errorIcon = "console.erroricon";
-        private static readonly Dictionary<string, string> iconPerExtension = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> iconPerExtension = new Dictionary<string, string>
         {
             {
                 ".anim", "AnimationClip Icon"
@@ -172,13 +170,15 @@ namespace Miniclip.ShapeShifter.Skinner
             Event evt = Event.current;
             Rect dropAreaRect = GUILayoutUtility.GetRect(0.0f, 50.0f, GUILayout.ExpandWidth(true));
             GUI.Box(dropAreaRect, "Drag file here to replace");
-            filepath = String.Empty;
+            filepath = string.Empty;
             switch (evt.type)
             {
                 case EventType.DragUpdated:
                 case EventType.DragPerform:
                     if (!dropAreaRect.Contains(evt.mousePosition))
+                    {
                         return false;
+                    }
 
                     DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
 
