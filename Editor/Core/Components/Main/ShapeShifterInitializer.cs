@@ -40,6 +40,7 @@ public class ShapeShifterInitializer
         if (isFocused)
         {
             AssetSwitcher.RestoreMissingAssets();
+            ShapeShifterUtils.DeleteDSStoreFiles();
         }
     }
 

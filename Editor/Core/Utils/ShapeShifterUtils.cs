@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.IO;
 using Miniclip.ShapeShifter.Switcher;
 using UnityEditor;
 
@@ -17,5 +19,23 @@ namespace Miniclip.ShapeShifter.Utils
             EditorApplication.ExecuteMenuItem("File/Save Project");
         }
 
+        public static void DeleteDSStoreFiles()
+        {
+            foreach (string gameName in ShapeShifterConfiguration.Instance.GameNames)
+            {
+                GameSkin gameSkin = new GameSkin(gameName);
+
+                IEnumerable<string> ds_stores = Directory.EnumerateFiles(
+                    gameSkin.MainFolder,
+                    ".DS_Store",
+                    SearchOption.AllDirectories
+                );
+
+                foreach (string dsStore in ds_stores)
+                {
+                    File.Delete(dsStore);
+                }
+            }
+        }
     }
 }
