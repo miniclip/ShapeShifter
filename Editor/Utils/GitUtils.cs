@@ -97,7 +97,24 @@ namespace Miniclip.ShapeShifter.Utils
 
         internal static void Untrack(string assetPath)
         {
+            string fullFilePath = PathUtils.GetFullPath(assetPath);
+
+            RemoveOrUnstage(fullFilePath);
+            RemoveOrUnstage(fullFilePath+".meta");
+            
             AddToGitIgnore(assetPath);
+        }
+
+        private static void RemoveOrUnstage(string fullFilePath)
+        {
+            if (IsTracked(fullFilePath))
+            {
+                RunGitCommand($"rm -r --cached {fullFilePath}");
+            }
+            else if (CanUnstage(fullFilePath))
+            {
+                UnStage(fullFilePath);
+            }
         }
 
         private static void AddToGitIgnore(string assetPath)
@@ -108,6 +125,7 @@ namespace Miniclip.ShapeShifter.Utils
             }
 
             string pathRelativeToProjectFolder = PathUtils.GetPathRelativeToProjectFolder(assetPath);
+            string metaPathRelativeToProjectFolder = pathRelativeToProjectFolder + ".meta";
 
             if (string.IsNullOrEmpty(pathRelativeToProjectFolder))
             {
@@ -120,11 +138,13 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 // a possible rename has happened, we should simply replace the existing ignore entry with this new one
                 gitIgnoreContent[gitIgnoreContent.IndexOf(assetIgnoreIdentifier) + 1] = pathRelativeToProjectFolder;
+                gitIgnoreContent[gitIgnoreContent.IndexOf(assetIgnoreIdentifier) + 2] = metaPathRelativeToProjectFolder;
                 return;
             }
 
             gitIgnoreContent.Add(assetIgnoreIdentifier);
             gitIgnoreContent.Add($"{pathRelativeToProjectFolder}");
+            gitIgnoreContent.Add($"{metaPathRelativeToProjectFolder}");
 
             SetGitIgnoreContent(gitIgnoreContent);
         }
@@ -144,7 +164,7 @@ namespace Miniclip.ShapeShifter.Utils
                 return;
             }
 
-            gitIgnoreContent.RemoveRange(lineToRemove, 2);
+            gitIgnoreContent.RemoveRange(lineToRemove, 3);
 
             SetGitIgnoreContent(gitIgnoreContent);
         }
@@ -162,6 +182,7 @@ namespace Miniclip.ShapeShifter.Utils
 
                 if (line.Contains(GIT_IGNORE_SHAPESHIFTER_LABEL))
                 {
+                    gitIgnoreContent.RemoveAt(index+2);
                     gitIgnoreContent.RemoveAt(index+1);
                     gitIgnoreContent.RemoveAt(index);
                 }
@@ -242,7 +263,10 @@ namespace Miniclip.ShapeShifter.Utils
                 return;
             }
 
-            gitIgnoreContent[index] = PathUtils.GetPathRelativeToRepositoryFolder(newFullPath);
+            string pathRelativeToRepositoryFolder = PathUtils.GetPathRelativeToRepositoryFolder(newFullPath);
+            string metaPathRelativeToRepositoryFolder = pathRelativeToRepositoryFolder + ".meta";
+            gitIgnoreContent[index] = pathRelativeToRepositoryFolder;
+            gitIgnoreContent[index+1] = metaPathRelativeToRepositoryFolder;
 
             SetGitIgnoreContent(gitIgnoreContent);
         }

@@ -8,49 +8,18 @@ using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Switcher
 {
     public static class AssetSwitcher
     {
-        private static Dictionary<string, string> missingGuidsToPathDictionary = new Dictionary<string, string>();
-
-        private static string ExtractGuidFromMetaFile(string path)
-        {
-            if (Path.GetExtension(path) != ".meta")
-            {
-                ShapeShifterLogger.LogError($"Trying to extract guid from non meta file : {path}");
-                return string.Empty;
-            }
-
-            using (StreamReader reader = new StreamReader(path))
-            {
-                while (!reader.EndOfStream)
-                {
-                    var line = reader.ReadLine();
-
-                    if (string.IsNullOrEmpty(line))
-                        continue;
-
-                    if (!line.StartsWith("guid"))
-                        continue;
-
-                    return line.Split(' ')[1];
-                }
-            }
-
-            return string.Empty;
-        }
-
         internal static void RestoreMissingAssets()
         {
-            missingGuidsToPathDictionary.Clear();
             List<string> missingAssets = new List<string>();
             Stopwatch stopwatch = Stopwatch.StartNew();
             if (ShapeShifter.ActiveGameSkin.HasInternalSkins())
             {
-                EditorUtility.DisplayProgressBar("ShapeShifter", "Checking for missing assets", 0.5f);
-
                 List<AssetSkin> assetSkins = ShapeShifter.ActiveGameSkin.GetAssetSkins();
 
                 foreach (AssetSkin assetSkin in assetSkins)
@@ -62,67 +31,46 @@ namespace Miniclip.ShapeShifter.Switcher
                     }
 
                     string guid = assetSkin.Guid;
-                    string assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
-                    if (string.IsNullOrEmpty(assetPath))
+                    string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
+                    string assetGitIgnorePath = PathUtils.GetFullPath(GitUtils.GetIgnoredPathByGUID(guid));
+
+                    if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
                     {
                         missingAssets.Add(guid);
                         continue;
                     }
 
-                    if (!File.Exists(PathUtils.GetFullPath(assetPath)))
+                    if (!File.Exists(assetDatabasePath))
                     {
                         missingAssets.Add(guid);
                     }
                 }
 
-                // get all deleted meta files
-                IEnumerable<GitUtils.ChangedFileGitInfo> deletedMetasInGit = GitUtils.GetDeletedFiles()
-                    .Where(
-                        deletedMeta => deletedMeta.path.Contains(".meta") && PathUtils.IsInternalPath(deletedMeta.path)
-                    );
-
-                //Restore meta files and do not call AssetDatabase refresh to prevent from being deleted again
-                //Store in dictionary mapping guid to path, since AssetDatabase.GUIDToAssetPath will not work
-                foreach (var deletedMeta in deletedMetasInGit)
+                if (missingAssets.Count == 0)
                 {
-                    string metaFullPath = PathUtils.GetFullPath(deletedMeta.path);
-
-                    //need to recover deleted meta to check its contents
-                    GitUtils.DiscardChanges(metaFullPath);
-
-                    string metaGuid = ExtractGuidFromMetaFile(metaFullPath);
-
-                    string fullPath = metaFullPath.Replace(".meta", "");
-
-                    if (ShapeShifter.ActiveGameSkin.HasGuid(metaGuid))
-                    {
-                        missingGuidsToPathDictionary.Add(metaGuid, PathUtils.GetPathRelativeToAssetsFolder(fullPath));
-                    }
-                    else
-                    {
-                        //if there are no skins with this guid, delete meta again
-                        FileUtil.DeleteFileOrDirectory(metaFullPath);
-                    }
+                    ShapeShifterLogger.Log("Nothing to sync from skins folder.");
                 }
-
-                PerformCopiesWithTracking(
-                    ShapeShifter.ActiveGame,
-                    "Add missing skins",
-                    CopyIfMissingInternal,
-                    CopyFromSkinnedExternalToOrigin
-                );
+                else
+                {
+                    PerformCopiesWithTracking(
+                        ShapeShifter.ActiveGame,
+                        "Add missing skins",
+                        CopyIfMissingInternal,
+                        CopyFromSkinnedExternalToOrigin
+                    );
+                    stopwatch.Stop();
+                    ShapeShifterLogger.Log(
+                        missingAssets.Count > 0
+                            ? $"Synced {missingAssets.Count} assets in {stopwatch.Elapsed.TotalSeconds} seconds"
+                            : $"Nothing to retrieve."
+                    );
+                }
+                
+                stopwatch.Stop();
             }
-
-            EditorUtility.ClearProgressBar();
-
-            stopwatch.Stop();
-            int missingCount = missingGuidsToPathDictionary.Count;
-            ShapeShifterLogger.Log(
-                missingCount > 0
-                    ? $"Finished retrieving {missingCount} assets in {stopwatch.Elapsed.TotalSeconds}"
-                    : $"Nothing to retrieve."
-            );
+            
+            
         }
 
         private static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory)
@@ -191,16 +139,37 @@ namespace Miniclip.ShapeShifter.Switcher
 
             string guid = skinDirectory.Name;
             string origin = AssetDatabase.GUIDToAssetPath(guid);
+
+            string originFullPath = PathUtils.GetFullPath(origin);
+
+            if (string.IsNullOrEmpty(origin))
+            {
+                ShapeShifterLogger.LogError(
+                    $"Getting an empty path for guid {guid}. Can't push changes to skin folder."
+                );
+                return;
+            }
+
             string target = Path.Combine(skinDirectory.FullName, Path.GetFileName(origin));
 
             if (AssetDatabase.IsValidFolder(origin))
             {
+                if (!Directory.Exists(originFullPath))
+                {
+                    return;
+                }
+
                 DirectoryInfo originInfo = new DirectoryInfo(origin);
                 DirectoryInfo targetInfo = new DirectoryInfo(target);
                 IOUtils.CopyFolder(originInfo, targetInfo);
             }
             else
             {
+                if (!File.Exists(originFullPath))
+                {
+                    return;
+                }
+
                 IOUtils.TryCreateDirectory(skinDirectory.FullName, true);
                 IOUtils.CopyFile(origin, target);
                 IOUtils.CopyFile(origin + ".meta", target + ".meta");
@@ -413,25 +382,45 @@ namespace Miniclip.ShapeShifter.Switcher
             foreach (AssetSkin assetSkin in gameSkin.GetAssetSkins())
             {
                 string guid = assetSkin.Guid;
-                
+
                 AssetDatabase.ImportAsset(AssetDatabase.GUIDToAssetPath(guid), ImportAssetOptions.ForceUpdate);
             }
-
         }
 
         private static void CopyIfMissingInternal(DirectoryInfo directory)
         {
             string guid = directory.Name;
 
-            // Ensure it has the same name, so we don't end up copying .DS_Store
-            string target = AssetDatabase.GUIDToAssetPath(guid);
-            if (string.IsNullOrEmpty(target) && !missingGuidsToPathDictionary.TryGetValue(guid, out target))
+            string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
+            string assetGitIgnorePath = PathUtils.GetFullPath(GitUtils.GetIgnoredPathByGUID(guid));
+
+            //prioritize path from gitignore as is the only one version controlled
+            string targetPath = assetGitIgnorePath;
+
+            FileInfo targetFileInfo = new FileInfo(targetPath);
+
+            if (!Directory.Exists(targetFileInfo.DirectoryName))
+            {
+                IOUtils.TryCreateDirectory(targetFileInfo.DirectoryName);
+            }
+            
+            if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
+            {
+                if (File.Exists(assetDatabasePath))
+                {
+                    //delete any file on AssetDatabasePath as is probably outdated and should not be there
+                    FileUtil.DeleteFileOrDirectory(assetDatabasePath);
+                    FileUtil.DeleteFileOrDirectory(assetDatabasePath + ".meta");
+                }
+            }
+
+            if (string.IsNullOrEmpty(targetPath))
             {
                 ShapeShifterLogger.LogError($"Can't find Asset Path for guid: {guid}");
                 return;
             }
 
-            string searchPattern = Path.GetFileName(target) + "*";
+            string searchPattern = Path.GetFileName(targetPath) + "*";
 
             FileInfo[] files = directory.GetFiles(searchPattern);
 
@@ -442,24 +431,24 @@ namespace Miniclip.ShapeShifter.Switcher
                     //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
                     if (fileInfo.Extension == ".meta")
                     {
-                        string metaFile = target + ".meta";
+                        string metaFile = targetPath + ".meta";
                         if (File.Exists(PathUtils.GetFullPath(metaFile)))
                         {
                             continue;
                         }
 
                         ShapeShifterLogger.Log($"Retrieving: {metaFile}");
-                        fileInfo.CopyTo(metaFile, true);
+                        FileUtil.CopyFileOrDirectory(fileInfo.FullName, metaFile);
                     }
                     else
                     {
-                        if (File.Exists(PathUtils.GetFullPath(target)))
+                        if (File.Exists(PathUtils.GetFullPath(targetPath)))
                         {
                             continue;
                         }
 
-                        ShapeShifterLogger.Log($"Retrieving: {target}");
-                        fileInfo.CopyTo(target, true);
+                        ShapeShifterLogger.Log($"Retrieving: {targetPath}");
+                        FileUtil.CopyFileOrDirectory(fileInfo.FullName, targetPath);
                     }
                 }
             }
@@ -468,12 +457,12 @@ namespace Miniclip.ShapeShifter.Switcher
 
             if (directories.Length > 0)
             {
-                target = Path.Combine(
+                targetPath = Path.Combine(
                     Application.dataPath.Replace("/Assets", string.Empty),
-                    target
+                    targetPath
                 );
 
-                IOUtils.CopyFolder(directories[0], new DirectoryInfo(target));
+                IOUtils.CopyFolder(directories[0], new DirectoryInfo(targetPath));
             }
         }
     }

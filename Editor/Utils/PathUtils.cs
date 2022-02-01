@@ -115,6 +115,11 @@ namespace Miniclip.ShapeShifter.Utils
 
         internal static string GetFullPath(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                return string.Empty;
+            }
+            
             if (Path.IsPathRooted(path))
             {
                 return path;
