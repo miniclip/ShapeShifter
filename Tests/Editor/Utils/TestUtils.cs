@@ -16,14 +16,14 @@ namespace Miniclip.ShapeShifter.Tests
         internal static string SpriteAssetName = "shapeshifter.test.sprite";
         internal static string TextFileAssetName = "shapeshifter.test.textfile";
         internal static string FolderAssetName = "shapeshifter.test.folder";
-        
-        internal static string[] TestGameNames = {
-            "Test0",
-            "Test1",
+
+        internal static string[] TestGameNames =
+        {
+            "Test0", "Test1",
         };
-        
+
         private static List<string> cachedGameNames;
-        
+
         internal static string GetAssetPath(string name)
         {
             string[] assetGUIDs = AssetDatabase.FindAssets(name);
@@ -50,13 +50,13 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsNotNull(asset, $"Could not load {name}");
             return asset;
         }
-        
+
         internal static void Reset()
         {
             CopyAllTestResourcesFromPackagesToAssetsFolder();
 
             AssetDatabase.Refresh();
-            
+
             cachedGameNames = new List<string>(ShapeShifterConfiguration.Instance.GameNames);
             ShapeShifterConfiguration.Instance.GameNames.Clear();
             ShapeShifterConfiguration.Instance.GameNames = new List<string>(TestGameNames);
@@ -96,7 +96,6 @@ namespace Miniclip.ShapeShifter.Tests
                 AssetSkinner.RemoveSkins(GetAssetPath(FolderAssetName));
             }
 
-            
             FileUtil.DeleteFileOrDirectory(TempFolderName);
             FileUtil.DeleteFileOrDirectory(TempFolderName + ".meta");
 
@@ -106,11 +105,11 @@ namespace Miniclip.ShapeShifter.Tests
                 {
                     continue;
                 }
-                
+
                 GameSkin gameSkin = new GameSkin(configurationGameName);
                 gameSkin.DeleteFolder();
             }
-            
+
             GitUtils.Stage(TempFolderName);
             AssetDatabase.Refresh();
             ShapeShifterConfiguration.Instance.GameNames = cachedGameNames;

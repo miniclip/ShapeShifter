@@ -34,7 +34,6 @@ namespace Miniclip.ShapeShifter
 
         internal string Name { get; }
 
-
         internal GameSkin(string name)
         {
             Name = name;
@@ -71,14 +70,14 @@ namespace Miniclip.ShapeShifter
 
             return assetSkins;
         }
-        
+
         internal bool HasExternalSkins() => DoesFolderExistAndHaveFiles(ExternalSkinsFolder);
 
         internal bool HasInternalSkins() => DoesFolderExistAndHaveFiles(InternalSkinsFolder);
 
-        private bool DoesFolderExistAndHaveFiles(string path) => Directory.Exists(path) && Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories).Any();
+        private bool DoesFolderExistAndHaveFiles(string path) =>
+            Directory.Exists(path) && Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories).Any();
 
-        
         internal void DeleteFolder()
         {
             if (Directory.Exists(MainFolder))

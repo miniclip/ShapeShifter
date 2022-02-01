@@ -19,8 +19,7 @@ namespace Miniclip.ShapeShifter.Utils
 
         internal static bool IsDirectory(string path)
         {
-            FileAttributes fa = File.GetAttributes(path);
-            return (fa & FileAttributes.Directory) != 0;
+            return !Path.HasExtension(path);
         }
 
         internal static bool IsPathRelativeToAssets(string path) =>
@@ -119,7 +118,7 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 return string.Empty;
             }
-            
+
             if (Path.IsPathRooted(path))
             {
                 return path;
@@ -169,6 +168,21 @@ namespace Miniclip.ShapeShifter.Utils
             }
 
             return count;
+        }
+
+        public static bool FileOrDirectoryExists(string assetDatabasePath)
+        {
+            assetDatabasePath = GetFullPath(assetDatabasePath);
+
+            if (string.IsNullOrEmpty(assetDatabasePath))
+                return false;
+
+            if (IsDirectory(assetDatabasePath))
+            {
+                return Directory.Exists(assetDatabasePath);
+            }
+
+            return File.Exists(assetDatabasePath);
         }
     }
 }

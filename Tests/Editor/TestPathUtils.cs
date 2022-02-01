@@ -9,24 +9,22 @@ namespace Miniclip.ShapeShifter.Tests
 {
     public class TestPathUtils : TestBase
     {
-
         [Test]
         public void TestPathOperations()
         {
             string basePath = Directory.GetCurrentDirectory();
-            
+
             Assert.IsFalse(PathUtils.IsPathRelativeToAssets(basePath));
 
             string assetPath = AssetDatabase.GetAssetPath(TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName));
-            
+
             Assert.IsTrue(PathUtils.IsPathRelativeToAssets(assetPath));
-            
+
             string assetFullPath = PathUtils.GetFullPath(assetPath);
 
             Assert.IsFalse(PathUtils.IsPathRelativeToAssets(assetFullPath));
-            
+
             Assert.IsTrue(PathUtils.IsPathRelativeToAssets(PathUtils.GetPathRelativeToAssetsFolder(assetFullPath)));
-            
         }
 
         [Test]
@@ -39,21 +37,33 @@ namespace Miniclip.ShapeShifter.Tests
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
             Assert.IsFalse(AssetSkinner.IsSkinned(assetPath), "Asset should not be skinned");
-            
+
             AssetSkinner.SkinAsset(assetPath);
-            
+
             Assert.IsTrue(AssetSkinner.IsSkinned(assetPath), "Asset should be skinned");
             Assert.IsTrue(ShapeShifter.ActiveGameSkin.HasGuid(guid), "Active Game skin should have this GUID.");
             Assert.IsTrue(PathUtils.IsPathRelativeToAssets(assetPath));
-            
+
             var assetSkin = ShapeShifter.ActiveGameSkin.GetAssetSkin(guid);
             Assert.IsNotNull(assetSkin);
-            
+
             string assetSkinPath = assetSkin.FolderPath;
-            
+
             Assert.IsFalse(string.IsNullOrEmpty(assetSkinPath));
             Assert.IsTrue(Path.IsPathRooted(assetSkinPath));
-         }
-        
+        }
+
+        [Test]
+        public void TestIfFileOrDirectoryExists()
+        {
+            string fakePath = Path.Combine(Application.dataPath, "fake");
+
+            Assert.IsFalse(PathUtils.FileOrDirectoryExists(fakePath));
+
+            var squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
+            string assetPath = AssetDatabase.GetAssetPath(squareSprite);
+
+            Assert.IsTrue(PathUtils.FileOrDirectoryExists(assetPath));
+        }
     }
 }

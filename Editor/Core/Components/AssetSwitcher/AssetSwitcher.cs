@@ -41,7 +41,7 @@ namespace Miniclip.ShapeShifter.Switcher
                         continue;
                     }
 
-                    if (!File.Exists(assetDatabasePath))
+                    if (!PathUtils.FileOrDirectoryExists(assetDatabasePath))
                     {
                         missingAssets.Add(guid);
                     }
@@ -66,11 +66,9 @@ namespace Miniclip.ShapeShifter.Switcher
                             : $"Nothing to retrieve."
                     );
                 }
-                
+
                 stopwatch.Stop();
             }
-            
-            
         }
 
         private static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory)
@@ -403,7 +401,7 @@ namespace Miniclip.ShapeShifter.Switcher
             {
                 IOUtils.TryCreateDirectory(targetFileInfo.DirectoryName);
             }
-            
+
             if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
             {
                 if (File.Exists(assetDatabasePath))
