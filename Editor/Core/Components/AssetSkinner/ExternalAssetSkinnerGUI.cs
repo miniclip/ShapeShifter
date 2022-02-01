@@ -29,7 +29,7 @@ namespace Miniclip.ShapeShifter.Skinner
                     );
 
                     AssetSkinnerGUI.GenerateAssetPreview(key, assetPath);
-                    AssetSkinnerGUI.DrawAssetPreview(key, game, assetPath);
+                    AssetSkinnerGUI.DrawAssetPreview(key, game, assetPath, false);
                 }
             }
 

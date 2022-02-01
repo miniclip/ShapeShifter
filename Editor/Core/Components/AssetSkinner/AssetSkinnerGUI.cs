@@ -115,7 +115,7 @@ namespace Miniclip.ShapeShifter.Skinner
             GUI.backgroundColor = oldColor;
         }
 
-        internal static void DrawAssetPreview(string key, string game, string path)
+        internal static void DrawAssetPreview(string key, string game, string path, bool drawDropAreaToReplace = true)
         {
             GUIStyle boxStyle = StyleUtils.BoxStyle;
 
@@ -135,7 +135,7 @@ namespace Miniclip.ShapeShifter.Skinner
                         GUILayout.MaxHeight(buttonWidth)
                     );
 
-                    if (DropAreaGUI(out string replacementFilePath))
+                    if (drawDropAreaToReplace && DropAreaGUI(out string replacementFilePath))
                     {
                         if (Path.GetExtension(replacementFilePath) == Path.GetExtension(path)
                             && !PathUtils.IsDirectory(replacementFilePath))
