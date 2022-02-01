@@ -21,13 +21,12 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPath = AssetDatabase.GetAssetPath(testAsset);
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             string assetFullPath = PathUtils.GetFullPath(assetPath);
-            
+
             Assert.IsNotNull(testAsset, "Text asset not found");
             Assert.IsNotEmpty(assetPath, "Text asset path is empty");
             Assert.IsTrue(!AssetSkinner.IsSkinned(assetPath));
             Assert.IsTrue(!ShapeShifterConfiguration.Instance.HasUnsavedChanges);
 
-            
             AssetSkinner.SkinAsset(assetPath);
 
             AssetSwitcher.SwitchToGame(0, true);
@@ -115,6 +114,42 @@ namespace Miniclip.ShapeShifter.Tests
                 PathUtils.GetAssetCountInFolder(skinPath) == 3,
                 "Skinned folder should still have the original file amount"
             );
+        }
+
+        [Test]
+        public void TestModifyingSpriteMeta()
+        {
+            Sprite spriteAsset = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
+
+            string assetPath = AssetDatabase.GetAssetPath(spriteAsset);
+
+            AssetSkinner.SkinAsset(assetPath);
+
+            AssetSwitcher.SwitchToGame(0, true);
+
+            TextureImporter textureImporter =
+                (TextureImporter)TextureImporter.GetAtPath(assetPath);
+            Assert.IsTrue(textureImporter.textureType == TextureImporterType.Sprite);
+            Assert.IsFalse(textureImporter.textureType == TextureImporterType.Default);
+
+            textureImporter.textureType = TextureImporterType.Default;
+            Assert.IsTrue(textureImporter.textureType == TextureImporterType.Default);
+            textureImporter.SaveAndReimport();
+            ShapeShifterUtils.SavePendingChanges();
+
+            AssetSwitcher.SwitchToGame(1, true);
+
+            textureImporter =
+                (TextureImporter)TextureImporter.GetAtPath(assetPath);
+            Assert.IsTrue(textureImporter.textureType == TextureImporterType.Sprite);
+            Assert.IsFalse(textureImporter.textureType == TextureImporterType.Default);
+
+            AssetSwitcher.SwitchToGame(0, true);
+
+            textureImporter =
+                (TextureImporter)TextureImporter.GetAtPath(assetPath);
+            Assert.IsTrue(textureImporter.textureType == TextureImporterType.Default);
+            Assert.IsFalse(textureImporter.textureType == TextureImporterType.Sprite);
         }
     }
 }
