@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using NUnit.Framework;
@@ -64,6 +65,31 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPath = AssetDatabase.GetAssetPath(squareSprite);
 
             Assert.IsTrue(PathUtils.FileOrDirectoryExists(assetPath));
+        }
+
+        [Test]
+        public void TestIfIsFileOrDirectory()
+        {
+            string directoryPath1 = Application.dataPath;
+            string directoryPath2 = Application.persistentDataPath;
+
+            Assert.IsTrue(PathUtils.IsDirectory(directoryPath1));
+            Assert.IsTrue(PathUtils.IsDirectory(directoryPath2));
+
+            Assert.IsFalse(PathUtils.IsFile(directoryPath1));
+            Assert.IsFalse(PathUtils.IsFile(directoryPath2));
+
+            ArgumentException exception = Assert.Throws<ArgumentException>(() => PathUtils.IsDirectory(""));
+            Assert.IsTrue(
+                exception.Message.Contains("Path given is empty or null"),
+                "Exception message is not the expected"
+            );
+
+            Sprite squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
+            string assetPath = AssetDatabase.GetAssetPath(squareSprite);
+
+            Assert.IsTrue(PathUtils.IsFile(assetPath));
+            Assert.IsFalse(PathUtils.IsDirectory(assetPath));
         }
     }
 }
