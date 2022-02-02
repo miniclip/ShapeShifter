@@ -54,7 +54,7 @@ namespace Miniclip.ShapeShifter.Switcher
             {
                 alignment = TextAnchor.MiddleCenter,
                 fontStyle = FontStyle.Bold,
-                fontSize = 25
+                fontSize = 20
             };
             
             GUILayout.Box($"Active game: {ShapeShifter.ActiveGameName}", titleStyle);
