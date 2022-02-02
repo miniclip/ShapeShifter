@@ -19,7 +19,17 @@ namespace Miniclip.ShapeShifter.Utils
 
         internal static bool IsDirectory(string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException("Path given is empty or null");
+            }
+
             return !Path.HasExtension(path);
+        }
+
+        internal static bool IsFile(string path)
+        {
+            return !IsDirectory(path);
         }
 
         internal static bool IsPathRelativeToAssets(string path) =>
@@ -116,7 +126,7 @@ namespace Miniclip.ShapeShifter.Utils
         {
             if (string.IsNullOrEmpty(path))
             {
-                return string.Empty;
+                throw new ArgumentException("Path is empty");
             }
 
             if (Path.IsPathRooted(path))
