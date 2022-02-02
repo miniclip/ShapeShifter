@@ -9,7 +9,6 @@ namespace Miniclip.ShapeShifter.Switcher
         private static int highlightedGame;
 
         private static bool showSwitcher = true;
-        private static Vector2 scrollPosition;
 
         internal static void OnGUI()
         {
@@ -54,15 +53,14 @@ namespace Miniclip.ShapeShifter.Switcher
             {
                 alignment = TextAnchor.MiddleCenter,
                 fontStyle = FontStyle.Bold,
-                fontSize = 20
+                fontSize = 20,
             };
-            
+
             GUILayout.Box($"Active game: {ShapeShifter.ActiveGameName}", titleStyle);
         }
 
         internal static void OnOverwriteAllSkinsGUI()
         {
-            
             Color backgroundColor = GUI.backgroundColor;
 
             GUI.backgroundColor = Color.red;
