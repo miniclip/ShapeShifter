@@ -26,13 +26,13 @@ public class ShapeShifterInitializer
     {
         if (!isFocused)
             return;
-        
+
         await Task.Delay(1000);
 
         if (EditorApplication.isPlaying)
             return;
 
-        while (EditorApplication.isCompiling)
+        while (EditorApplication.isCompiling || EditorApplication.isUpdating)
         {
             await Task.Delay(1000);
         }
