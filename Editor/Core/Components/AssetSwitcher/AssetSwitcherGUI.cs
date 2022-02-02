@@ -9,6 +9,7 @@ namespace Miniclip.ShapeShifter.Switcher
         private static int highlightedGame;
 
         private static bool showSwitcher = true;
+        private static Vector2 scrollPosition;
 
         internal static void OnGUI()
         {
@@ -19,35 +20,49 @@ namespace Miniclip.ShapeShifter.Switcher
                 return;
             }
 
-            using (new GUILayout.VerticalScope(StyleUtils.BoxStyle))
+            GUIStyle boxStyle = StyleUtils.BoxStyle;
+            using (new GUILayout.VerticalScope(boxStyle))
             {
-                GUIStyle titleStyle = new GUIStyle(StyleUtils.LabelStyle)
+                using (new GUILayout.VerticalScope())
                 {
-                    alignment = TextAnchor.MiddleCenter
-                };
+                    OnActiveGameGUI();
 
-                string currentGame = ShapeShifter.ActiveGameName;
-
-                GUILayout.Box($"Current game: {currentGame}", titleStyle);
-
-                highlightedGame = GUILayout.SelectionGrid(
-                    highlightedGame,
-                    ShapeShifterConfiguration.Instance.GameNames.ToArray(),
-                    2,
-                    StyleUtils.ButtonStyle
-                );
-
-                GUILayout.Space(10.0f);
-
-                if (GUILayout.Button("Switch!", StyleUtils.ButtonStyle))
-                {
-                    AssetSwitcher.SwitchToGame(highlightedGame);
+                    OnSwitchToGUI();
                 }
             }
         }
 
+        private static void OnSwitchToGUI()
+        {
+            GUILayout.Space(10.0f);
+
+            highlightedGame = EditorGUILayout.Popup(
+                "Switch To",
+                highlightedGame,
+                ShapeShifterConfiguration.Instance.GameNames.ToArray()
+            );
+
+            if (GUILayout.Button("Switch!", StyleUtils.ButtonStyle))
+            {
+                AssetSwitcher.SwitchToGame(highlightedGame);
+            }
+        }
+
+        private static void OnActiveGameGUI()
+        {
+            GUIStyle titleStyle = new GUIStyle(StyleUtils.LabelStyle)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                fontStyle = FontStyle.Bold,
+                fontSize = 25
+            };
+            
+            GUILayout.Box($"Active game: {ShapeShifter.ActiveGameName}", titleStyle);
+        }
+
         internal static void OnOverwriteAllSkinsGUI()
         {
+            
             Color backgroundColor = GUI.backgroundColor;
 
             GUI.backgroundColor = Color.red;
