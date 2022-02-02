@@ -11,7 +11,7 @@ namespace Miniclip.ShapeShifter.Tests
 {
     class TestUtils
     {
-        private static string TempFolderName = "Assets/ShapeShifterTestAssets";
+        internal static string TempFolderName = "Assets/ShapeShifterTestAssets";
 
         internal static string SpriteAssetName = "shapeshifter.test.sprite";
         internal static string TextFileAssetName = "shapeshifter.test.textfile";

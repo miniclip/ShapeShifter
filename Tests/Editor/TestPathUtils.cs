@@ -59,12 +59,12 @@ namespace Miniclip.ShapeShifter.Tests
         {
             string fakePath = Path.Combine(Application.dataPath, "fake");
 
-            Assert.IsFalse(PathUtils.FileOrDirectoryExists(fakePath));
+            Assert.IsFalse(PathUtils.IsValidFileOrDirectoryPath(fakePath));
 
             var squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
             string assetPath = AssetDatabase.GetAssetPath(squareSprite);
 
-            Assert.IsTrue(PathUtils.FileOrDirectoryExists(assetPath));
+            Assert.IsTrue(PathUtils.IsValidFileOrDirectoryPath(assetPath));
         }
 
         [Test]
@@ -90,6 +90,13 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsTrue(PathUtils.IsFile(assetPath));
             Assert.IsFalse(PathUtils.IsDirectory(assetPath));
+        }
+
+        [Test]
+        public void TestCountingAssetsInFolder()
+        {
+            int assetCountInFolder = PathUtils.GetAssetCountInFolder(TestUtils.TempFolderName);
+            Assert.IsTrue(assetCountInFolder == 2, $"Counted {assetCountInFolder} assets in folder. Expected 2.");
         }
     }
 }

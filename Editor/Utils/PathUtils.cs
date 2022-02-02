@@ -156,10 +156,15 @@ namespace Miniclip.ShapeShifter.Utils
 
         internal static int GetAssetCountInFolder(string path)
         {
-            if (!Directory.Exists(path))
+            path = PathUtils.GetFullPath(path);
+            if (!IsDirectory(path))
             {
-                Debug.LogError("Trying to count number of assets inside path that is not a folder.");
-                return 0;
+                throw new ArgumentException($"Path {path} does not seem to be for a folder.");
+            }
+
+            if (!IsValidFileOrDirectoryPath(path))
+            {
+                throw new ArgumentException($"Folder at {path} does not exist.");
             }
 
             DirectoryInfo directoryInfo = new DirectoryInfo(GetFullPath(path));
@@ -180,19 +185,24 @@ namespace Miniclip.ShapeShifter.Utils
             return count;
         }
 
-        public static bool FileOrDirectoryExists(string assetDatabasePath)
+        /// <summary>
+        /// Returns true if path to file or directory exists.
+        /// </summary>
+        /// <param name="assetPath"></param>
+        /// <returns></returns>
+        public static bool IsValidFileOrDirectoryPath(string assetPath)
         {
-            assetDatabasePath = GetFullPath(assetDatabasePath);
+            assetPath = GetFullPath(assetPath);
 
-            if (string.IsNullOrEmpty(assetDatabasePath))
+            if (string.IsNullOrEmpty(assetPath))
                 return false;
 
-            if (IsDirectory(assetDatabasePath))
+            if (IsDirectory(assetPath))
             {
-                return Directory.Exists(assetDatabasePath);
+                return Directory.Exists(assetPath);
             }
 
-            return File.Exists(assetDatabasePath);
+            return File.Exists(assetPath);
         }
     }
 }
