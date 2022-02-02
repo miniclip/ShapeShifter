@@ -30,8 +30,6 @@ namespace Miniclip.ShapeShifter
             int totalDirectories = directoryInfo.EnumerateDirectories().Count();
             int totalFiles = directoryInfo.EnumerateFiles().Count();
 
-            string newFullPath;
-
             if (totalDirectories > 0)
             {
                 string skinnedFolderFullPath = directoryInfo.GetDirectories().FirstOrDefault()?.FullName;
@@ -39,10 +37,14 @@ namespace Miniclip.ShapeShifter
                 if (!string.IsNullOrEmpty(skinnedFolderFullPath))
                 {
                     string oldName = new DirectoryInfo(skinnedFolderFullPath).Name;
+                    string newFullPath = skinnedFolderFullPath.Replace(oldName, newName);
 
-                    newFullPath = skinnedFolderFullPath.Replace(oldName, newName);
-                    Directory.Move(skinnedFolderFullPath, newFullPath);
-                    File.Move(skinnedFolderFullPath + ".meta", newFullPath + ".meta");
+                    if (!string.Equals(skinnedFolderFullPath, newFullPath))
+                    {
+                        Directory.Move(skinnedFolderFullPath, newFullPath);
+                        File.Move(skinnedFolderFullPath + ".meta", newFullPath + ".meta");
+                    }
+
                     return;
                 }
 
@@ -57,7 +59,7 @@ namespace Miniclip.ShapeShifter
                     string skinnedFileFullPath = fileFullPath;
                     string oldName = Path.GetFileName(skinnedFileFullPath);
 
-                    newFullPath = skinnedFileFullPath.Replace(oldName, newName);
+                    string newFullPath = skinnedFileFullPath.Replace(oldName, newName);
 
                     File.Move(skinnedFileFullPath, newFullPath);
                     File.Move(skinnedFileFullPath + ".meta", newFullPath + ".meta");
