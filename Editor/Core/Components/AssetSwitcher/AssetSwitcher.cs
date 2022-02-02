@@ -8,7 +8,6 @@ using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Switcher
 {
@@ -63,7 +62,7 @@ namespace Miniclip.ShapeShifter.Switcher
                     ShapeShifterLogger.Log(
                         missingAssets.Count > 0
                             ? $"Synced {missingAssets.Count} assets in {stopwatch.Elapsed.TotalSeconds} seconds"
-                            : $"Nothing to retrieve."
+                            : "Nothing to retrieve."
                     );
                 }
 
@@ -207,8 +206,8 @@ namespace Miniclip.ShapeShifter.Switcher
             }
 
             PerformCopiesWithTracking(
-                selected: selected,
-                description: "Overwrite selected skin",
+                selected,
+                "Overwrite selected skin",
                 CopyFromUnityToSkins,
                 CopyFromOriginToSkinnedExternal
             );
@@ -271,10 +270,8 @@ namespace Miniclip.ShapeShifter.Switcher
             EditorUtility.ClearProgressBar();
         }
 
-        private static string GetGameFolderPath(int selected)
-        {
-            return Path.Combine(ShapeShifter.SkinsFolder.FullName, ShapeShifterUtils.GetGameName(selected));
-        }
+        private static string GetGameFolderPath(int selected) =>
+            Path.Combine(ShapeShifter.SkinsFolder.FullName, ShapeShifterUtils.GetGameName(selected));
 
         private static void PerformOperationOnPath(string gameFolderPath,
             string assetFolder,
@@ -306,7 +303,9 @@ namespace Miniclip.ShapeShifter.Switcher
             throw new NotImplementedException("// TODO: Replace this in Unity 2020 with PackageManager.Client.Resolve");
 #else
             if (HasAnyPackageRelatedSkin())
+            {
                 ForceUnityToLoseAndRegainFocus();
+            }
 #endif
 
             AssetDatabase.Refresh();
@@ -332,8 +331,8 @@ namespace Miniclip.ShapeShifter.Switcher
                     Arguments =
                         "-e 'tell application \"Finder\" to activate' -e 'delay 0.5' -e 'tell application \"Unity\" to activate'",
                     UseShellExecute = false,
-                    CreateNoWindow = true
-                }
+                    CreateNoWindow = true,
+                },
             };
 
             process.Start();
@@ -345,7 +344,7 @@ namespace Miniclip.ShapeShifter.Switcher
             {
                 int choice = EditorUtility.DisplayDialogComplex(
                     "Shape Shifter",
-                    $"There are unsaved changes in your skinned assets. You should make sure to save them into your Active Game folder",
+                    "There are unsaved changes in your skinned assets. You should make sure to save them into your Active Game folder",
                     $"Save changes to {ShapeShifter.ActiveGameName} and switch to {ShapeShifterUtils.GetGameName(gameToSwitchTo)}.",
                     "Cancel Switch",
                     $"Discard changes and switch to {ShapeShifterUtils.GetGameName(gameToSwitchTo)}"
@@ -395,16 +394,29 @@ namespace Miniclip.ShapeShifter.Switcher
             //prioritize path from gitignore as is the only one version controlled
             string targetPath = assetGitIgnorePath;
 
-            FileInfo targetFileInfo = new FileInfo(targetPath);
-
-            if (!Directory.Exists(targetFileInfo.DirectoryName))
+            if (string.IsNullOrEmpty(targetPath))
             {
-                IOUtils.TryCreateDirectory(targetFileInfo.DirectoryName);
+                ShapeShifterLogger.LogError($"Can't find Asset Path for guid: {guid}");
+                return;
             }
+
+            string assetFolder = string.Empty;
+            if (PathUtils.IsDirectory(targetPath))
+            {
+                DirectoryInfo fileSystemInfo = new DirectoryInfo(targetPath);
+                assetFolder = fileSystemInfo.FullName;
+            }
+            else if (PathUtils.IsFile(targetPath))
+            {
+                FileInfo fileSystemInfo = new FileInfo(targetPath);
+                assetFolder = fileSystemInfo.DirectoryName;
+            }
+
+            IOUtils.TryCreateDirectory(assetFolder);
 
             if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
             {
-                if (File.Exists(assetDatabasePath))
+                if (PathUtils.FileOrDirectoryExists(assetDatabasePath))
                 {
                     //delete any file on AssetDatabasePath as is probably outdated and should not be there
                     FileUtil.DeleteFileOrDirectory(assetDatabasePath);
@@ -412,42 +424,32 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
             }
 
-            if (string.IsNullOrEmpty(targetPath))
-            {
-                ShapeShifterLogger.LogError($"Can't find Asset Path for guid: {guid}");
-                return;
-            }
-
             string searchPattern = Path.GetFileName(targetPath) + "*";
 
             FileInfo[] files = directory.GetFiles(searchPattern);
 
-            if (files.Length > 0)
+            foreach (FileInfo fileInfo in files)
             {
-                foreach (FileInfo fileInfo in files)
+                if (fileInfo.Extension == ".meta")
                 {
-                    //ShapeShifterLogger.Log($"[Shape Shifter] Copying from: {origin.FullName} to {target}");
-                    if (fileInfo.Extension == ".meta")
+                    string metaFile = targetPath + ".meta";
+                    if (File.Exists(PathUtils.GetFullPath(metaFile)))
                     {
-                        string metaFile = targetPath + ".meta";
-                        if (File.Exists(PathUtils.GetFullPath(metaFile)))
-                        {
-                            continue;
-                        }
-
-                        ShapeShifterLogger.Log($"Retrieving: {metaFile}");
-                        FileUtil.CopyFileOrDirectory(fileInfo.FullName, metaFile);
+                        continue;
                     }
-                    else
+
+                    ShapeShifterLogger.Log($"Retrieving: {metaFile}");
+                    FileUtil.CopyFileOrDirectory(fileInfo.FullName, metaFile);
+                }
+                else
+                {
+                    if (File.Exists(PathUtils.GetFullPath(targetPath)))
                     {
-                        if (File.Exists(PathUtils.GetFullPath(targetPath)))
-                        {
-                            continue;
-                        }
-
-                        ShapeShifterLogger.Log($"Retrieving: {targetPath}");
-                        FileUtil.CopyFileOrDirectory(fileInfo.FullName, targetPath);
+                        continue;
                     }
+
+                    ShapeShifterLogger.Log($"Retrieving: {targetPath}");
+                    FileUtil.CopyFileOrDirectory(fileInfo.FullName, targetPath);
                 }
             }
 
