@@ -50,7 +50,14 @@ namespace Miniclip.ShapeShifter
                     ActiveGame = 0;
                 }
 
-                return ShapeShifterEditorPrefs.GetInt(ACTIVE_GAME_PLAYER_PREFS_KEY);
+                int activeGame = ShapeShifterEditorPrefs.GetInt(ACTIVE_GAME_PLAYER_PREFS_KEY);
+
+                if (activeGame >= ShapeShifterConfiguration.Instance.GameNames.Count)
+                {
+                    ActiveGame = 0;
+                }
+                
+                return activeGame;
             }
             set
             {
