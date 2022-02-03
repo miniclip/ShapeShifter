@@ -44,8 +44,8 @@ namespace Miniclip.ShapeShifter
             {
                 if (!ShapeShifterEditorPrefs.HasKey(ACTIVE_GAME_PLAYER_PREFS_KEY))
                 {
-                    ShapeShifterLogger.Log(
-                        "Could not find any active game on EditorPrefs, setting by default game 0"
+                    ShapeShifterLogger.LogWarning(
+                        "Could not find any active game on EditorPrefs, defaulting to game 0"
                     );
                     ActiveGame = 0;
                 }
@@ -54,6 +54,7 @@ namespace Miniclip.ShapeShifter
 
                 if (activeGame >= ShapeShifterConfiguration.Instance.GameNames.Count)
                 {
+                    ShapeShifterLogger.LogWarning($"Current active game doesn't exist, defaulting to game 0.");
                     ActiveGame = 0;
                 }
                 
