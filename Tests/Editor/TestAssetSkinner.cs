@@ -2,6 +2,7 @@
 using System.Linq;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
+using Miniclip.ShapeShifter.Utils.Git;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -51,13 +52,13 @@ namespace Miniclip.ShapeShifter.Tests
             string assetPath = AssetDatabase.GetAssetPath(squareSprite);
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             
-            Assert.IsTrue(GitUtils.IsIgnored(guid), "GUID should be in git ignore");
-            var ignoredPath = GitUtils.GetIgnoredPathByGUID(guid);
+            Assert.IsTrue(GitIgnore.IsIgnored(guid), "GUID should be in git ignore");
+            var ignoredPath = GitIgnore.GetIgnoredPathByGUID(guid);
             Assert.IsTrue(ignoredPath == PathUtils.GetPathRelativeToRepositoryFolder(assetPath), $"Asset path {assetPath} is different from {ignoredPath}");
             Assert.IsTrue(PathUtils.GetFullPath(ignoredPath) == PathUtils.GetFullPath(assetPath), $"Asset path {assetPath} is different from {ignoredPath}");
             
             AssetSkinner.RemoveSkins(assetPath);
-            Assert.IsTrue(!GitUtils.IsIgnored(guid), "GUID should not be in git ignore");
+            Assert.IsTrue(!GitIgnore.IsIgnored(guid), "GUID should not be in git ignore");
         }
         
     }

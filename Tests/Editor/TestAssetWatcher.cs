@@ -1,6 +1,7 @@
 using System.IO;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
+using Miniclip.ShapeShifter.Utils.Git;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -63,7 +64,7 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(AssetSkinner.IsSkinned(assetPathBeforeRename));
 
             string assetIgnoredPathBeforeRename =
-                GitUtils.GetIgnoredPathByGUID(AssetDatabase.AssetPathToGUID(assetPathBeforeRename));
+                GitIgnore.GetIgnoredPathByGUID(AssetDatabase.AssetPathToGUID(assetPathBeforeRename));
             Assert.IsTrue(
                 fullAssetPathBeforeRename == PathUtils.GetFullPath(assetIgnoredPathBeforeRename),
                 "Asset path in .gitignore is not correct"
@@ -77,7 +78,7 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(assetPathBeforeRename != assetPathAfterRename, "New asset path should be different by now");
 
             string assetIgnorePathAfterRename =
-                GitUtils.GetIgnoredPathByGUID(guid);
+                GitIgnore.GetIgnoredPathByGUID(guid);
 
             Assert.IsTrue(fullAssetPathAfterRename == PathUtils.GetFullPath(assetIgnorePathAfterRename));
 

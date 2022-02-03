@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
+using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
 using UnityEngine;
 
@@ -32,7 +33,7 @@ namespace Miniclip.ShapeShifter.Switcher
                     string guid = assetSkin.Guid;
 
                     string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
-                    string assetGitIgnorePath = PathUtils.GetFullPath(GitUtils.GetIgnoredPathByGUID(guid));
+                    string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGUID(guid));
 
                     if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
                     {
@@ -389,7 +390,7 @@ namespace Miniclip.ShapeShifter.Switcher
             string guid = directory.Name;
 
             string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
-            string assetGitIgnorePath = PathUtils.GetFullPath(GitUtils.GetIgnoredPathByGUID(guid));
+            string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGUID(guid));
 
             //prioritize path from gitignore as is the only one version controlled
             string targetPath = assetGitIgnorePath;

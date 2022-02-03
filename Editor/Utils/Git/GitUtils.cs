@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Extensions;
+using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,8 +18,6 @@ namespace Miniclip.ShapeShifter.Utils
         private static readonly string git_status_renamed = "R";
         private static readonly string git_status_updated = "U";
         private static readonly string git_status_untracked = "??";
-
-        private static readonly string GIT_IGNORE_SHAPESHIFTER_LABEL = "#ShapeShifter";
 
         private static string GitWorkingDirectory = string.Empty;
 
@@ -37,14 +36,6 @@ namespace Miniclip.ShapeShifter.Utils
                 return GitWorkingDirectory;
             }
         }
-
-        private static string GitIgnorePath() => Path.Combine(RepositoryPath, ".gitignore");
-
-        private static string GenerateAssetIgnoreIdentifierFromGUID(string guid) =>
-            $"{GIT_IGNORE_SHAPESHIFTER_LABEL} {guid}";
-
-        private static string GenerateAssetIgnoreIdentifierFromAssetPath(string assetPath) =>
-            $"{GIT_IGNORE_SHAPESHIFTER_LABEL} {AssetDatabase.AssetPathToGUID(assetPath)}";
 
         internal static bool CanStage(string assetPath)
         {
@@ -89,20 +80,30 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
-        internal static void Track(string assetPath)
+        internal static void Track(string guid)
         {
-            RemoveFromGitIgnore(assetPath);
+            GitIgnore.Remove(guid);
+
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+
+            if (string.IsNullOrEmpty(assetPath))
+            {
+                throw new Exception($"GUID {guid} not found in AssetDatabase");
+            }
+
             Stage(assetPath);
+            Stage(assetPath + ".meta");
         }
 
-        internal static void Untrack(string assetPath)
+        internal static void Untrack(string guid)
         {
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
             string fullFilePath = PathUtils.GetFullPath(assetPath);
 
             RemoveOrUnstage(fullFilePath);
-            RemoveOrUnstage(fullFilePath+".meta");
-            
-            AddToGitIgnore(assetPath);
+            RemoveOrUnstage(fullFilePath + ".meta");
+
+            GitIgnore.Add(guid);
         }
 
         private static void RemoveOrUnstage(string fullFilePath)
@@ -115,160 +116,6 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 UnStage(fullFilePath);
             }
-        }
-
-        private static void AddToGitIgnore(string assetPath)
-        {
-            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
-            {
-                return;
-            }
-
-            string pathRelativeToProjectFolder = PathUtils.GetPathRelativeToProjectFolder(assetPath);
-            string metaPathRelativeToProjectFolder = pathRelativeToProjectFolder + ".meta";
-
-            if (string.IsNullOrEmpty(pathRelativeToProjectFolder))
-            {
-                return;
-            }
-
-            string assetIgnoreIdentifier = GenerateAssetIgnoreIdentifierFromAssetPath(assetPath);
-
-            if (gitIgnoreContent.Any(line => line.Equals(assetIgnoreIdentifier, StringComparison.Ordinal)))
-            {
-                // a possible rename has happened, we should simply replace the existing ignore entry with this new one
-                gitIgnoreContent[gitIgnoreContent.IndexOf(assetIgnoreIdentifier) + 1] = pathRelativeToProjectFolder;
-                gitIgnoreContent[gitIgnoreContent.IndexOf(assetIgnoreIdentifier) + 2] = metaPathRelativeToProjectFolder;
-                return;
-            }
-
-            gitIgnoreContent.Add(assetIgnoreIdentifier);
-            gitIgnoreContent.Add($"{pathRelativeToProjectFolder}");
-            gitIgnoreContent.Add($"{metaPathRelativeToProjectFolder}");
-
-            SetGitIgnoreContent(gitIgnoreContent);
-        }
-
-        private static void RemoveFromGitIgnore(string pathToAcknowledge)
-        {
-            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
-            {
-                return;
-            }
-
-            int lineToRemove = gitIgnoreContent.IndexOf(GenerateAssetIgnoreIdentifierFromAssetPath(pathToAcknowledge));
-
-            if (lineToRemove == -1)
-            {
-                ShapeShifterLogger.LogWarning($"Couldn't find {pathToAcknowledge} on .gitignore");
-                return;
-            }
-
-            gitIgnoreContent.RemoveRange(lineToRemove, 3);
-
-            SetGitIgnoreContent(gitIgnoreContent);
-        }
-
-        [MenuItem("Window/Shape Shifter/Remove all git ignore entries")]
-        public static void RemoveAllShapeshifterEntriesFromGitIgnore()
-        {
-            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
-            {
-                return;
-            }
-            for (int index = gitIgnoreContent.Count - 1; index >= 0; index--)
-            {
-                string line = gitIgnoreContent[index];
-
-                if (line.Contains(GIT_IGNORE_SHAPESHIFTER_LABEL))
-                {
-                    gitIgnoreContent.RemoveAt(index+2);
-                    gitIgnoreContent.RemoveAt(index+1);
-                    gitIgnoreContent.RemoveAt(index);
-                }
-            }
-            
-            SetGitIgnoreContent(gitIgnoreContent);
-        }
-        
-        private static bool TryGetGitIgnoreLines(out List<string> gitIgnoreContent)
-        {
-            string gitIgnorePath = GitIgnorePath();
-
-            if (!File.Exists(gitIgnorePath))
-            {
-                ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
-                gitIgnoreContent = null;
-                return false;
-            }
-
-            gitIgnoreContent = File.ReadAllLines(gitIgnorePath).ToList();
-            return true;
-        }
-
-        private static void SetGitIgnoreContent(IEnumerable<string> newGitIgnoreContent)
-        {
-            string gitIgnorePath = GitIgnorePath();
-
-            if (!File.Exists(gitIgnorePath))
-            {
-                ShapeShifterLogger.LogError($"Could not find .gitignore file at {gitIgnorePath}");
-                return;
-            }
-
-            File.WriteAllLines(gitIgnorePath, newGitIgnoreContent);
-
-            Stage(gitIgnorePath);
-        }
-
-        internal static bool IsIgnored(string guid)
-        {
-            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
-            {
-                return false;
-            }
-
-            return gitIgnoreContent.Any(
-                line => line.Equals(GenerateAssetIgnoreIdentifierFromGUID(guid), StringComparison.Ordinal)
-            );
-        }
-
-        public static string GetIgnoredPathByGUID(string guid)
-        {
-            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
-            {
-                return string.Empty;
-            }
-
-            string ignoreIdentifier = GenerateAssetIgnoreIdentifierFromGUID(guid);
-
-            int index = gitIgnoreContent.FindIndex(line => line == ignoreIdentifier) + 1;
-            return gitIgnoreContent[index];
-        }
-
-        public static void ReplaceIgnoreEntry(string guid, string newFullPath)
-        {
-            if (!TryGetGitIgnoreLines(out List<string> gitIgnoreContent))
-            {
-                return;
-            }
-
-            string ignoreIdentifier = GenerateAssetIgnoreIdentifierFromGUID(guid);
-
-            int index = gitIgnoreContent.FindIndex(line => line == ignoreIdentifier) + 1;
-
-            if (index == -1)
-            {
-                ShapeShifterLogger.LogError($"Could not find guid {guid} in git ignore.");
-                return;
-            }
-
-            string pathRelativeToRepositoryFolder = PathUtils.GetPathRelativeToRepositoryFolder(newFullPath);
-            string metaPathRelativeToRepositoryFolder = pathRelativeToRepositoryFolder + ".meta";
-            gitIgnoreContent[index] = pathRelativeToRepositoryFolder;
-            gitIgnoreContent[index+1] = metaPathRelativeToRepositoryFolder;
-
-            SetGitIgnoreContent(gitIgnoreContent);
         }
 
         public static void DiscardChanges(string assetPath)

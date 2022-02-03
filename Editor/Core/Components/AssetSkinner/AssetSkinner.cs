@@ -12,9 +12,10 @@ namespace Miniclip.ShapeShifter.Skinner
     {
         public static void RemoveSkins(string assetPath)
         {
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
             {
-                string guid = AssetDatabase.AssetPathToGUID(assetPath);
                 string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
                 ShapeShifter.DirtyAssets.Remove(key);
                 ShapeShifter.CachedPreviewPerAssetDict.Remove(key);
@@ -31,7 +32,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 GitUtils.Stage(assetFolder);
             }
 
-            GitUtils.Track(assetPath);
+            GitUtils.Track(guid);
         }
 
         internal static void RemoveAllInternalSkins()
@@ -43,7 +44,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 RemoveSkins(assetPath);
             }
         }
-        
+
         private static void SkinAssets(string[] assetPaths, bool saveFirst = true)
         {
             if (saveFirst)
@@ -65,10 +66,11 @@ namespace Miniclip.ShapeShifter.Skinner
                 ShapeShifterUtils.SavePendingChanges();
             }
 
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
             {
                 string origin = assetPath;
-                string guid = AssetDatabase.AssetPathToGUID(origin);
                 string assetFolder = Path.Combine(
                     ShapeShifter.SkinsFolder.FullName,
                     game,
@@ -100,7 +102,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 GitUtils.Stage(assetFolder);
             }
 
-            GitUtils.Untrack(assetPath);
+            GitUtils.Untrack(guid);
         }
 
         public static bool IsSkinned(string assetPath) =>
@@ -151,7 +153,7 @@ namespace Miniclip.ShapeShifter.Skinner
         internal static void CreateGameSkinFolder(string gameName)
         {
             GameSkin gameSkin = new GameSkin(gameName);
-            
+
             IOUtils.TryCreateDirectory(gameSkin.MainFolder);
         }
     }

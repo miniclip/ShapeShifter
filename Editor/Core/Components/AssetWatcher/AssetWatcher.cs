@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
+using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
 using UnityEngine;
 
@@ -82,7 +83,7 @@ namespace Miniclip.ShapeShifter.Watcher
                 assetSkin.Stage();
             }
 
-            GitUtils.ReplaceIgnoreEntry(guid, PathUtils.GetPathRelativeToRepositoryFolder(assetPath));
+            GitIgnore.Add(guid);
         }
 
         private static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)
