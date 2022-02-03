@@ -24,6 +24,16 @@ namespace Miniclip.ShapeShifter.Utils
                 throw new ArgumentException("Path given is empty or null");
             }
 
+            if (Directory.Exists(path))
+            {
+                return true;
+            }
+
+            if (File.Exists(path))
+            {
+                return false;
+            }
+            
             return !Path.HasExtension(path);
         }
 
