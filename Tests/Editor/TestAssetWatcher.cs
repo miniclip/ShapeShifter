@@ -64,7 +64,7 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(AssetSkinner.IsSkinned(assetPathBeforeRename));
 
             string assetIgnoredPathBeforeRename =
-                GitIgnore.GetIgnoredPathByGUID(AssetDatabase.AssetPathToGUID(assetPathBeforeRename));
+                GitIgnore.GetIgnoredPathByGuid(AssetDatabase.AssetPathToGUID(assetPathBeforeRename));
             Assert.IsTrue(
                 fullAssetPathBeforeRename == PathUtils.GetFullPath(assetIgnoredPathBeforeRename),
                 "Asset path in .gitignore is not correct"
@@ -78,7 +78,7 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(assetPathBeforeRename != assetPathAfterRename, "New asset path should be different by now");
 
             string assetIgnorePathAfterRename =
-                GitIgnore.GetIgnoredPathByGUID(guid);
+                GitIgnore.GetIgnoredPathByGuid(guid);
 
             Assert.IsTrue(fullAssetPathAfterRename == PathUtils.GetFullPath(assetIgnorePathAfterRename));
 

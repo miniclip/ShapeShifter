@@ -13,68 +13,21 @@ namespace Miniclip.ShapeShifter.Utils.Git
 
         private static string GitIgnorePath => Path.Combine(GitUtils.RepositoryPath, ".gitignore");
 
-        private static string GenerateAssetIgnoreIdentifierFromGUID(string guid) =>
+        private static string GenerateAssetIgnoreIdentifierFromGuid(string guid) =>
             $"{GIT_IGNORE_SHAPESHIFTER_LABEL} {guid}";
 
-        [MenuItem("Window/Shape Shifter/Parse git ignore")]
-        private static GitIgnoreWrapper GetGitIgnore()
-        {
-            List<string> ignoredContent = ReadGitIgnore();
+        internal static bool IsIgnored(string guid) => GitIgnoreWrapper.Instance().ContainsKey(guid);
 
-            string currentKey = string.Empty;
-            GitIgnoreWrapper guidToPathsIgnoredDict = new GitIgnoreWrapper();
-
-            int i;
-            guidToPathsIgnoredDict.Add(NON_SHAPE_SHIFTER_LINES_KEY, new List<string>());
-            for (i = 0; i < ignoredContent.Count; i++)
-            {
-                string line = ignoredContent[i];
-                
-                if (line.Contains(GIT_IGNORE_SHAPESHIFTER_LABEL))
-                {
-                    break;
-                }
-
-                guidToPathsIgnoredDict[NON_SHAPE_SHIFTER_LINES_KEY].Add(line);
-            }
-
-            for (; i < ignoredContent.Count; i++)
-            {
-                string line = ignoredContent[i];
-
-                if (line.Contains(GIT_IGNORE_SHAPESHIFTER_LABEL))
-                {
-                    string guid = line.Split(' ')[1]; //#ShapeShifter 8d5cf74b6c07945baa7484f8777682ea
-                    currentKey = guid;
-                    guidToPathsIgnoredDict.Add(guid, new List<string>());
-                    continue;
-                }
-
-                if (string.IsNullOrEmpty(currentKey))
-                {
-                    continue;
-                }
-
-                guidToPathsIgnoredDict[currentKey].Add(line);
-            }
-
-            return guidToPathsIgnoredDict;
-        }
+        internal static string GetIgnoredPathByGuid(string guid) =>
+            GitIgnoreWrapper.Instance().TryGetValue(guid, out List<string> ignoredPaths)
+                ? ignoredPaths.FirstOrDefault()
+                : null;
 
         internal static void Add(string guid)
         {
-            GitIgnoreWrapper gitIgnore = GetGitIgnore();
+            GitIgnoreWrapper gitIgnore = GitIgnoreWrapper.Instance();
 
-            List<string> ignoredPaths;
-
-            if (gitIgnore.ContainsKey(guid))
-            {
-                ignoredPaths = gitIgnore[guid];
-            }
-            else
-            {
-                ignoredPaths = new List<string>();
-            }
+            List<string> ignoredPaths = gitIgnore.ContainsKey(guid) ? gitIgnore[guid] : new List<string>();
 
             ignoredPaths.Clear();
 
@@ -91,19 +44,20 @@ namespace Miniclip.ShapeShifter.Utils.Git
             ignoredPaths.Add(pathRelativeToProjectFolder);
             ignoredPaths.Add(metaPathRelativeToProjectFolder);
             gitIgnore[guid] = ignoredPaths;
-            WriteGitIgnore(gitIgnore);
+
+            gitIgnore.WriteToFile();
         }
 
         internal static void Remove(string guid)
         {
-            GitIgnoreWrapper gitIgnore = GetGitIgnore();
+            GitIgnoreWrapper gitIgnore = GitIgnoreWrapper.Instance();
 
             if (gitIgnore.ContainsKey(guid))
             {
                 gitIgnore.Remove(guid);
             }
 
-            WriteGitIgnore(gitIgnore);
+            gitIgnore.WriteToFile();
         }
 
         private static List<string> ReadGitIgnore()
@@ -124,51 +78,88 @@ namespace Miniclip.ShapeShifter.Utils.Git
         }
 
         [MenuItem("Window/Shape Shifter/Remove all git ignore entries")]
-        public static void ClearShapeShifterEntries()
+        internal static void ClearShapeShifterEntries()
         {
-            GitIgnoreWrapper gitIgnore = GetGitIgnore();
+            GitIgnoreWrapper gitIgnore = GitIgnoreWrapper.Instance();
 
             foreach (string key in gitIgnore.Keys.Where(key => key != NON_SHAPE_SHIFTER_LINES_KEY))
             {
                 gitIgnore.Remove(key);
             }
 
-            WriteGitIgnore(gitIgnore);
+            gitIgnore.WriteToFile();
         }
 
-        private static void WriteGitIgnore(GitIgnoreWrapper gitIgnore)
+        private class GitIgnoreWrapper : Dictionary<string, List<string>>
         {
-            IEnumerable<string> linesToWrite = ConvertDictionaryIntoStringList(gitIgnore);
-            File.WriteAllLines(GitIgnorePath, linesToWrite);
-            GitUtils.Stage(GitIgnorePath);
-        }
+            public static GitIgnoreWrapper Instance() => new GitIgnoreWrapper();
 
-        private static IEnumerable<string> ConvertDictionaryIntoStringList(GitIgnoreWrapper gitIgnore)
-        {
-            List<string> list = new List<string>();
-
-            list.AddRange(gitIgnore[NON_SHAPE_SHIFTER_LINES_KEY]);
-
-            gitIgnore.Remove(NON_SHAPE_SHIFTER_LINES_KEY);
-
-            foreach (KeyValuePair<string, List<string>> keyValuePair in gitIgnore)
+            private GitIgnoreWrapper()
             {
-                list.Add(GenerateAssetIgnoreIdentifierFromGUID(keyValuePair.Key));
+                List<string> ignoredContent = ReadGitIgnore();
 
-                foreach (string path in keyValuePair.Value)
+                string currentKey = string.Empty;
+                int i;
+                Add(NON_SHAPE_SHIFTER_LINES_KEY, new List<string>());
+                for (i = 0; i < ignoredContent.Count; i++)
                 {
-                    list.Add(path);
+                    string line = ignoredContent[i];
+
+                    if (line.Contains(GIT_IGNORE_SHAPESHIFTER_LABEL))
+                    {
+                        break;
+                    }
+
+                    this[NON_SHAPE_SHIFTER_LINES_KEY].Add(line);
+                }
+
+                for (; i < ignoredContent.Count; i++)
+                {
+                    string line = ignoredContent[i];
+
+                    if (line.Contains(GIT_IGNORE_SHAPESHIFTER_LABEL))
+                    {
+                        string guid = line.Split(' ')[1]; //#ShapeShifter 8d5cf74b6c07945baa7484f8777682ea
+                        currentKey = guid;
+                        Add(guid, new List<string>());
+                        continue;
+                    }
+
+                    if (string.IsNullOrEmpty(currentKey))
+                    {
+                        continue;
+                    }
+
+                    this[currentKey].Add(line);
                 }
             }
 
-            return list;
+            internal void WriteToFile()
+            {
+                File.WriteAllLines(GitIgnorePath, ToListString());
+                GitUtils.Stage(GitIgnorePath);
+            }
+
+            private IEnumerable<string> ToListString()
+            {
+                List<string> list = new List<string>();
+
+                list.AddRange(this[NON_SHAPE_SHIFTER_LINES_KEY]);
+
+                Remove(NON_SHAPE_SHIFTER_LINES_KEY);
+
+                foreach (KeyValuePair<string, List<string>> keyValuePair in this)
+                {
+                    list.Add(GenerateAssetIgnoreIdentifierFromGuid(keyValuePair.Key));
+
+                    foreach (string path in keyValuePair.Value)
+                    {
+                        list.Add(path);
+                    }
+                }
+
+                return list;
+            }
         }
-
-        public static bool IsIgnored(string guid) => GetGitIgnore().ContainsKey(guid);
-
-        public static string GetIgnoredPathByGUID(string guid) =>
-            GetGitIgnore().TryGetValue(guid, out List<string> ignoredPaths) ? ignoredPaths.FirstOrDefault() : null;
-
-        private class GitIgnoreWrapper : Dictionary<string, List<string>> { }
     }
 }

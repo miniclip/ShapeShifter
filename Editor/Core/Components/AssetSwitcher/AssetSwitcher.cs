@@ -33,7 +33,7 @@ namespace Miniclip.ShapeShifter.Switcher
                     string guid = assetSkin.Guid;
 
                     string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
-                    string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGUID(guid));
+                    string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(guid));
 
                     if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
                     {
@@ -390,7 +390,7 @@ namespace Miniclip.ShapeShifter.Switcher
             string guid = directory.Name;
 
             string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
-            string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGUID(guid));
+            string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(guid));
 
             //prioritize path from gitignore as is the only one version controlled
             string targetPath = assetGitIgnorePath;
