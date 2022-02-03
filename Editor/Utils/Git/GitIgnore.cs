@@ -60,24 +60,6 @@ namespace Miniclip.ShapeShifter.Utils.Git
             gitIgnore.WriteToFile();
         }
 
-        private static List<string> ReadGitIgnore()
-        {
-            if (!File.Exists(GitIgnorePath))
-            {
-                throw new FileNotFoundException($"Could not find .gitignore file at {GitIgnorePath}");
-            }
-
-            List<string> gitIgnoreContent = File.ReadAllLines(GitIgnorePath).ToList();
-
-            if (gitIgnoreContent.Count == 0)
-            {
-                throw new Exception("Could not read git ignore file");
-            }
-
-            return gitIgnoreContent;
-        }
-
-        [MenuItem("Window/Shape Shifter/Remove all git ignore entries")]
         internal static void ClearShapeShifterEntries()
         {
             GitIgnoreWrapper gitIgnore = GitIgnoreWrapper.Instance();
@@ -96,7 +78,7 @@ namespace Miniclip.ShapeShifter.Utils.Git
 
             private GitIgnoreWrapper()
             {
-                List<string> ignoredContent = ReadGitIgnore();
+                List<string> ignoredContent = IOUtils.ReadAllLines(GitIgnorePath);
 
                 string currentKey = string.Empty;
                 int i;

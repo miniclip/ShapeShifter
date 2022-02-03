@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 
@@ -40,5 +42,22 @@ namespace Miniclip.ShapeShifter.Utils
             Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
 
         internal static bool IsFolderEmpty(DirectoryInfo directoryInfo) => IsFolderEmpty(directoryInfo.FullName);
+
+        internal static List<string> ReadAllLines(string filepath)
+        {
+            if (!File.Exists(filepath))
+            {
+                throw new FileNotFoundException($"Could not find file at {filepath}");
+            }
+
+            List<string> lines = File.ReadAllLines(filepath).ToList();
+
+            if (lines.Count == 0)
+            {
+                throw new Exception("Could not read file");
+            }
+
+            return lines;
+        }
     }
 }
