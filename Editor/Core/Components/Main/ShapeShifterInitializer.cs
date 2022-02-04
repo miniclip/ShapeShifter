@@ -28,16 +28,14 @@ public class ShapeShifterInitializer
             return;
 
         await Task.Delay(1000);
-
-        if (EditorApplication.isPlaying)
-            return;
+        
 
         while (EditorApplication.isCompiling || EditorApplication.isUpdating)
         {
             await Task.Delay(1000);
         }
 
-        if (isFocused)
+        if (isFocused && !EditorApplication.isPlayingOrWillChangePlaymode)
         {
             AssetSwitcher.RestoreMissingAssets();
             ShapeShifterUtils.DeleteDSStoreFiles();
