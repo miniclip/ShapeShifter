@@ -25,6 +25,11 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 GameSkin gameSkin = new GameSkin(gameName);
 
+                if (!gameSkin.HasValidFolders())
+                {
+                    continue;
+                }
+                
                 IEnumerable<string> ds_stores = Directory.EnumerateFiles(
                     gameSkin.MainFolder,
                     ".DS_Store",

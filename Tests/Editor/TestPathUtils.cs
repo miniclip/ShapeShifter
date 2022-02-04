@@ -59,12 +59,12 @@ namespace Miniclip.ShapeShifter.Tests
         {
             string fakePath = Path.Combine(Application.dataPath, "fake");
 
-            Assert.IsFalse(PathUtils.IsValidFileOrDirectoryPath(fakePath));
+            Assert.IsFalse(PathUtils.FileOrDirectoryExists(fakePath));
 
             var squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
             string assetPath = AssetDatabase.GetAssetPath(squareSprite);
 
-            Assert.IsTrue(PathUtils.IsValidFileOrDirectoryPath(assetPath));
+            Assert.IsTrue(PathUtils.FileOrDirectoryExists(assetPath));
         }
 
         [Test]

@@ -41,7 +41,7 @@ namespace Miniclip.ShapeShifter.Switcher
                         continue;
                     }
 
-                    if (!PathUtils.IsValidFileOrDirectoryPath(assetDatabasePath))
+                    if (!PathUtils.FileOrDirectoryExists(assetDatabasePath))
                     {
                         missingAssets.Add(guid);
                     }
@@ -417,7 +417,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
             if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
             {
-                if (PathUtils.IsValidFileOrDirectoryPath(assetDatabasePath))
+                if (PathUtils.FileOrDirectoryExists(assetDatabasePath))
                 {
                     //delete any file on AssetDatabasePath as is probably outdated and should not be there
                     FileUtil.DeleteFileOrDirectory(assetDatabasePath);

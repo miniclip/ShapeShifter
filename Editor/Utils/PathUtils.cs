@@ -24,6 +24,11 @@ namespace Miniclip.ShapeShifter.Utils
                 throw new ArgumentException("Path given is empty or null");
             }
 
+            if (!FileOrDirectoryExists(path))
+            {
+                throw new Exception("File or Directory do not exist.");
+            }
+
             if (Directory.Exists(path))
             {
                 return true;
@@ -33,7 +38,7 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 return false;
             }
-            
+
             return !Path.HasExtension(path);
         }
 
@@ -172,7 +177,7 @@ namespace Miniclip.ShapeShifter.Utils
                 throw new ArgumentException($"Path {path} does not seem to be for a folder.");
             }
 
-            if (!IsValidFileOrDirectoryPath(path))
+            if (!FileOrDirectoryExists(path))
             {
                 throw new ArgumentException($"Folder at {path} does not exist.");
             }
@@ -200,19 +205,24 @@ namespace Miniclip.ShapeShifter.Utils
         /// </summary>
         /// <param name="assetPath"></param>
         /// <returns></returns>
-        public static bool IsValidFileOrDirectoryPath(string assetPath)
+        public static bool FileOrDirectoryExists(string assetPath)
         {
             assetPath = GetFullPath(assetPath);
 
             if (string.IsNullOrEmpty(assetPath))
                 return false;
 
-            if (IsDirectory(assetPath))
+            if (!File.Exists(assetPath) && !Directory.Exists(assetPath))
             {
-                return Directory.Exists(assetPath);
+                return false;
             }
 
-            return File.Exists(assetPath);
+            if (Directory.Exists(assetPath) || File.Exists(assetPath))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

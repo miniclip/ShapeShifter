@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
@@ -144,6 +145,8 @@ namespace Miniclip.ShapeShifter.Skinner
 
                 if (foldoutDictionary[asset])
                 {
+                    List<Texture2D> texture2Ds = new List<Texture2D>();
+
                     foreach (SpriteRenderer spriteRenderer in spriteRenderers)
                     {
                         if (spriteRenderer.sprite == null)
@@ -151,7 +154,7 @@ namespace Miniclip.ShapeShifter.Skinner
                             continue;
                         }
 
-                        DrawAssetSection(spriteRenderer.sprite.texture, false);
+                        texture2Ds.Add(spriteRenderer.sprite.texture);
                     }
 
                     foreach (Image image in images)
@@ -161,7 +164,12 @@ namespace Miniclip.ShapeShifter.Skinner
                             continue;
                         }
 
-                        DrawAssetSection(image.sprite.texture, false);
+                        texture2Ds.Add(image.sprite.texture);
+                    }
+
+                    foreach (Texture2D texture2D in texture2Ds.Distinct())
+                    {
+                        DrawAssetSection(texture2D, false);
                     }
                 }
             }
