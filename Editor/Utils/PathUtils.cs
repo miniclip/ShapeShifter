@@ -80,7 +80,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             return path;
         }
-
+        
         internal static string GetPathRelativeToAssetsFolder(string path)
         {
             if (!IsInternalPath(path))

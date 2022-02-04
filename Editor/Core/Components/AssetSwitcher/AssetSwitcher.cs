@@ -401,18 +401,8 @@ namespace Miniclip.ShapeShifter.Switcher
                 return;
             }
 
-            string assetFolder = string.Empty;
-            if (PathUtils.IsDirectory(targetPath))
-            {
-                DirectoryInfo fileSystemInfo = new DirectoryInfo(targetPath);
-                assetFolder = fileSystemInfo.FullName;
-            }
-            else if (PathUtils.IsFile(targetPath))
-            {
-                FileInfo fileSystemInfo = new FileInfo(targetPath);
-                assetFolder = fileSystemInfo.DirectoryName;
-            }
-
+            string assetFolder = Path.GetDirectoryName(targetPath);
+            
             IOUtils.TryCreateDirectory(assetFolder);
 
             if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
