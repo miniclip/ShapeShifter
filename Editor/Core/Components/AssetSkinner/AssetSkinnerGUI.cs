@@ -4,6 +4,7 @@ using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Miniclip.ShapeShifter.Skinner
 {
@@ -48,6 +49,8 @@ namespace Miniclip.ShapeShifter.Skinner
             },
         };
 
+        private static readonly Dictionary<object, bool> foldoutDictionary = new Dictionary<object, bool>();
+
         public static void OnGUI()
         {
             showSkinner = EditorGUILayout.Foldout(showSkinner, "Asset Skinner");
@@ -67,7 +70,8 @@ namespace Miniclip.ShapeShifter.Skinner
 
                 scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
-                foreach (var assetSupportInfo in assets.GetAssetsSupportInfo())
+                foreach ((Object asset, bool isSupported, string reason) assetSupportInfo in
+                         assets.GetAssetsSupportInfo())
                 {
                     if (assetSupportInfo.isSupported)
                     {
@@ -93,9 +97,21 @@ namespace Miniclip.ShapeShifter.Skinner
             GUI.backgroundColor = oldColor;
         }
 
-        private static void DrawAssetSection(Object asset)
+        private static void DrawAssetSection(Object asset, bool useInspectorTitlebarHeader = true)
         {
-            EditorGUILayout.InspectorTitlebar(true, asset);
+            if (asset == null)
+            {
+                return;
+            }
+
+            if (useInspectorTitlebarHeader)
+            {
+                EditorGUILayout.InspectorTitlebar(true, asset);
+            }
+            else
+            {
+                EditorGUILayout.InspectorTitlebar(false, asset);
+            }
 
             string path = AssetDatabase.GetAssetPath(asset);
 
@@ -113,6 +129,42 @@ namespace Miniclip.ShapeShifter.Skinner
             }
 
             GUI.backgroundColor = oldColor;
+
+            if (asset is GameObject prefab)
+            {
+                if (!foldoutDictionary.ContainsKey(asset))
+                {
+                    foldoutDictionary.Add(asset, false);
+                }
+
+                SpriteRenderer[] spriteRenderers = prefab.GetComponentsInChildren<SpriteRenderer>();
+                Image[] images = prefab.GetComponentsInChildren<Image>();
+
+                foldoutDictionary[asset] = EditorGUILayout.Foldout(foldoutDictionary[asset], "Prefab Contains", true);
+
+                if (foldoutDictionary[asset])
+                {
+                    foreach (SpriteRenderer spriteRenderer in spriteRenderers)
+                    {
+                        if (spriteRenderer.sprite == null)
+                        {
+                            continue;
+                        }
+
+                        DrawAssetSection(spriteRenderer.sprite.texture, false);
+                    }
+
+                    foreach (Image image in images)
+                    {
+                        if (image.sprite == null)
+                        {
+                            continue;
+                        }
+
+                        DrawAssetSection(image.sprite.texture, false);
+                    }
+                }
+            }
         }
 
         internal static void DrawAssetPreview(string key, string game, string path, bool drawDropAreaToReplace = true)
