@@ -33,12 +33,14 @@ namespace Miniclip.ShapeShifter
         public List<string> SkinnedExternalAssetPaths => skinnedExternalAssetPaths;
         internal static ShapeShifterConfiguration Instance { get; private set; }
 
+        public List<string> GameNames => gameNames;
+
         private const string CONFIGURATION_RESOURCE = "ShapeShifterConfiguration.asset";
         private const string CONFIGURATION_RESOURCE_FOLDER_PATH = "Assets/Editor Default Resources/";
 
         public static void RemoveAllGames(bool deleteFolders = true)
         {
-            foreach (string instanceGameName in Instance.gameNames)
+            foreach (string instanceGameName in Instance.GameNames)
             {
                 RemoveGame(instanceGameName, deleteFolders);
             }
@@ -51,15 +53,15 @@ namespace Miniclip.ShapeShifter
                 throw new Exception("Configuration not initialized");
             }
 
-            if (index > Instance.gameNames.Count)
+            if (index > Instance.GameNames.Count)
             {
                 throw new Exception("Index is bigger than current game count");
             }
 
-            return Instance.gameNames[index];
+            return Instance.GameNames[index];
         }
 
-        public static IReadOnlyCollection<string> GetGameNames() => Instance.gameNames.AsReadOnly();
+        public static IReadOnlyCollection<string> GetGameNames() => Instance.GameNames.AsReadOnly();
 
         internal static void Initialise()
         {
@@ -109,7 +111,7 @@ namespace Miniclip.ShapeShifter
                 typeof(ShapeShifterExternalConfigurationEditor)
             );
 
-            if (Instance.gameNames.Count == 0)
+            if (Instance.GameNames.Count == 0)
             {
                 ShapeShifterLogger.Log(
                     "ShapeShifter has no configured games, creating a default one and making it active"
@@ -123,27 +125,27 @@ namespace Miniclip.ShapeShifter
             AssetDatabase.Refresh();
         }
 
-        internal static bool IsInitialized() => Instance != null && Instance.gameNames.Count > 0;
+        internal static bool IsInitialized() => Instance != null && Instance.GameNames.Count > 0;
 
         internal static void AddGame(string gameName)
         {
-            if (Instance.gameNames.Contains(gameName))
+            if (Instance.GameNames.Contains(gameName))
             {
                 return;
             }
 
-            Instance.gameNames.Add(gameName);
+            Instance.GameNames.Add(gameName);
 
             GameSkin gameSkin = new GameSkin(gameName);
 
             IOUtils.TryCreateDirectory(gameSkin.MainFolder);
         }
 
-        private static void RemoveGame(string gameName, bool deleteFolder)
+        internal static void RemoveGame(string gameName, bool deleteFolder)
         {
-            if (Instance.gameNames.Contains(gameName))
+            if (Instance.GameNames.Contains(gameName))
             {
-                Instance.gameNames.Remove(gameName);
+                Instance.GameNames.Remove(gameName);
             }
 
             GameSkin gameSkin = new GameSkin(gameName);

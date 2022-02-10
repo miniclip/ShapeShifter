@@ -1,4 +1,11 @@
-﻿using UnityEditor;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using Miniclip.ShapeShifter.Skinner;
+using Miniclip.ShapeShifter.Switcher;
+using Miniclip.ShapeShifter.Utils;
+using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
@@ -7,53 +14,55 @@ namespace Miniclip.ShapeShifter
     [CustomEditor(typeof(ShapeShifterConfiguration))]
     public class ShapeShifterConfigurationEditor : Editor
     {
-        private ReorderableList gameNamesList;
-        private SerializedProperty gameNamesProperty;
-        private SerializedProperty hasUnsavedChangesProperty;
+        private SerializedProperty gameSkinsProperty;
+        private ShapeShifterConfiguration configuration;
+        private ReadOnlyCollection<string> gameNames;
 
         private void OnEnable()
         {
-            gameNamesProperty = serializedObject.FindProperty("gameNames");
-            gameNamesList = new ReorderableList(
-                serializedObject,
-                gameNamesProperty,
-                true,
-                true,
-                true,
-                true
-            );
-
-            gameNamesList.drawElementCallback = DrawGameNamesElement;
-            gameNamesList.drawHeaderCallback = DrawGameNamesHeader;
-
-            hasUnsavedChangesProperty = serializedObject.FindProperty("hasUnsavedChanges");
+            configuration = target as ShapeShifterConfiguration;
         }
 
         public override void OnInspectorGUI()
         {
+            gameNames = new ReadOnlyCollection<string>(configuration.GameNames.AsReadOnly());
+
+            using (new EditorGUILayout.VerticalScope())
+            {
+                EditorGUILayout.PrefixLabel("Game Names", StyleUtils.LabelStyle);
+
+                for (int index = 0; index < gameNames.Count; index++)
+                {
+                    string gameName = gameNames[index];
+                    using (new EditorGUILayout.HorizontalScope(StyleUtils.BoxStyle))
+                    {
+                        EditorGUILayout.LabelField(gameName, StyleUtils.LabelStyle);
+
+                        if (GUILayout.Button("Rename", StyleUtils.ButtonStyle))
+                        {
+                            throw new NotImplementedException();
+                        }
+
+                        if (GUILayout.Button("Duplicate", StyleUtils.ButtonStyle))
+                        {
+                            string newGame = ShapeShifterUtils.GetUniqueTemporaryGameName(gameName);
+
+                            GameSkin gameSkin = new GameSkin(gameName);
+                            gameSkin.Duplicate(newGame);
+                            
+                            ShapeShifterConfiguration.AddGame(newGame);
+                        }
+
+                        if (GUILayout.Button("Delete", StyleUtils.ButtonStyle))
+                        {
+                            ShapeShifterConfiguration.RemoveGame(gameName, true);
+                        }
+                    }
+                }
+            }
+
             serializedObject.Update();
-            gameNamesList.DoLayoutList();
-            EditorGUILayout.PropertyField(hasUnsavedChangesProperty);
             serializedObject.ApplyModifiedProperties();
-        }
-
-        private void DrawGameNamesElement(Rect rect, int index, bool isActive, bool isFocused)
-        {
-            SerializedProperty element = gameNamesList.serializedProperty.GetArrayElementAtIndex(index);
-            element.stringValue = EditorGUI.TextField(
-                new Rect(
-                    rect.x,
-                    rect.y,
-                    EditorGUIUtility.currentViewWidth - 40.0f, // buffer to account for scrollbars, padding, etc 
-                    EditorGUIUtility.singleLineHeight
-                ),
-                element.stringValue
-            );
-        }
-
-        private void DrawGameNamesHeader(Rect rect)
-        {
-            EditorGUI.LabelField(rect, "Game names:");
         }
     }
 }

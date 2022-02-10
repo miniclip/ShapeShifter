@@ -2,38 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using UnityEditor;
+using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
     [Serializable]
     class GameSkin
     {
+        [SerializeField]
+        internal string Name { get; }
+        
         internal string ExternalSkinsFolder { get; }
 
         internal string InternalSkinsFolder { get; }
 
         internal string MainFolder { get; }
-
-        private DirectoryInfo mainFolderDirectoryInfo;
-
-        internal DirectoryInfo MainFolderDirectoryInfo
-        {
-            get
-            {
-                if (mainFolderDirectoryInfo != null)
-                {
-                    mainFolderDirectoryInfo.Refresh();
-                    return mainFolderDirectoryInfo;
-                }
-
-                mainFolderDirectoryInfo = new DirectoryInfo(MainFolder);
-                return mainFolderDirectoryInfo;
-            }
-            set => mainFolderDirectoryInfo = value;
-        }
-
-        internal string Name { get; }
-
+        
         internal GameSkin(string name)
         {
             Name = name;
@@ -86,6 +71,12 @@ namespace Miniclip.ShapeShifter
             {
                 Directory.Delete(MainFolder, true);
             }
+        }
+
+        public void Duplicate(string newGame)
+        {
+            GameSkin newGameSkin = new GameSkin(newGame);
+            FileUtil.CopyFileOrDirectory(MainFolder, newGameSkin.MainFolder);
         }
     }
 }

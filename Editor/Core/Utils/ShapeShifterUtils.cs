@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Miniclip.ShapeShifter.Switcher;
 using UnityEditor;
 
@@ -29,7 +30,7 @@ namespace Miniclip.ShapeShifter.Utils
                 {
                     continue;
                 }
-                
+
                 IEnumerable<string> ds_stores = Directory.EnumerateFiles(
                     gameSkin.MainFolder,
                     ".DS_Store",
@@ -40,6 +41,23 @@ namespace Miniclip.ShapeShifter.Utils
                 {
                     File.Delete(dsStore);
                 }
+            }
+        }
+
+        public static string GetUniqueTemporaryGameName(string gameName)
+        {
+            int nameAttempt = 0;
+
+            var names = ShapeShifterConfiguration.GetGameNames();
+            while (true)
+            {
+                nameAttempt++;
+                string newName = $"{gameName} {nameAttempt}";
+
+                if (names.Contains(newName))
+                    continue;
+
+                return newName;
             }
         }
     }
