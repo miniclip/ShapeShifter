@@ -62,16 +62,26 @@ namespace Miniclip.ShapeShifter
 
             GUILayout.BeginArea(rightRect);
 
-            OnActiveGameLabelGUI();
+            string toolbarButtonMessage;
+            if (!ShapeShifterConfiguration.IsInitialized())
+            {
+                toolbarButtonMessage = "ShapeShifter";
+            }
+            else
+            {
+                toolbarButtonMessage = $"Active Game: {ShapeShifter.ActiveGameName.ToUpper()}";
+            }
+
+            DrawToolbarItem(toolbarButtonMessage, ShapeShifterEditorWindow.OpenShapeShifter);
 
             GUILayout.EndArea();
         }
 
-        private static void OnActiveGameLabelGUI()
+        private static void DrawToolbarItem(string contentMessage, Action buttonPressedAction)
         {
             GUIStyle style = new GUIStyle(StyleUtils.ButtonStyle);
             style.fontStyle = FontStyle.Bold;
-            GUIContent content = new GUIContent($"Active Game: {ShapeShifter.ActiveGameName.ToUpper()}");
+            GUIContent content = new GUIContent(contentMessage);
 
             style.CalcMinMaxWidth(content, out float _, out float maxWidth);
 
@@ -79,7 +89,7 @@ namespace Miniclip.ShapeShifter
 
             if (GUILayout.Button(content, style))
             {
-                ShapeShifterEditorWindow.OpenShapeShifter();
+                buttonPressedAction();
             }
         }
 

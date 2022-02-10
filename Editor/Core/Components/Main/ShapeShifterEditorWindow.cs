@@ -13,33 +13,15 @@ namespace Miniclip.ShapeShifter
     {
         private bool showConfiguration;
 
-        [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, 'G')]
-        public static void OpenShapeShifter()
-        {
-            ShowNextToInspector(true);
-        }
-
-        private static void ShowNextToInspector(bool focus = false)
-        {
-            Assembly editorAssembly = typeof(Editor).Assembly;
-            Type inspectorWindowType = editorAssembly.GetType("UnityEditor.InspectorWindow");
-
-            GetWindow<ShapeShifterEditorWindow>(
-                "Shape Shifter",
-                focus,
-                inspectorWindowType
-            );
-        }
-
         private void OnGUI()
         {
-            if (ShapeShifterConfiguration.Instance == null)
+            if (!ShapeShifterConfiguration.IsInitialized())
             {
                 using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Label("Shapeshifter configuration not found.");
+                    GUILayout.Label("Shapeshifter configuration needs to be initialized.");
 
-                    if (GUILayout.Button("Try To Fix"))
+                    if (GUILayout.Button("Initialize"))
                     {
                         ShapeShifterConfiguration.Initialise();
                     }
@@ -76,8 +58,33 @@ namespace Miniclip.ShapeShifter
 
                 OnDangerousOperationsGUI();
             }
-            
+
             Repaint();
+        }
+
+        private void OnSelectionChange()
+        {
+            ShapeShifter.DirtyAssets.Clear();
+            ShapeShifter.CachedPreviewPerAssetDict.Clear();
+            AssetWatcher.ClearAllWatchedPaths();
+        }
+
+        [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, 'G')]
+        public static void OpenShapeShifter()
+        {
+            ShowNextToInspector(true);
+        }
+
+        private static void ShowNextToInspector(bool focus = false)
+        {
+            Assembly editorAssembly = typeof(Editor).Assembly;
+            Type inspectorWindowType = editorAssembly.GetType("UnityEditor.InspectorWindow");
+
+            GetWindow<ShapeShifterEditorWindow>(
+                "Shape Shifter",
+                focus,
+                inspectorWindowType
+            );
         }
 
         private static void OnDangerousOperationsGUI()
@@ -106,13 +113,6 @@ namespace Miniclip.ShapeShifter
             }
 
             GUI.backgroundColor = backgroundColor;
-        }
-
-        private void OnSelectionChange()
-        {
-            ShapeShifter.DirtyAssets.Clear();
-            ShapeShifter.CachedPreviewPerAssetDict.Clear();
-            AssetWatcher.ClearAllWatchedPaths();
         }
     }
 }

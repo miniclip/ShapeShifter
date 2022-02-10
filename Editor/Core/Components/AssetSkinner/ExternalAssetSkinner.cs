@@ -72,7 +72,7 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             string key = GenerateKeyFromRelativePath(relativePath);
 
-            foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
+            foreach (string game in ShapeShifterConfiguration.GetGameNames())
             {
                 ShapeShifter.DirtyAssets.Remove(key);
                 ShapeShifter.CachedPreviewPerAssetDict.Remove(key);
@@ -132,7 +132,7 @@ namespace Miniclip.ShapeShifter.Skinner
             string origin = absoluteAssetPath;
             string key = GenerateKeyFromRelativePath(relativeAssetPath);
 
-            foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
+            foreach (string game in ShapeShifterConfiguration.GetGameNames())
             {
                 string assetFolder = Path.Combine(
                     ShapeShifter.SkinsFolder.FullName,

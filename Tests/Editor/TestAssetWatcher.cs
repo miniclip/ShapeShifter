@@ -82,7 +82,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsTrue(fullAssetPathAfterRename == PathUtils.GetFullPath(assetIgnorePathAfterRename));
 
-            foreach (string gameName in ShapeShifterConfiguration.Instance.GameNames)
+            foreach (string gameName in ShapeShifterConfiguration.GetGameNames())
             {
                 GameSkin gameSkin = new GameSkin(gameName);
                 AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);

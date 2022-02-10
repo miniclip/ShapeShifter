@@ -14,7 +14,7 @@ namespace Miniclip.ShapeShifter.Watcher
             string[] movedAssets,
             string[] movedFromAssetPaths)
         {
-            if (ShapeShifterConfiguration.Instance == null)
+            if (!ShapeShifterConfiguration.IsInitialized())
                 return;
 
             //changed
@@ -72,9 +72,8 @@ namespace Miniclip.ShapeShifter.Watcher
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-            for (int index = 0; index < ShapeShifterConfiguration.Instance.GameNames.Count; index++)
+            foreach (string gameName in ShapeShifterConfiguration.GetGameNames())
             {
-                string gameName = ShapeShifterConfiguration.Instance.GameNames[index];
                 GameSkin gameSkin = new GameSkin(gameName);
 
                 var assetSkin = gameSkin.GetAssetSkin(guid);

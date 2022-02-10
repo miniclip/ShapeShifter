@@ -17,7 +17,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
             using (new GUILayout.HorizontalScope(boxStyle))
             {
-                foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
+                foreach (string game in ShapeShifterConfiguration.GetGameNames())
                 {
                     string key = ExternalAssetSkinner.GenerateKeyFromRelativePath(relativePath);
                     string assetPath = Path.Combine(

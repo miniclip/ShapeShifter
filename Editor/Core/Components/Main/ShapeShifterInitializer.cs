@@ -27,6 +27,9 @@ public class ShapeShifterInitializer
         if (!isFocused)
             return;
 
+        if(!ShapeShifterConfiguration.IsInitialized())
+            return;
+        
         await Task.Delay(1000);
         
 

@@ -52,7 +52,7 @@ namespace Miniclip.ShapeShifter
 
                 int activeGame = ShapeShifterEditorPrefs.GetInt(ACTIVE_GAME_PLAYER_PREFS_KEY);
 
-                if (activeGame >= ShapeShifterConfiguration.Instance.GameNames.Count)
+                if (activeGame >= ShapeShifterConfiguration.GetGameNames().Count)
                 {
                     ShapeShifterLogger.LogWarning($"Current active game doesn't exist, defaulting to game 0.");
                     ActiveGame = 0;

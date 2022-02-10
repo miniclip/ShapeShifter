@@ -1,3 +1,4 @@
+using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace Miniclip.ShapeShifter.Switcher
         {
             showSwitcher = EditorGUILayout.Foldout(showSwitcher, "Asset Switcher");
 
-            if (!showSwitcher || ShapeShifterConfiguration.Instance.GameNames.Count == 0)
+            if (!showSwitcher || !ShapeShifterConfiguration.IsInitialized())
             {
                 return;
             }
@@ -33,12 +34,15 @@ namespace Miniclip.ShapeShifter.Switcher
 
         private static void OnSwitchToGUI()
         {
+            if (!ShapeShifterConfiguration.IsInitialized())
+                return;
+
             GUILayout.Space(10.0f);
 
             highlightedGame = EditorGUILayout.Popup(
                 "Switch To",
                 highlightedGame,
-                ShapeShifterConfiguration.Instance.GameNames.ToArray()
+                ShapeShifterConfiguration.GetGameNames().ToArray()
             );
 
             if (GUILayout.Button("Switch!", StyleUtils.ButtonStyle))

@@ -14,7 +14,7 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-            foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
+            foreach (string game in ShapeShifterConfiguration.GetGameNames())
             {
                 string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
                 ShapeShifter.DirtyAssets.Remove(key);
@@ -68,7 +68,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-            foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
+            foreach (string game in ShapeShifterConfiguration.GetGameNames())
             {
                 string origin = assetPath;
                 string assetFolder = Path.Combine(
@@ -106,7 +106,7 @@ namespace Miniclip.ShapeShifter.Skinner
         }
 
         public static bool IsSkinned(string assetPath) =>
-            ShapeShifterConfiguration.Instance.GameNames.Any(game => IsSkinned(assetPath, game));
+            ShapeShifterConfiguration.GetGameNames().Any(game => IsSkinned(assetPath, game));
 
         private static bool IsSkinned(string assetPath, string game)
         {

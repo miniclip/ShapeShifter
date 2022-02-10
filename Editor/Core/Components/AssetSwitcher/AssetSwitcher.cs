@@ -227,8 +227,6 @@ namespace Miniclip.ShapeShifter.Switcher
 
             if (Directory.Exists(gameFolderPath))
             {
-                // this will fail the total by 0-3, as it counts the game, the internal and the external directories
-                // but that doesn't make enough of a difference to justify making this a more complex calculation
                 int totalDirectories = Directory.EnumerateDirectories(
                         gameFolderPath,
                         "*",
