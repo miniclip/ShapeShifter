@@ -58,7 +58,7 @@ namespace Miniclip.ShapeShifter.Tests
             AssetDatabase.Refresh();
 
             cachedGameNames = new List<string>(ShapeShifterConfiguration.GetGameNames());
-            ShapeShifterConfiguration.RemoveAllGames();
+            ShapeShifterConfiguration.RemoveAllGames(deleteFolders:false);
 
             foreach (string testGameName in TestGameNames)
             {
@@ -104,15 +104,14 @@ namespace Miniclip.ShapeShifter.Tests
             FileUtil.DeleteFileOrDirectory(TempFolderName);
             FileUtil.DeleteFileOrDirectory(TempFolderName + ".meta");
 
-            foreach (string configurationGameName in ShapeShifterConfiguration.GetGameNames())
+            foreach (string configurationGameName in ShapeShifterConfiguration.GetGameNames().ToList())
             {
                 if (!configurationGameName.Contains("Test"))
                 {
                     continue;
                 }
-
-                GameSkin gameSkin = new GameSkin(configurationGameName);
-                gameSkin.DeleteFolder();
+                
+                ShapeShifterConfiguration.RemoveGame(configurationGameName, true);
             }
 
             GitUtils.Stage(TempFolderName);
