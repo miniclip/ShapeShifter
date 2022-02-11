@@ -55,69 +55,72 @@ namespace Miniclip.ShapeShifter
 
 #region Rename
         private int renamingIndex = -1;
-        private string newNameStringHelper = String.Empty;
+        private string newName = string.Empty;
 
         private void OnRenameGUI(string gameName, int index)
         {
             if (index == renamingIndex)
             {
                 RenameOperation(gameName, index);
+                return;
             }
 
             if (GUILayout.Button("Rename", StyleUtils.ButtonStyle))
             {
                 renamingIndex = index;
-                newNameStringHelper = gameName;
+                newName = gameName;
             }
         }
 
         private void RenameOperation(string gameName, int index)
         {
+            var oldColor = GUI.backgroundColor;
+            GUI.backgroundColor = Color.white;
             using (new EditorGUILayout.HorizontalScope())
             {
-                newNameStringHelper = EditorGUILayout.DelayedTextField(newNameStringHelper);
+                newName = EditorGUILayout.TextField(newName);
+                GUI.backgroundColor = Color.red;
                 if (GUILayout.Button("OK", StyleUtils.ButtonStyle))
                 {
-                    Debug.Log($"Rename to {newNameStringHelper}");
-
-                    ValidateNewName(gameName, newNameStringHelper);
-
-                    renamingIndex = -1;
+                    if (ValidateNewName(gameName, newName))
+                    {
+                        configuration.RenameGame(index, newName);
+                        renamingIndex = -1;
+                    }
                 }
 
+                GUI.backgroundColor = Color.green;
                 if (GUILayout.Button("Cancel", StyleUtils.ButtonStyle))
                 {
                     renamingIndex = -1;
-                    newNameStringHelper = string.Empty;
+                    newName = string.Empty;
                 }
             }
+
+            GUI.backgroundColor = oldColor;
         }
 
-        private void ValidateNewName(string oldName, string newName)
+        private bool ValidateNewName(string oldName, string newName)
         {
             if (string.IsNullOrEmpty(newName))
             {
-                ShapeShifterLogger.LogError("Invalid name");
-                return;
+                ShapeShifterLogger.LogWarning("Invalid name");
+                return false;
             }
 
             if (string.Equals(oldName, newName, StringComparison.OrdinalIgnoreCase))
             {
-                ShapeShifterLogger.Log("Can't rename to same name");
-                return;
+                ShapeShifterLogger.LogWarning("Can't rename to same name");
+                return false;
             }
 
             if (configuration.GameNames.Contains(newName))
             {
                 ShapeShifterLogger.LogError("Can't rename to an already existing game name");
-                return;
+                return false;
             }
 
-            // configuration.GameNames[]
-            
-            GameSkin gameSkin = new GameSkin(oldName);
-
-            gameSkin.Rename(newName);
+            return true;
         }
 #endregion
 

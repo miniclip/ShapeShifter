@@ -26,7 +26,6 @@ namespace Miniclip.ShapeShifter
 
         internal Editor DefaultConfigurationEditor { get; private set; }
         internal Editor ExternalConfigurationEditor { get; private set; }
-      
 
         private bool isDirty;
 
@@ -47,6 +46,13 @@ namespace Miniclip.ShapeShifter
             }
 
             return Instance.GameNames[index];
+        }
+
+        public void RenameGame(int index, string newName)
+        {
+            GameSkin gameSkin = new GameSkin(gameNames[index]);
+            gameSkin.RenameFolder(newName);
+            gameNames[index] = newName;
         }
 
         internal void AddGame(string gameName)
@@ -109,7 +115,8 @@ namespace Miniclip.ShapeShifter
 
                 AssetDatabase.CreateAsset(
                     Instance,
-                    ShapeShifterConstants.CONFIGURATION_RESOURCE_FOLDER_PATH + ShapeShifterConstants.CONFIGURATION_RESOURCE
+                    ShapeShifterConstants.CONFIGURATION_RESOURCE_FOLDER_PATH
+                    + ShapeShifterConstants.CONFIGURATION_RESOURCE
                 );
 
                 EditorUtility.SetDirty(Instance);
