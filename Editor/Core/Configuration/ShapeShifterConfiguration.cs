@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
@@ -16,9 +15,6 @@ namespace Miniclip.ShapeShifter
         private List<string> gameNames = new List<string>();
 
         public List<string> GameNames => gameNames;
-
-        [SerializeField]
-        private bool isDirty;
         public bool IsDirty => isDirty;
 
         [SerializeField]
@@ -30,13 +26,14 @@ namespace Miniclip.ShapeShifter
 
         internal Editor DefaultConfigurationEditor { get; private set; }
         internal Editor ExternalConfigurationEditor { get; private set; }
-        private const string CONFIGURATION_RESOURCE = "ShapeShifterConfiguration.asset";
-        private const string CONFIGURATION_RESOURCE_FOLDER_PATH = "Assets/Editor Default Resources/";
+      
+
+        private bool isDirty;
 
         public void SetDirty(bool isDirty = true) => Instance.isDirty = isDirty;
 
         public void Save() => isDirty = false;
-        
+
         public string GetGameNameAtIndex(int index)
         {
             if (!IsInitialized())
@@ -79,7 +76,7 @@ namespace Miniclip.ShapeShifter
                 gameSkin.DeleteFolder();
             }
         }
-        
+
         internal static bool IsInitialized() => Instance != null && Instance.GameNames.Count > 0;
 
         internal static void Initialise()
@@ -87,13 +84,13 @@ namespace Miniclip.ShapeShifter
             if (Instance == null)
             {
                 Instance = (ShapeShifterConfiguration)EditorGUIUtility.Load(
-                    CONFIGURATION_RESOURCE
+                    ShapeShifterConstants.CONFIGURATION_RESOURCE
                 );
             }
 
             string configurationPath = Path.Combine(
-                CONFIGURATION_RESOURCE_FOLDER_PATH,
-                CONFIGURATION_RESOURCE
+                ShapeShifterConstants.CONFIGURATION_RESOURCE_FOLDER_PATH,
+                ShapeShifterConstants.CONFIGURATION_RESOURCE
             );
 
             if (Instance == null && File.Exists(configurationPath))
@@ -105,14 +102,14 @@ namespace Miniclip.ShapeShifter
             {
                 Instance = CreateInstance<ShapeShifterConfiguration>();
 
-                if (!AssetDatabase.IsValidFolder(CONFIGURATION_RESOURCE_FOLDER_PATH))
+                if (!AssetDatabase.IsValidFolder(ShapeShifterConstants.CONFIGURATION_RESOURCE_FOLDER_PATH))
                 {
                     AssetDatabase.CreateFolder("Assets", "Editor Default Resources");
                 }
 
                 AssetDatabase.CreateAsset(
                     Instance,
-                    CONFIGURATION_RESOURCE_FOLDER_PATH + CONFIGURATION_RESOURCE
+                    ShapeShifterConstants.CONFIGURATION_RESOURCE_FOLDER_PATH + ShapeShifterConstants.CONFIGURATION_RESOURCE
                 );
 
                 EditorUtility.SetDirty(Instance);

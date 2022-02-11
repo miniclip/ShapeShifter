@@ -7,5 +7,8 @@ namespace Miniclip.ShapeShifter
         internal const string INTERNAL_ASSETS_FOLDER = "internal";
 
         internal const string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
+        
+        internal const string CONFIGURATION_RESOURCE = "ShapeShifterConfiguration.asset";
+        internal const string CONFIGURATION_RESOURCE_FOLDER_PATH = "Assets/Editor Default Resources/";
     }
 }
