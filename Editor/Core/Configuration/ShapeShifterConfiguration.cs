@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
@@ -40,7 +41,7 @@ namespace Miniclip.ShapeShifter
 
         public static void RemoveAllGames(bool deleteFolders = true)
         {
-            foreach (string instanceGameName in Instance.GameNames)
+            foreach (string instanceGameName in Instance.GameNames.ToList())
             {
                 RemoveGame(instanceGameName, deleteFolders);
             }
@@ -53,7 +54,7 @@ namespace Miniclip.ShapeShifter
                 throw new Exception("Configuration not initialized");
             }
 
-            if (index > Instance.GameNames.Count)
+            if (index >= Instance.GameNames.Count)
             {
                 throw new Exception("Index is bigger than current game count");
             }
@@ -148,10 +149,10 @@ namespace Miniclip.ShapeShifter
                 Instance.GameNames.Remove(gameName);
             }
 
-            GameSkin gameSkin = new GameSkin(gameName);
-            if (Directory.Exists(gameSkin.MainFolder))
+            if (deleteFolder)
             {
-                Directory.Delete(gameSkin.MainFolder, true);
+                GameSkin gameSkin = new GameSkin(gameName);
+                gameSkin.DeleteFolder();
             }
         }
     }

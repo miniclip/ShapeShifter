@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Switcher;
+using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
@@ -89,17 +91,15 @@ namespace Miniclip.ShapeShifter
 
         private static void OnDangerousOperationsGUI()
         {
-            if (!ShapeShifter.ActiveGameSkin.HasInternalSkins() && !ShapeShifter.ActiveGameSkin.HasExternalSkins())
-            {
-                return;
-            }
 
+            GUILayout.BeginVertical(StyleUtils.BoxStyle);
             GUILayout.Label("Dangerous Operations");
-
             AssetSwitcherGUI.OnOverwriteAllSkinsGUI();
-
+            GUILayout.Space(20);
             OnRemoveAllSkinsGUI();
+            GUILayout.EndVertical();
         }
+        
 
         private static void OnRemoveAllSkinsGUI()
         {
@@ -110,6 +110,10 @@ namespace Miniclip.ShapeShifter
                 AssetSkinner.RemoveAllInternalSkins();
                 ExternalAssetSkinner.RemoveAllExternalSkins();
                 GitIgnore.ClearShapeShifterEntries();
+                if (ShapeShifter.SkinsFolder.Exists)
+                {
+                    ShapeShifter.SkinsFolder.Delete(true);
+                }
             }
 
             GUI.backgroundColor = backgroundColor;
