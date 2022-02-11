@@ -78,5 +78,10 @@ namespace Miniclip.ShapeShifter
             GameSkin newGameSkin = new GameSkin(newGame);
             FileUtil.CopyFileOrDirectory(MainFolder, newGameSkin.MainFolder);
         }
+
+        public void Rename(string newName)
+        {
+                throw new NotImplementedException();
+        }
     }
 }
