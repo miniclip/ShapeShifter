@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using UnityEngine;
 
@@ -7,42 +8,38 @@ namespace Miniclip.ShapeShifter
 {
     static class ShapeShifter
     {
-        private const string SHAPESHIFTER_SKINS_FOLDER_NAME = "Skins";
-
-        private const string ACTIVE_GAME_PLAYER_PREFS_KEY = "ACTIVE_GAME_PLAYER_PREFS_KEY";
-
-        internal const string EXTERNAL_ASSETS_FOLDER = "external";
-        internal const string INTERNAL_ASSETS_FOLDER = "internal";
-
         private static DirectoryInfo skinsFolder;
 
         internal static DirectoryInfo SkinsFolder
         {
-            
             get
             {
                 if (skinsFolder == null)
                 {
-                    skinsFolder = new DirectoryInfo(Application.dataPath + $"/../../{SHAPESHIFTER_SKINS_FOLDER_NAME}/");
+                    skinsFolder = new DirectoryInfo(
+                        Application.dataPath + $"/../../{ShapeShifterConstants.SKINS_MAIN_FOLDER}/"
+                    );
                     IOUtils.TryCreateDirectory(SkinsFolder.FullName);
                 }
 
                 return skinsFolder;
             }
-            set => skinsFolder = value;
         }
 
+        private static List<string> GameNames => config.GameNames;
         internal static HashSet<string> DirtyAssets { get; set; } = new HashSet<string>();
 
         internal static Dictionary<string, Texture2D> CachedPreviewPerAssetDict = new Dictionary<string, Texture2D>();
 
         internal static string ActiveGameName => ShapeShifterUtils.GetGameName(ActiveGame);
 
+        private static ShapeShifterConfiguration config => ShapeShifterConfiguration.Instance;
+
         public static int ActiveGame
         {
             get
             {
-                if (!ShapeShifterEditorPrefs.HasKey(ACTIVE_GAME_PLAYER_PREFS_KEY))
+                if (!ShapeShifterEditorPrefs.HasKey(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY))
                 {
                     ShapeShifterLogger.LogWarning(
                         "Could not find any active game on EditorPrefs, defaulting to game 0"
@@ -50,14 +47,14 @@ namespace Miniclip.ShapeShifter
                     ActiveGame = 0;
                 }
 
-                int activeGame = ShapeShifterEditorPrefs.GetInt(ACTIVE_GAME_PLAYER_PREFS_KEY);
+                int activeGame = ShapeShifterEditorPrefs.GetInt(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY);
 
-                if (activeGame >= ShapeShifterConfiguration.GetGameNames().Count)
+                if (activeGame >= GameNames.Count)
                 {
-                    ShapeShifterLogger.LogWarning($"Current active game doesn't exist, defaulting to game 0.");
+                    ShapeShifterLogger.LogWarning("Current active game doesn't exist, defaulting to game 0.");
                     ActiveGame = 0;
                 }
-                
+
                 return activeGame;
             }
             set
@@ -65,7 +62,7 @@ namespace Miniclip.ShapeShifter
                 ShapeShifterLogger.Log(
                     $"Setting active game on EditorPrefs: {value}"
                 );
-                ShapeShifterEditorPrefs.SetInt(ACTIVE_GAME_PLAYER_PREFS_KEY, value);
+                ShapeShifterEditorPrefs.SetInt(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY, value);
             }
         }
 
@@ -83,6 +80,14 @@ namespace Miniclip.ShapeShifter
                 activeGameSkin = new GameSkin(ActiveGameName);
 
                 return activeGameSkin;
+            }
+        }
+
+        public static void RemoveAllGames(bool deleteFolders = true)
+        {
+            foreach (string instanceGameName in GameNames.ToList())
+            {
+                config.RemoveGame(instanceGameName, deleteFolders);
             }
         }
     }

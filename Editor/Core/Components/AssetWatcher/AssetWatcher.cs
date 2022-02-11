@@ -42,13 +42,13 @@ namespace Miniclip.ShapeShifter.Watcher
         {
             if (AssetSkinner.IsSkinned(modifiedAssetPath))
             {
-                ShapeShifterConfiguration.Instance.HasUnsavedChanges = true;
+                ShapeShifterConfiguration.Instance.SetDirty();
             }
             else
             {
                 if (TryGetParentSkinnedFolder(modifiedAssetPath, out string skinnedFolderPath))
                 {
-                    ShapeShifterConfiguration.Instance.HasUnsavedChanges = true;
+                    ShapeShifterConfiguration.Instance.SetDirty();
                 }
             }
         }
@@ -62,7 +62,7 @@ namespace Miniclip.ShapeShifter.Watcher
 
             RenameAssetSkins(newName);
 
-            ShapeShifterConfiguration.Instance.HasUnsavedChanges = true;
+            ShapeShifterConfiguration.Instance.SetDirty();
 
             GitUtils.Stage(newName + ".meta");
             GitUtils.Stage(oldName + ".meta");
@@ -72,7 +72,7 @@ namespace Miniclip.ShapeShifter.Watcher
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-            foreach (string gameName in ShapeShifterConfiguration.GetGameNames())
+            foreach (string gameName in ShapeShifterConfiguration.Instance.GameNames)
             {
                 GameSkin gameSkin = new GameSkin(gameName);
 

@@ -42,7 +42,7 @@ namespace Miniclip.ShapeShifter.Switcher
             highlightedGame = EditorGUILayout.Popup(
                 "Switch To",
                 highlightedGame,
-                ShapeShifterConfiguration.GetGameNames().ToArray()
+                ShapeShifterConfiguration.Instance.GameNames.ToArray()
             );
 
             if (GUILayout.Button("Switch!", StyleUtils.ButtonStyle))

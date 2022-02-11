@@ -20,7 +20,7 @@ namespace Miniclip.ShapeShifter.Tests
             AssetSkinner.SkinAsset(assetPath);
 
             Assert.IsFalse(
-                ShapeShifterConfiguration.Instance.HasUnsavedChanges,
+                ShapeShifterConfiguration.Instance.IsDirty,
                 "Asset was just skinned now, it should not be in the modified assets list"
             );
 
@@ -29,7 +29,7 @@ namespace Miniclip.ShapeShifter.Tests
             AssetDatabase.Refresh();
 
             Assert.IsTrue(
-                ShapeShifterConfiguration.Instance.HasUnsavedChanges,
+                ShapeShifterConfiguration.Instance.IsDirty,
                 "Asset was modified and it is not showing in modified assets list"
             );
         }
@@ -82,7 +82,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsTrue(fullAssetPathAfterRename == PathUtils.GetFullPath(assetIgnorePathAfterRename));
 
-            foreach (string gameName in ShapeShifterConfiguration.GetGameNames())
+            foreach (string gameName in ShapeShifterConfiguration.Instance.GameNames)
             {
                 GameSkin gameSkin = new GameSkin(gameName);
                 AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);

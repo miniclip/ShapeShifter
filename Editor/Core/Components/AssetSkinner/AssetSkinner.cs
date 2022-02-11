@@ -14,7 +14,7 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-            foreach (string game in ShapeShifterConfiguration.GetGameNames())
+            foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
             {
                 string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
                 ShapeShifter.DirtyAssets.Remove(key);
@@ -23,7 +23,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 string assetFolder = Path.Combine(
                     ShapeShifter.SkinsFolder.FullName,
                     game,
-                    ShapeShifter.INTERNAL_ASSETS_FOLDER,
+                    ShapeShifterConstants.INTERNAL_ASSETS_FOLDER,
                     guid
                 );
 
@@ -68,13 +68,13 @@ namespace Miniclip.ShapeShifter.Skinner
 
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-            foreach (string game in ShapeShifterConfiguration.GetGameNames())
+            foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
             {
                 string origin = assetPath;
                 string assetFolder = Path.Combine(
                     ShapeShifter.SkinsFolder.FullName,
                     game,
-                    ShapeShifter.INTERNAL_ASSETS_FOLDER,
+                    ShapeShifterConstants.INTERNAL_ASSETS_FOLDER,
                     guid
                 );
 
@@ -106,7 +106,7 @@ namespace Miniclip.ShapeShifter.Skinner
         }
 
         public static bool IsSkinned(string assetPath) =>
-            ShapeShifterConfiguration.GetGameNames().Any(game => IsSkinned(assetPath, game));
+            ShapeShifterConfiguration.Instance.GameNames.Any(game => IsSkinned(assetPath, game));
 
         private static bool IsSkinned(string assetPath, string game)
         {
@@ -118,7 +118,7 @@ namespace Miniclip.ShapeShifter.Skinner
             string assetFolder = Path.Combine(
                 ShapeShifter.SkinsFolder.FullName,
                 game,
-                ShapeShifter.INTERNAL_ASSETS_FOLDER,
+                ShapeShifterConstants.INTERNAL_ASSETS_FOLDER,
                 guid
             );
 

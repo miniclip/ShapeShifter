@@ -182,7 +182,7 @@ namespace Miniclip.ShapeShifter.Skinner
             using (new GUILayout.VerticalScope(boxStyle))
             {
                 float buttonWidth = EditorGUIUtility.currentViewWidth
-                                    * (1.0f / ShapeShifterConfiguration.GetGameNames().Count);
+                                    * (1.0f / ShapeShifterConfiguration.Instance.GameNames.Count);
                 buttonWidth -= 20; // to account for a possible scrollbar or some extra padding 
 
                 bool clicked = false;
@@ -265,13 +265,13 @@ namespace Miniclip.ShapeShifter.Skinner
 
             using (new GUILayout.HorizontalScope(boxStyle))
             {
-                foreach (string game in ShapeShifterConfiguration.GetGameNames())
+                foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
                 {
                     string guid = AssetDatabase.AssetPathToGUID(assetPath);
                     string skinnedPath = Path.Combine(
                         ShapeShifter.SkinsFolder.FullName,
                         game,
-                        ShapeShifter.INTERNAL_ASSETS_FOLDER,
+                        ShapeShifterConstants.INTERNAL_ASSETS_FOLDER,
                         guid,
                         Path.GetFileName(assetPath)
                     );

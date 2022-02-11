@@ -10,7 +10,7 @@ namespace Miniclip.ShapeShifter.Utils
     {
         internal static string GenerateUniqueAssetSkinKey(string game, string guid) => game + ":" + guid;
 
-        internal static string GetGameName(int index) => ShapeShifterConfiguration.GetGameNameAtIndex(index);
+        internal static string GetGameName(int index) => ShapeShifterConfiguration.Instance.GetGameNameAtIndex(index);
 
         internal static void SavePendingChanges()
         {
@@ -22,7 +22,7 @@ namespace Miniclip.ShapeShifter.Utils
 
         public static void DeleteDSStoreFiles()
         {
-            foreach (string gameName in ShapeShifterConfiguration.GetGameNames())
+            foreach (string gameName in ShapeShifterConfiguration.Instance.GameNames)
             {
                 GameSkin gameSkin = new GameSkin(gameName);
 
@@ -48,13 +48,13 @@ namespace Miniclip.ShapeShifter.Utils
         {
             int nameAttempt = 0;
 
-            var names = ShapeShifterConfiguration.GetGameNames();
+            var gameNames = ShapeShifterConfiguration.Instance.GameNames;
             while (true)
             {
                 nameAttempt++;
                 string newName = $"{gameName} {nameAttempt}";
 
-                if (names.Contains(newName))
+                if (gameNames.Contains(newName))
                     continue;
 
                 return newName;

@@ -57,14 +57,14 @@ namespace Miniclip.ShapeShifter
                     GameSkin gameSkin = new GameSkin(gameName);
                     gameSkin.Duplicate(newGame);
 
-                    ShapeShifterConfiguration.AddGame(newGame);
+                    ShapeShifterConfiguration.Instance.AddGame(newGame);
                 }
 
                 if (GUILayout.Button("Delete", StyleUtils.ButtonStyle))
                 {
                     if (!isActive)
                     {
-                        ShapeShifterConfiguration.RemoveGame(gameName, true);
+                        ShapeShifterConfiguration.Instance.RemoveGame(gameName, true);
                     }
                     else
                     {

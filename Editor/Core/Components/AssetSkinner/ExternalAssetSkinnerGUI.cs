@@ -17,13 +17,13 @@ namespace Miniclip.ShapeShifter.Skinner
 
             using (new GUILayout.HorizontalScope(boxStyle))
             {
-                foreach (string game in ShapeShifterConfiguration.GetGameNames())
+                foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
                 {
                     string key = ExternalAssetSkinner.GenerateKeyFromRelativePath(relativePath);
                     string assetPath = Path.Combine(
                         ShapeShifter.SkinsFolder.FullName,
                         game,
-                        ShapeShifter.EXTERNAL_ASSETS_FOLDER,
+                        ShapeShifterConstants.EXTERNAL_ASSETS_FOLDER,
                         key,
                         Path.GetFileName(relativePath)
                     );

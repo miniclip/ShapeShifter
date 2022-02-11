@@ -6,7 +6,7 @@ namespace Miniclip.ShapeShifter.Saver
 {
     public class AssetSaver : UnityEditor.AssetModificationProcessor
     {
-        private static bool CanSave => ShapeShifterConfiguration.Instance.HasUnsavedChanges;
+        private static bool CanSave => ShapeShifterConfiguration.Instance.IsDirty;
         private static bool isSaving;
 
         [UsedImplicitly]

@@ -11,43 +11,33 @@ namespace Miniclip.ShapeShifter
 {
     public class ShapeShifterConfiguration : ScriptableObject
     {
-        public Editor DefaultConfigurationEditor { get; private set; }
-
-        public Editor ExternalConfigurationEditor { get; private set; }
-
         [SerializeField]
         [HideInInspector]
         private List<string> gameNames = new List<string>();
 
-        [SerializeField]
-        private bool hasUnsavedChanges;
+        public List<string> GameNames => gameNames;
 
-        public bool HasUnsavedChanges
-        {
-            get => hasUnsavedChanges;
-            set => hasUnsavedChanges = value;
-        }
+        [SerializeField]
+        private bool isDirty;
+        public bool IsDirty => isDirty;
 
         [SerializeField]
         [HideInInspector]
         private List<string> skinnedExternalAssetPaths = new List<string>();
         public List<string> SkinnedExternalAssetPaths => skinnedExternalAssetPaths;
+
         internal static ShapeShifterConfiguration Instance { get; private set; }
 
-        public List<string> GameNames => gameNames;
-
+        internal Editor DefaultConfigurationEditor { get; private set; }
+        internal Editor ExternalConfigurationEditor { get; private set; }
         private const string CONFIGURATION_RESOURCE = "ShapeShifterConfiguration.asset";
         private const string CONFIGURATION_RESOURCE_FOLDER_PATH = "Assets/Editor Default Resources/";
 
-        public static void RemoveAllGames(bool deleteFolders = true)
-        {
-            foreach (string instanceGameName in Instance.GameNames.ToList())
-            {
-                RemoveGame(instanceGameName, deleteFolders);
-            }
-        }
+        public void SetDirty(bool isDirty = true) => Instance.isDirty = isDirty;
 
-        public static string GetGameNameAtIndex(int index)
+        public void Save() => isDirty = false;
+        
+        public string GetGameNameAtIndex(int index)
         {
             if (!IsInitialized())
             {
@@ -62,7 +52,35 @@ namespace Miniclip.ShapeShifter
             return Instance.GameNames[index];
         }
 
-        public static IReadOnlyCollection<string> GetGameNames() => Instance.GameNames.AsReadOnly();
+        internal void AddGame(string gameName)
+        {
+            if (Instance.GameNames.Contains(gameName))
+            {
+                return;
+            }
+
+            Instance.GameNames.Add(gameName);
+
+            GameSkin gameSkin = new GameSkin(gameName);
+
+            IOUtils.TryCreateDirectory(gameSkin.MainFolder);
+        }
+
+        internal void RemoveGame(string gameName, bool deleteFolder)
+        {
+            if (Instance.GameNames.Contains(gameName))
+            {
+                Instance.GameNames.Remove(gameName);
+            }
+
+            if (deleteFolder)
+            {
+                GameSkin gameSkin = new GameSkin(gameName);
+                gameSkin.DeleteFolder();
+            }
+        }
+        
+        internal static bool IsInitialized() => Instance != null && Instance.GameNames.Count > 0;
 
         internal static void Initialise()
         {
@@ -117,43 +135,13 @@ namespace Miniclip.ShapeShifter
                 ShapeShifterLogger.Log(
                     "ShapeShifter has no configured games, creating a default one and making it active"
                 );
-                AddGame(Application.productName);
+                Instance.AddGame(Application.productName);
                 AssetSwitcher.SwitchToGame(0);
                 EditorUtility.SetDirty(Instance);
             }
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-        }
-
-        internal static bool IsInitialized() => Instance != null && Instance.GameNames.Count > 0;
-
-        internal static void AddGame(string gameName)
-        {
-            if (Instance.GameNames.Contains(gameName))
-            {
-                return;
-            }
-
-            Instance.GameNames.Add(gameName);
-
-            GameSkin gameSkin = new GameSkin(gameName);
-
-            IOUtils.TryCreateDirectory(gameSkin.MainFolder);
-        }
-
-        internal static void RemoveGame(string gameName, bool deleteFolder)
-        {
-            if (Instance.GameNames.Contains(gameName))
-            {
-                Instance.GameNames.Remove(gameName);
-            }
-
-            if (deleteFolder)
-            {
-                GameSkin gameSkin = new GameSkin(gameName);
-                gameSkin.DeleteFolder();
-            }
         }
     }
 }

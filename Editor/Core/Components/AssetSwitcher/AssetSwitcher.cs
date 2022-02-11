@@ -213,7 +213,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 CopyFromOriginToSkinnedExternal
             );
 
-            ShapeShifterConfiguration.Instance.HasUnsavedChanges = false;
+            ShapeShifterConfiguration.Instance.SetDirty(false);
         }
 
         private static void PerformCopiesWithTracking(int selected,
@@ -239,7 +239,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                 PerformOperationOnPath(
                     gameFolderPath,
-                    ShapeShifter.INTERNAL_ASSETS_FOLDER,
+                    ShapeShifterConstants.INTERNAL_ASSETS_FOLDER,
                     internalAssetOperation,
                     description,
                     progressBarStep,
@@ -248,7 +248,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                 PerformOperationOnPath(
                     gameFolderPath,
-                    ShapeShifter.EXTERNAL_ASSETS_FOLDER,
+                    ShapeShifterConstants.EXTERNAL_ASSETS_FOLDER,
                     externalAssetOperation,
                     description,
                     progressBarStep,
@@ -339,7 +339,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
         internal static void SwitchToGame(int gameToSwitchTo, bool forceSwitch = false)
         {
-            if (ShapeShifterConfiguration.Instance.HasUnsavedChanges && !forceSwitch)
+            if (ShapeShifterConfiguration.Instance.IsDirty && !forceSwitch)
             {
                 int choice = EditorUtility.DisplayDialogComplex(
                     "Shape Shifter",
@@ -371,7 +371,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 CopyFromSkinnedExternalToOrigin
             );
             ShapeShifter.ActiveGame = gameToSwitchTo;
-            ShapeShifterConfiguration.Instance.HasUnsavedChanges = false;
+            ShapeShifterConfiguration.Instance.SetDirty(false);
 
             GameSkin gameSkin = ShapeShifter.ActiveGameSkin;
 
