@@ -9,6 +9,7 @@ using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Switcher
 {
@@ -30,6 +31,13 @@ namespace Miniclip.ShapeShifter.Switcher
                         // assetSkin.Delete();
                     }
 
+                    if (GitUtils.IsTracked(AssetDatabase.GUIDToAssetPath(assetSkin.Guid)))
+                    {
+                        Debug.LogError("This asset should not be tracket, you probably did "
+                                       + "a merge from a branch with unskinned version");
+                        throw new NotImplementedException();
+                    }
+                    
                     string guid = assetSkin.Guid;
 
                     string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
