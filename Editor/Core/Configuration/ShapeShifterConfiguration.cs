@@ -38,6 +38,8 @@ namespace Miniclip.ShapeShifter
             int index = gameNames.IndexOf(gameSkinToRename.Name);
             gameSkinToRename.Rename(newName);
             gameNames[index] = newName;
+
+            EditorUtility.SetDirty(this);
         }
 
         internal void AddGame(string gameSkinName)
@@ -52,6 +54,8 @@ namespace Miniclip.ShapeShifter
             GameSkin gameSkin = new GameSkin(gameSkinName);
 
             IOUtils.TryCreateDirectory(gameSkin.MainFolderPath);
+
+            EditorUtility.SetDirty(this);
         }
 
         internal void RemoveGame(string gameName, bool deleteFolder)
@@ -66,6 +70,8 @@ namespace Miniclip.ShapeShifter
                 GameSkin gameSkin = new GameSkin(gameName);
                 gameSkin.DeleteFolder();
             }
+
+            EditorUtility.SetDirty(this);
         }
 
         internal static bool IsInitialized() => Instance != null && Instance.GameNames.Count > 0;
