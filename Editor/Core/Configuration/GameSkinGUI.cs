@@ -27,8 +27,8 @@ namespace Miniclip.ShapeShifter
 
         private static void OnRenameGUI(string gameName)
         {
-            GameSkin gameSkinToRename = new GameSkin(gameName);
-
+            GameSkin gameSkinToRename = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
+            
             if (currentGameSkinInRenameMode != null && currentGameSkinInRenameMode.Equals(gameSkinToRename))
             {
                 OnRenameModeOperationGUI(gameName);

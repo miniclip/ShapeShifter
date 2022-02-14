@@ -9,6 +9,8 @@ namespace Miniclip.ShapeShifter
 {
     public class ShapeShifterConfiguration : ScriptableObject
     {
+        private Dictionary<string, GameSkin> nameToGameSkinDict = new Dictionary<string, GameSkin>();
+
         [SerializeField]
         private List<string> gameNames = new List<string>();
         public List<string> GameNames => gameNames;
@@ -135,6 +137,18 @@ namespace Miniclip.ShapeShifter
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+        }
+
+        public GameSkin GetGameSkinByName(string gameName)
+        {
+            if (nameToGameSkinDict.TryGetValue(gameName, out GameSkin gameSkin))
+            {
+                return gameSkin;
+            }
+
+            gameSkin = new GameSkin(gameName);
+            nameToGameSkinDict.Add(gameName, gameSkin);
+            return gameSkin;
         }
     }
 }
