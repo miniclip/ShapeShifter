@@ -68,23 +68,22 @@ namespace Miniclip.ShapeShifter.Skinner
                 GUILayout.Label("Selected assets:", EditorStyles.boldLabel);
 
                 Object[] assets = Selection.GetFiltered<Object>(SelectionMode.Assets);
-
-                scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-
-                foreach ((Object asset, bool isSupported, string reason) assetSupportInfo in
-                         assets.GetAssetsSupportInfo())
+                
+                using (new GUILayout.ScrollViewScope(scrollPosition))
                 {
-                    if (assetSupportInfo.isSupported)
+                    foreach ((Object asset, bool isSupported, string reason) assetSupportInfo in
+                             assets.GetAssetsSupportInfo())
                     {
-                        DrawAssetSection(assetSupportInfo.asset);
-                    }
-                    else
-                    {
-                        DrawUnsupportedAssetSection(assetSupportInfo);
+                        if (assetSupportInfo.isSupported)
+                        {
+                            DrawAssetSection(assetSupportInfo.asset);
+                        }
+                        else
+                        {
+                            DrawUnsupportedAssetSection(assetSupportInfo);
+                        }
                     }
                 }
-
-                GUILayout.EndScrollView();
             }
         }
 

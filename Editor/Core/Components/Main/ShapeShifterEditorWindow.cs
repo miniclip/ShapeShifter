@@ -43,7 +43,7 @@ namespace Miniclip.ShapeShifter
                 {
                     ShapeShifterConfiguration.Instance.DefaultConfigurationEditor.OnInspectorGUI();
                     ShapeShifterConfiguration.Instance.ExternalConfigurationEditor.OnInspectorGUI();
-                }
+                }   
 
                 AssetSwitcherGUI.OnGUI();
                 AssetSkinnerGUI.OnGUI();

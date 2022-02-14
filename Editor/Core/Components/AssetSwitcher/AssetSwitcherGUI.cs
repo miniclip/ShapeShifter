@@ -35,12 +35,9 @@ namespace Miniclip.ShapeShifter.Switcher
             GUIStyle boxStyle = StyleUtils.BoxStyle;
             using (new GUILayout.VerticalScope(boxStyle))
             {
-                using (new GUILayout.VerticalScope())
-                {
-                    OnActiveGameGUI();
+                OnActiveGameGUI();
 
-                    OnSwitchToGUI();
-                }
+                OnSwitchToGUI();
             }
         }
 
@@ -61,6 +58,7 @@ namespace Miniclip.ShapeShifter.Switcher
             {
                 GameSkin gameSkin = new GameSkin(GameNames[HighlightedGame]);
                 AssetSwitcher.SwitchToGame(gameSkin);
+                GUIUtility.ExitGUI();
             }
         }
 
