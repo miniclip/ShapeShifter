@@ -154,7 +154,7 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             GameSkin gameSkin = new GameSkin(gameName);
 
-            IOUtils.TryCreateDirectory(gameSkin.MainFolder);
+            IOUtils.TryCreateDirectory(gameSkin.MainFolderPath);
         }
     }
 }

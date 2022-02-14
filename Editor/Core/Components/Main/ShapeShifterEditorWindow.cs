@@ -42,8 +42,6 @@ namespace Miniclip.ShapeShifter
                     && ShapeShifterConfiguration.Instance.ExternalConfigurationEditor != null)
                 {
                     ShapeShifterConfiguration.Instance.DefaultConfigurationEditor.OnInspectorGUI();
-
-                    // TODO: hide this when it's no longer necessary, as direct access to this list may cause issues
                     ShapeShifterConfiguration.Instance.ExternalConfigurationEditor.OnInspectorGUI();
                 }
 
@@ -94,7 +92,7 @@ namespace Miniclip.ShapeShifter
 
             GUILayout.BeginVertical(StyleUtils.BoxStyle);
             GUILayout.Label("Dangerous Operations");
-            AssetSwitcherGUI.OnOverwriteAllSkinsGUI();
+            // AssetSwitcherGUI.OnOverwriteAllSkinsGUI();
             GUILayout.Space(20);
             OnRemoveAllSkinsGUI();
             GUILayout.EndVertical();

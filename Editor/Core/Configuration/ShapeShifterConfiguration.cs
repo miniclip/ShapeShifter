@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
@@ -11,10 +10,9 @@ namespace Miniclip.ShapeShifter
     public class ShapeShifterConfiguration : ScriptableObject
     {
         [SerializeField]
-        [HideInInspector]
         private List<string> gameNames = new List<string>();
-
         public List<string> GameNames => gameNames;
+
         public bool IsDirty => isDirty;
 
         [SerializeField]
@@ -33,47 +31,32 @@ namespace Miniclip.ShapeShifter
 
         public void Save() => isDirty = false;
 
-        public string GetGameNameAtIndex(int index)
+        public void RenameGame(GameSkin gameSkinToRename, string newName)
         {
-            if (!IsInitialized())
-            {
-                throw new Exception("Configuration not initialized");
-            }
-
-            if (index >= Instance.GameNames.Count)
-            {
-                throw new Exception("Index is bigger than current game count");
-            }
-
-            return Instance.GameNames[index];
-        }
-
-        public void RenameGame(int index, string newName)
-        {
-            GameSkin gameSkin = new GameSkin(gameNames[index]);
-            gameSkin.RenameFolder(newName);
+            int index = gameNames.IndexOf(gameSkinToRename.Name);
+            gameSkinToRename.Rename(newName);
             gameNames[index] = newName;
         }
 
-        internal void AddGame(string gameName)
+        internal void AddGame(string gameSkinName)
         {
-            if (Instance.GameNames.Contains(gameName))
+            if (gameNames.Contains(gameSkinName))
             {
                 return;
             }
 
-            Instance.GameNames.Add(gameName);
+            gameNames.Add(gameSkinName);
 
-            GameSkin gameSkin = new GameSkin(gameName);
+            GameSkin gameSkin = new GameSkin(gameSkinName);
 
-            IOUtils.TryCreateDirectory(gameSkin.MainFolder);
+            IOUtils.TryCreateDirectory(gameSkin.MainFolderPath);
         }
 
         internal void RemoveGame(string gameName, bool deleteFolder)
         {
-            if (Instance.GameNames.Contains(gameName))
+            if (gameNames.Contains(gameName))
             {
-                Instance.GameNames.Remove(gameName);
+                gameNames.Remove(gameName);
             }
 
             if (deleteFolder)
@@ -108,7 +91,10 @@ namespace Miniclip.ShapeShifter
             {
                 Instance = CreateInstance<ShapeShifterConfiguration>();
 
-                if (!AssetDatabase.IsValidFolder(ShapeShifterConstants.CONFIGURATION_RESOURCE_FOLDER_PATH))
+                if (!AssetDatabase.IsValidFolder(ShapeShifterConstants.CONFIGURATION_RESOURCE_FOLDER_PATH)
+                    && !Directory.Exists(
+                        PathUtils.GetFullPath(ShapeShifterConstants.CONFIGURATION_RESOURCE_FOLDER_PATH)
+                    ))
                 {
                     AssetDatabase.CreateFolder("Assets", "Editor Default Resources");
                 }
@@ -139,8 +125,11 @@ namespace Miniclip.ShapeShifter
                 ShapeShifterLogger.Log(
                     "ShapeShifter has no configured games, creating a default one and making it active"
                 );
-                Instance.AddGame(Application.productName);
-                AssetSwitcher.SwitchToGame(0);
+
+                string gameSkinName = Application.productName;
+
+                Instance.AddGame(gameSkinName);
+                AssetSwitcher.SwitchToGame(new GameSkin(gameSkinName));
                 EditorUtility.SetDirty(Instance);
             }
 

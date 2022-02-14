@@ -24,5 +24,10 @@ namespace Miniclip.ShapeShifter.Utils
         public static bool GetBool(string key) => EditorPrefs.GetBool(GetProjectSpecificKey(key));
 
         public static void SetBool(string key, bool value) => EditorPrefs.SetBool(GetProjectSpecificKey(key), value);
+
+        public static string GetString(string key) => EditorPrefs.GetString(GetProjectSpecificKey(key));
+
+        public static void SetString(string key, string value) =>
+            EditorPrefs.SetString(GetProjectSpecificKey(key), value);
     }
 }

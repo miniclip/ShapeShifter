@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
@@ -8,8 +9,19 @@ namespace Miniclip.ShapeShifter.Switcher
     public static class AssetSwitcherGUI
     {
         private static int highlightedGame;
+        private static GameSkin highlightedGameSkin;
 
         private static bool showSwitcher = true;
+        private static List<string> GameNames => ShapeShifterConfiguration.Instance.GameNames;
+
+        public static int HighlightedGame
+        {
+            get => highlightedGame;
+            set
+            {
+                highlightedGame = value;
+            }
+        }
 
         internal static void OnGUI()
         {
@@ -39,15 +51,16 @@ namespace Miniclip.ShapeShifter.Switcher
 
             GUILayout.Space(10.0f);
 
-            highlightedGame = EditorGUILayout.Popup(
+            HighlightedGame = EditorGUILayout.Popup(
                 "Switch To",
-                highlightedGame,
-                ShapeShifterConfiguration.Instance.GameNames.ToArray()
+                HighlightedGame,
+                GameNames.ToArray()
             );
 
             if (GUILayout.Button("Switch!", StyleUtils.ButtonStyle))
             {
-                AssetSwitcher.SwitchToGame(highlightedGame);
+                GameSkin gameSkin = new GameSkin(GameNames[HighlightedGame]);
+                AssetSwitcher.SwitchToGame(gameSkin);
             }
         }
 
@@ -63,29 +76,29 @@ namespace Miniclip.ShapeShifter.Switcher
             GUILayout.Box($"Active game: {ShapeShifter.ActiveGameName}", titleStyle);
         }
 
-        internal static void OnOverwriteAllSkinsGUI()
-        {
-            Color backgroundColor = GUI.backgroundColor;
-
-            GUI.backgroundColor = Color.red;
-
-            if (GUILayout.Button(
-                    $"Overwrite all {ShapeShifterUtils.GetGameName(highlightedGame)} skins",
-                    StyleUtils.ButtonStyle
-                ))
-            {
-                if (EditorUtility.DisplayDialog(
-                        "ShapeShifter",
-                        $"This will overwrite you current {ShapeShifterUtils.GetGameName(highlightedGame)} assets with the assets currently inside unity. Are you sure?",
-                        "Yes, overwrite it.",
-                        "Nevermind"
-                    ))
-                {
-                    AssetSwitcher.OverwriteSelectedSkin(highlightedGame);
-                }
-            }
-
-            GUI.backgroundColor = backgroundColor;
-        }
+        // internal static void OnOverwriteAllSkinsGUI()
+        // {
+        //     Color backgroundColor = GUI.backgroundColor;
+        //
+        //     GUI.backgroundColor = Color.red;
+        //
+        //     if (GUILayout.Button(
+        //             $"Overwrite all {ShapeShifterUtils.GetGameName(HighlightedGame)} skins",
+        //             StyleUtils.ButtonStyle
+        //         ))
+        //     {
+        //         if (EditorUtility.DisplayDialog(
+        //                 "ShapeShifter",
+        //                 $"This will overwrite you current {ShapeShifterUtils.GetGameName(HighlightedGame)} assets with the assets currently inside unity. Are you sure?",
+        //                 "Yes, overwrite it.",
+        //                 "Nevermind"
+        //             ))
+        //         {
+        //             AssetSwitcher.OverwriteSelectedSkin(HighlightedGame);
+        //         }
+        //     }
+        //
+        //     GUI.backgroundColor = backgroundColor;
+        // }
     }
 }

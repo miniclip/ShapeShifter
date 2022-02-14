@@ -17,6 +17,9 @@ namespace Miniclip.ShapeShifter.Tests
         internal static string TextFileAssetName = "shapeshifter.test.textfile";
         internal static string FolderAssetName = "shapeshifter.test.folder";
 
+        internal static GameSkin game0 = new GameSkin("Test0");
+        internal static GameSkin game1 = new GameSkin("Test1");
+        
         internal static string[] TestGameNames =
         {
             "Test0", "Test1",

@@ -31,11 +31,11 @@ namespace Miniclip.ShapeShifter
 
         internal static Dictionary<string, Texture2D> CachedPreviewPerAssetDict = new Dictionary<string, Texture2D>();
 
-        internal static string ActiveGameName => ShapeShifterUtils.GetGameName(ActiveGame);
+        internal static string ActiveGameName => ActiveGame;
 
         private static ShapeShifterConfiguration config => ShapeShifterConfiguration.Instance;
 
-        public static int ActiveGame
+        public static string ActiveGame
         {
             get
             {
@@ -44,26 +44,37 @@ namespace Miniclip.ShapeShifter
                     ShapeShifterLogger.LogWarning(
                         "Could not find any active game on EditorPrefs, defaulting to game 0"
                     );
-                    ActiveGame = 0;
+                    ActiveGame = GameNames.FirstOrDefault();
                 }
 
-                int activeGame = ShapeShifterEditorPrefs.GetInt(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY);
+                string activeGame =
+                    ShapeShifterEditorPrefs.GetString(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY);
 
-                if (activeGame >= GameNames.Count)
+                if (!GameNames.Contains(activeGame))
                 {
                     ShapeShifterLogger.LogWarning("Current active game doesn't exist, defaulting to game 0.");
-                    ActiveGame = 0;
+                    SetDefaultGameSkin();
                 }
 
                 return activeGame;
             }
             set
             {
+                if (!GameNames.Contains(value))
+                {
+                    SetDefaultGameSkin();
+                }
                 ShapeShifterLogger.Log(
                     $"Setting active game on EditorPrefs: {value}"
                 );
-                ShapeShifterEditorPrefs.SetInt(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY, value);
+                ShapeShifterEditorPrefs.SetString(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY, value);
+                ActiveGameSkin = new GameSkin(value);
             }
+        }
+
+        private static void SetDefaultGameSkin()
+        {
+            ActiveGame = GameNames.FirstOrDefault();
         }
 
         private static GameSkin activeGameSkin;
@@ -72,15 +83,16 @@ namespace Miniclip.ShapeShifter
         {
             get
             {
-                if (activeGameSkin != null && activeGameSkin.Name == ActiveGameName)
+                if (activeGameSkin?.Name == ActiveGame)
                 {
                     return activeGameSkin;
                 }
 
-                activeGameSkin = new GameSkin(ActiveGameName);
+                activeGameSkin = new GameSkin(ActiveGame);
 
                 return activeGameSkin;
             }
+            private set => activeGameSkin = value;
         }
 
         public static void RemoveAllGames(bool deleteFolders = true)

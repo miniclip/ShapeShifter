@@ -4,7 +4,7 @@ using Miniclip.ShapeShifter.Utils;
 
 namespace Miniclip.ShapeShifter
 {
-    class AssetSkin
+    public class AssetSkin
     {
         public AssetSkin(string guid, string folderPath)
         {

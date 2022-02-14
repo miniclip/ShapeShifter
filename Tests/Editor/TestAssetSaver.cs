@@ -29,7 +29,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             AssetSkinner.SkinAsset(assetPath);
 
-            AssetSwitcher.SwitchToGame(0, true);
+            AssetSwitcher.SwitchToGame(TestUtils.game0, true);
 
             File.WriteAllText(assetFullPath, "new content");
 
@@ -60,7 +60,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsTrue(AssetSkinner.IsSkinned(assetPath), "Folder was not skinned");
 
-            AssetSwitcher.SwitchToGame(0, true);
+            AssetSwitcher.SwitchToGame(TestUtils.game0, true);
 
             string skinPath = Path.Combine(
                 ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath,
@@ -99,7 +99,7 @@ namespace Miniclip.ShapeShifter.Tests
                 "Skinned folder should have 2 files only after overwrite"
             );
 
-            AssetSwitcher.SwitchToGame(1);
+            AssetSwitcher.SwitchToGame(TestUtils.game1);
 
             skinPath = Path.Combine(
                 ShapeShifter.ActiveGameSkin.GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath)).FolderPath,
@@ -125,7 +125,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             AssetSkinner.SkinAsset(assetPath);
 
-            AssetSwitcher.SwitchToGame(0, true);
+            AssetSwitcher.SwitchToGame(TestUtils.game0, true);
 
             TextureImporter textureImporter =
                 (TextureImporter)TextureImporter.GetAtPath(assetPath);
@@ -137,14 +137,14 @@ namespace Miniclip.ShapeShifter.Tests
             textureImporter.SaveAndReimport();
             ShapeShifterUtils.SavePendingChanges();
 
-            AssetSwitcher.SwitchToGame(1, true);
+            AssetSwitcher.SwitchToGame(TestUtils.game1, true);
 
             textureImporter =
                 (TextureImporter)TextureImporter.GetAtPath(assetPath);
             Assert.IsTrue(textureImporter.textureType == TextureImporterType.Sprite);
             Assert.IsFalse(textureImporter.textureType == TextureImporterType.Default);
 
-            AssetSwitcher.SwitchToGame(0, true);
+            AssetSwitcher.SwitchToGame(TestUtils.game0, true);
 
             textureImporter =
                 (TextureImporter)TextureImporter.GetAtPath(assetPath);

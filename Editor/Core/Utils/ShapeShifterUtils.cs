@@ -9,9 +9,7 @@ namespace Miniclip.ShapeShifter.Utils
     internal static class ShapeShifterUtils
     {
         internal static string GenerateUniqueAssetSkinKey(string game, string guid) => game + ":" + guid;
-
-        internal static string GetGameName(int index) => ShapeShifterConfiguration.Instance.GetGameNameAtIndex(index);
-
+        
         internal static void SavePendingChanges()
         {
             AssetDatabase.SaveAssets();
@@ -32,7 +30,7 @@ namespace Miniclip.ShapeShifter.Utils
                 }
 
                 IEnumerable<string> ds_stores = Directory.EnumerateFiles(
-                    gameSkin.MainFolder,
+                    gameSkin.MainFolderPath,
                     ".DS_Store",
                     SearchOption.AllDirectories
                 );
