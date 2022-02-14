@@ -31,13 +31,17 @@ namespace Miniclip.ShapeShifter.Switcher
                         // assetSkin.Delete();
                     }
 
-                    if (GitUtils.IsTracked(AssetDatabase.GUIDToAssetPath(assetSkin.Guid)))
+                    string guidToAssetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
+                    string metaPath = guidToAssetPath + ".meta";
+                    if (GitUtils.IsTracked(guidToAssetPath) || GitUtils.IsTracked(metaPath))
                     {
-                        Debug.LogError("This asset should not be tracket, you probably did "
-                                       + "a merge from a branch with unskinned version");
-                        throw new NotImplementedException();
+                        Debug.LogError(
+                            "This asset should not be tracked, you probably did "
+                            + "a merge from a branch with unskinned version"
+                        );
+                        GitUtils.Untrack(assetSkin.Guid);
                     }
-                    
+
                     string guid = assetSkin.Guid;
 
                     string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
