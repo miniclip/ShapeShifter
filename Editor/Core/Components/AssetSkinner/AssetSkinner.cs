@@ -103,6 +103,8 @@ namespace Miniclip.ShapeShifter.Skinner
             }
 
             GitUtils.Untrack(guid);
+            
+            GitUtils.Stage(assetPath+".meta");
         }
 
         public static bool IsSkinned(string assetPath) =>
