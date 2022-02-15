@@ -7,11 +7,14 @@ using Miniclip.ShapeShifter.Extensions;
 using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Utils
 {
     class GitUtils
     {
+        private const string TEMPORARY_GIT_CLONES_FOLDER = "Assets/git_clone_temp~";
+
         private static readonly string git_status_modified = "M";
         private static readonly string git_status_added = "A";
         private static readonly string git_status_deleted = "D";
@@ -231,6 +234,77 @@ namespace Miniclip.ShapeShifter.Utils
                 isTracked = true;
                 hasStagedChanges = !status.StartsWith(" ");
                 hasUnstagedChanges = !status.EndsWith(" ");
+            }
+        }
+        
+        public static string GetGitURL(string gitRepositoryPath)
+        {
+            string gitURL = RunGitCommand("config --get remote.origin.url", gitRepositoryPath);
+            return gitURL;
+        }
+        
+        public static DirectoryInfo GetOrCheckoutRepo(string submoduleURL)
+        {
+            DirectoryInfo reposContainerFolder = new DirectoryInfo(TEMPORARY_GIT_CLONES_FOLDER);
+            if (!reposContainerFolder.Exists)
+            {
+                reposContainerFolder.Create();
+            }
+
+            if (TryFindRepo(submoduleURL, reposContainerFolder, out DirectoryInfo checkedOutRepo))
+            {
+                Debug.Log($"Found {submoduleURL} local copy.");
+                return checkedOutRepo;
+            }
+
+            Debug.Log($"Cloning {submoduleURL}.");
+            Clone(submoduleURL);
+
+            if (TryFindRepo(submoduleURL, reposContainerFolder, out checkedOutRepo))
+            {
+                return checkedOutRepo;
+            }
+
+            throw new Exception($"Could not checkout {submoduleURL} into {TEMPORARY_GIT_CLONES_FOLDER} folder");
+        }
+
+        public static void CreateBranch(DirectoryInfo repository, string branchName)
+        {
+            RunGitCommand($"checkout -b {branchName}", repository.FullName);
+        }
+
+        private static bool TryFindRepo(string submoduleURL, DirectoryInfo mainDirectoryInfo,
+            out DirectoryInfo repositoryDirectoryInfo)
+        {
+            foreach (DirectoryInfo directoryInfo in mainDirectoryInfo.EnumerateDirectories())
+            {
+                if (GetGitURL(directoryInfo.FullName) == submoduleURL)
+                {
+                    {
+                        repositoryDirectoryInfo = directoryInfo;
+                        return true;
+                    }
+                }
+            }
+
+            repositoryDirectoryInfo = null;
+            return false;
+        }
+
+        private static void Clone(string submoduleURL)
+        {
+            string fullPath = Path.GetFullPath(TEMPORARY_GIT_CLONES_FOLDER);
+
+            RunGitCommand($"clone {submoduleURL}", fullPath);
+        }
+
+        public static void Commit(DirectoryInfo repository, string branchName, string commitMessage, bool pushCommit)
+        {
+            RunGitCommand($"commit -a -m \"{commitMessage}\"", repository.FullName);
+
+            if (pushCommit)
+            {
+                RunGitCommand($"push -u origin {branchName}", repository.FullName);
             }
         }
     }
