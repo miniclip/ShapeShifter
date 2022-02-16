@@ -11,7 +11,7 @@ using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Utils
 {
-    class GitUtils
+    public class GitUtils
     {
         private const string TEMPORARY_GIT_CLONES_FOLDER = "Assets/git_clone_temp~";
 
@@ -24,7 +24,7 @@ namespace Miniclip.ShapeShifter.Utils
 
         private static string GitWorkingDirectory = string.Empty;
 
-        internal static string RepositoryPath
+        internal static string MainRepositoryPath
         {
             get
             {
@@ -166,6 +166,11 @@ namespace Miniclip.ShapeShifter.Utils
             return changedFiles.Where(file => file.status.Contains(git_status_deleted)).ToList();
         }
 
+        internal static string RunGitCommand(string arguments, DirectoryInfo workingDirectory)
+        {
+            return RunGitCommand(arguments, workingDirectory.FullName);
+        }
+
         internal static string RunGitCommand(string arguments, string workingDirectory = null)
         {
             using (Process process = new Process())
@@ -194,7 +199,7 @@ namespace Miniclip.ShapeShifter.Utils
         {
             if (workingDirectory == null)
             {
-                workingDirectory = RepositoryPath;
+                workingDirectory = MainRepositoryPath;
             }
 
             return process.Run(
@@ -236,13 +241,13 @@ namespace Miniclip.ShapeShifter.Utils
                 hasUnstagedChanges = !status.EndsWith(" ");
             }
         }
-        
+
         public static string GetGitURL(string gitRepositoryPath)
         {
             string gitURL = RunGitCommand("config --get remote.origin.url", gitRepositoryPath);
             return gitURL;
         }
-        
+
         public static DirectoryInfo GetOrCheckoutRepo(string submoduleURL)
         {
             DirectoryInfo reposContainerFolder = new DirectoryInfo(TEMPORARY_GIT_CLONES_FOLDER);
@@ -306,6 +311,11 @@ namespace Miniclip.ShapeShifter.Utils
             {
                 RunGitCommand($"push -u origin {branchName}", repository.FullName);
             }
+        }
+
+        public static string GetCurrentBranch(DirectoryInfo repoDirectoryInfo)
+        {
+            return RunGitCommand("branch --show-current", repoDirectoryInfo);
         }
     }
 }

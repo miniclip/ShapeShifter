@@ -11,7 +11,7 @@ namespace Miniclip.ShapeShifter.Utils.Git
         private const string GIT_IGNORE_SHAPESHIFTER_LABEL = "#ShapeShifter";
         private const string NON_SHAPE_SHIFTER_LINES_KEY = "RestOfGitIgnore";
 
-        private static string GitIgnorePath => Path.Combine(GitUtils.RepositoryPath, ".gitignore");
+        private static string GitIgnorePath => Path.Combine(GitUtils.MainRepositoryPath, ".gitignore");
 
         private static string GenerateAssetIgnoreIdentifierFromGuid(string guid) =>
             $"{GIT_IGNORE_SHAPESHIFTER_LABEL} {guid}";

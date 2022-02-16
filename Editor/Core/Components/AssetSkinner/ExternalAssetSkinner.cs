@@ -12,7 +12,7 @@ namespace Miniclip.ShapeShifter.Skinner
     {
         private static Editor externalConfigurationEditor;
 
-        private static string DetermineRecommendedPath() => GitUtils.RepositoryPath;
+        private static string DetermineRecommendedPath() => GitUtils.MainRepositoryPath;
 
         internal static string GenerateKeyFromRelativePath(string relativePath) =>
             WebUtility.UrlEncode(relativePath).Replace(".", "{dot}");

@@ -108,7 +108,7 @@ namespace Miniclip.ShapeShifter.Utils
         internal static string GetPathRelativeToRepositoryFolder(string path)
         {
             string fullPath = GetFullPath(path);
-            string projectFolderName = Directory.GetParent(GitUtils.RepositoryPath).Name;
+            string projectFolderName = Directory.GetParent(GitUtils.MainRepositoryPath).Name;
 
             return GetRelativeTo(fullPath, projectFolderName, false);
         }
