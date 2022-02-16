@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Switcher;
 using UnityEditor;
+using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Utils
 {
@@ -57,6 +58,11 @@ namespace Miniclip.ShapeShifter.Utils
 
                 return newName;
             }
+        }
+
+        public static string GetAssetPath(this UnityEngine.Object obj)
+        {
+            return AssetDatabase.GetAssetPath(obj);
         }
     }
 }

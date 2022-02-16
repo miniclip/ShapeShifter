@@ -313,9 +313,14 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
-        public static string GetCurrentBranch(DirectoryInfo repoDirectoryInfo)
+        public static string GetCurrentBranch(DirectoryInfo repository)
         {
-            return RunGitCommand("branch --show-current", repoDirectoryInfo);
+            return RunGitCommand("branch --show-current", repository);
+        }
+
+        public static void SwitchBranch(string branchToSwitchTo, DirectoryInfo repository)
+        {
+            RunGitCommand($"checkout {branchToSwitchTo}", repository);
         }
     }
 }
