@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using UnityEditor;
@@ -65,16 +64,16 @@ namespace Miniclip.ShapeShifter.Utils.Git
         {
             GitIgnoreWrapper gitIgnore = GitIgnoreWrapper.Instance();
 
-            var readOnlyKeys = new ReadOnlyCollection<string>(gitIgnore.Keys.ToList());
-            
-            foreach (string key in readOnlyKeys.Where(key => key != NON_SHAPE_SHIFTER_LINES_KEY))
+            var listCopy = new List<string>(gitIgnore.Keys.ToList());
+
+            foreach (string key in listCopy.Where(key => key != NON_SHAPE_SHIFTER_LINES_KEY))
             {
                 gitIgnore.Remove(key);
             }
 
             gitIgnore.WriteToFile();
         }
-        
+
         public class GitIgnoreWrapper : Dictionary<string, List<string>>
         {
             public static GitIgnoreWrapper Instance() => new GitIgnoreWrapper();

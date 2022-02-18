@@ -1,34 +1,40 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
-using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
     public static class PreMergeCheck
     {
-        public static int HasShapeShifterConflictsWith(string targetBranch)
+        public static int HasShapeShifterConflictsWith(string currentBranch,
+            string targetBranch,
+            out List<string> filesChangedBetweenBranches)
         {
-            List<string> skinnedAssetsGUIDs = GitIgnore.GitIgnoreWrapper.Instance().Keys.ToList();
-
-            ShapeShifterLogger.Log(skinnedAssetsGUIDs);
-
-            string commitWhereCurrentBranchForkedFromTargetBranch =
-                GitUtils.RunGitCommand($"merge-base --fork-point {targetBranch}");
-
-            ShapeShifterLogger.Log("commitWhereCurrentBranchForkedFromTargetBranch:" + commitWhereCurrentBranchForkedFromTargetBranch);
-
-            string latestCommitFromTargetBranch = GitUtils.RunGitCommand($"log --format=\"%H\" -n 1 {targetBranch}");
-
-            ShapeShifterLogger.Log("latestCommitFromTargetBranch:" + latestCommitFromTargetBranch);
+            List<string> skinnedPaths = GetCurrentSkinnedPaths();
             
-            //get list of skinned assets that were not skinned at fork point
+            string[] allChangedFilesInTargetBranch = GitUtils
+                .RunGitCommand("git diff " + currentBranch + "..." + targetBranch + " --name-only")
+                .Split('\n');
             
-            // check if they remain unchanged between fork point and latest commit from target branch
+            filesChangedBetweenBranches = allChangedFilesInTargetBranch
+                .Where(diffFile => skinnedPaths.Contains(diffFile))
+                .ToList();
             
-
             return 0;
+        }
+
+        private static List<string> GetCurrentSkinnedPaths()
+        {
+            GitIgnore.GitIgnoreWrapper gitIgnoreWrapper = GitIgnore.GitIgnoreWrapper.Instance();
+            List<string> currentSkinnedPaths = new List<string>();
+            foreach (KeyValuePair<string, List<string>> keyValuePair in
+                     gitIgnoreWrapper)
+            {
+                currentSkinnedPaths.AddRange(keyValuePair.Value);
+            }
+
+            return currentSkinnedPaths;
         }
     }
 }

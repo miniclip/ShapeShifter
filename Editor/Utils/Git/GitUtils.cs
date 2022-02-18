@@ -175,6 +175,11 @@ namespace Miniclip.ShapeShifter.Utils
         {
             using (Process process = new Process())
             {
+                if (arguments.StartsWith("git "))
+                {
+                    arguments = arguments.TrimStart("git ".ToCharArray());
+                }
+
                 int exitCode = RunProcessAndGetExitCode(
                     arguments,
                     process,
