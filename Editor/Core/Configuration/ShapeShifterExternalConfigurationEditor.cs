@@ -31,11 +31,6 @@ namespace Miniclip.ShapeShifter
 
         private void OnEnable()
         {
-            if (this.serializedObject == null)
-            {
-                Debug.Log("##! this should not happen");
-            }
-            
             this.externalAssetsProperty = this.serializedObject.FindProperty("skinnedExternalAssetPaths");
 
             this.externalAssetsList = new ReorderableList(

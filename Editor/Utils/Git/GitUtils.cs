@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using Miniclip.ShapeShifter.Extensions;
 using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
@@ -13,8 +14,6 @@ namespace Miniclip.ShapeShifter.Utils
 {
     public class GitUtils
     {
-        private const string TEMPORARY_GIT_CLONES_FOLDER = "Assets/git_clone_temp~";
-
         private static readonly string git_status_modified = "M";
         private static readonly string git_status_added = "A";
         private static readonly string git_status_deleted = "D";
@@ -154,16 +153,52 @@ namespace Miniclip.ShapeShifter.Utils
             return changedFiles.Where(file => file.hasStagedChanges).ToArray();
         }
 
-        internal static List<ChangedFileGitInfo> GetDeletedFiles(ChangedFileGitInfo[] changedFiles = null)
+        public static void CreateBranch(DirectoryInfo repository, string branchName)
         {
-            if (changedFiles == null)
-            {
-                return GetAllChangedFilesGitInfo()
-                    .Where(file => file.status.Contains(git_status_deleted) && !file.isFullyStaged)
-                    .ToList();
-            }
+            RunGitCommand($"checkout -b {branchName}", repository.FullName);
+        }
 
-            return changedFiles.Where(file => file.status.Contains(git_status_deleted)).ToList();
+        public static void Commit(DirectoryInfo repository, string branchName, string commitMessage, bool pushCommit)
+        {
+            RunGitCommand($"commit -a -m \"{commitMessage}\"", repository.FullName);
+
+            if (pushCommit)
+            {
+                RunGitCommand($"push -u origin {branchName}", repository.FullName);
+            }
+        }
+
+        public static string GetCurrentBranch(DirectoryInfo repository)
+        {
+            return RunGitCommand("branch --show-current", repository);
+        }
+
+        public static void SwitchBranch(string branchToSwitchTo, DirectoryInfo repository)
+        {
+            RunGitCommand($"checkout {branchToSwitchTo}", repository);
+        }
+
+        public static bool IsConnectedToVPN() => true;
+
+        //commit
+        private static bool Ping(string url)
+        {
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                request.Timeout = 3000;
+                request.AllowAutoRedirect = false; // find out if this site is up and don't follow a redirector
+                request.Method = "HEAD";
+
+                using (var response = request.GetResponse())
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         internal static string RunGitCommand(string arguments, DirectoryInfo workingDirectory)
@@ -245,87 +280,6 @@ namespace Miniclip.ShapeShifter.Utils
                 hasStagedChanges = !status.StartsWith(" ");
                 hasUnstagedChanges = !status.EndsWith(" ");
             }
-        }
-
-        public static string GetGitURL(string gitRepositoryPath)
-        {
-            string gitURL = RunGitCommand("config --get remote.origin.url", gitRepositoryPath);
-            return gitURL;
-        }
-
-        public static DirectoryInfo GetOrCheckoutRepo(string submoduleURL)
-        {
-            DirectoryInfo reposContainerFolder = new DirectoryInfo(TEMPORARY_GIT_CLONES_FOLDER);
-            if (!reposContainerFolder.Exists)
-            {
-                reposContainerFolder.Create();
-            }
-
-            if (TryFindRepo(submoduleURL, reposContainerFolder, out DirectoryInfo checkedOutRepo))
-            {
-                Debug.Log($"Found {submoduleURL} local copy.");
-                return checkedOutRepo;
-            }
-
-            Debug.Log($"Cloning {submoduleURL}.");
-            Clone(submoduleURL);
-
-            if (TryFindRepo(submoduleURL, reposContainerFolder, out checkedOutRepo))
-            {
-                return checkedOutRepo;
-            }
-
-            throw new Exception($"Could not checkout {submoduleURL} into {TEMPORARY_GIT_CLONES_FOLDER} folder");
-        }
-
-        public static void CreateBranch(DirectoryInfo repository, string branchName)
-        {
-            RunGitCommand($"checkout -b {branchName}", repository.FullName);
-        }
-
-        private static bool TryFindRepo(string submoduleURL, DirectoryInfo mainDirectoryInfo,
-            out DirectoryInfo repositoryDirectoryInfo)
-        {
-            foreach (DirectoryInfo directoryInfo in mainDirectoryInfo.EnumerateDirectories())
-            {
-                if (GetGitURL(directoryInfo.FullName) == submoduleURL)
-                {
-                    {
-                        repositoryDirectoryInfo = directoryInfo;
-                        return true;
-                    }
-                }
-            }
-
-            repositoryDirectoryInfo = null;
-            return false;
-        }
-
-        private static void Clone(string submoduleURL)
-        {
-            string fullPath = Path.GetFullPath(TEMPORARY_GIT_CLONES_FOLDER);
-
-            RunGitCommand($"clone {submoduleURL}", fullPath);
-        }
-
-        public static void Commit(DirectoryInfo repository, string branchName, string commitMessage, bool pushCommit)
-        {
-            RunGitCommand($"commit -a -m \"{commitMessage}\"", repository.FullName);
-
-            if (pushCommit)
-            {
-                RunGitCommand($"push -u origin {branchName}", repository.FullName);
-            }
-        }
-
-        public static string GetCurrentBranch(DirectoryInfo repository)
-        {
-            return RunGitCommand("branch --show-current", repository);
-        }
-
-        public static void SwitchBranch(string branchToSwitchTo, DirectoryInfo repository)
-        {
-            RunGitCommand($"checkout {branchToSwitchTo}", repository);
         }
     }
 }

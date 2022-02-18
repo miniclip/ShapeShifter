@@ -140,8 +140,9 @@ namespace Miniclip.ShapeShifter
             GameSkin newSkin = new GameSkin(newName);
             if (Directory.Exists(newSkin.MainFolderPath))
             {
-                Directory.Delete(newSkin.MainFolderPath,true);
+                Directory.Delete(newSkin.MainFolderPath, true);
             }
+
             FileUtil.CopyFileOrDirectory(mainFolderPath, newSkin.MainFolderPath);
         }
     }

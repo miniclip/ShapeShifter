@@ -7,21 +7,15 @@ namespace Miniclip.ShapeShifter
 {
     public static class PreMergeCheck
     {
-        public static int HasShapeShifterConflictsWith(string currentBranch,
+        public static int HasShapeShifterConflictsBetweenBranches(string currentBranch,
             string targetBranch,
-            out List<string> filesChangedBetweenBranches)
+            out List<string> possibleConflictingFiles)
         {
             List<string> skinnedPaths = GetCurrentSkinnedPaths();
-            
-            string[] allChangedFilesInTargetBranch = GitUtils
-                .RunGitCommand("git diff " + currentBranch + "..." + targetBranch + " --name-only")
-                .Split('\n');
-            
-            filesChangedBetweenBranches = allChangedFilesInTargetBranch
-                .Where(diffFile => skinnedPaths.Contains(diffFile))
-                .ToList();
-            
-            return 0;
+
+            possibleConflictingFiles = GetPossibleConflictingFiles(currentBranch, targetBranch, skinnedPaths);
+
+            return possibleConflictingFiles.Count > 0 ? 1 : 0;
         }
 
         private static List<string> GetCurrentSkinnedPaths()
@@ -35,6 +29,18 @@ namespace Miniclip.ShapeShifter
             }
 
             return currentSkinnedPaths;
+        }
+
+        private static List<string> GetPossibleConflictingFiles(string currentBranch, string targetBranch,
+            List<string> localSkinnedPaths)
+        {
+            string[] changedFileInTargetBranchSinceCommonAncestor = GitUtils
+                .RunGitCommand("git diff " + currentBranch + "..." + targetBranch + " --name-only")
+                .Split('\n');
+
+            return changedFileInTargetBranchSinceCommonAncestor
+                .Where(diffFile => (!string.IsNullOrEmpty(diffFile) && localSkinnedPaths.Contains(diffFile)))
+                .ToList();
         }
     }
 }

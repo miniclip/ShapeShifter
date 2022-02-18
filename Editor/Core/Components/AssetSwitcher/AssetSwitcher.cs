@@ -313,6 +313,8 @@ namespace Miniclip.ShapeShifter.Switcher
             if (HasAnyPackageRelatedSkin())
             {
                 ForceUnityToLoseAndRegainFocus();
+
+                //try  EditorUtility.RequestScriptReload();
             }
 #endif
 
