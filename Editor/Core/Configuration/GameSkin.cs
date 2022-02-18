@@ -138,6 +138,10 @@ namespace Miniclip.ShapeShifter
         public void Duplicate(string newName)
         {
             GameSkin newSkin = new GameSkin(newName);
+            if (Directory.Exists(newSkin.MainFolderPath))
+            {
+                Directory.Delete(newSkin.MainFolderPath,true);
+            }
             FileUtil.CopyFileOrDirectory(mainFolderPath, newSkin.MainFolderPath);
         }
     }

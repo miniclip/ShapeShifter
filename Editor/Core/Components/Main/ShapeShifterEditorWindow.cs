@@ -43,18 +43,19 @@ namespace Miniclip.ShapeShifter
                 {
                     ShapeShifterConfiguration.Instance.DefaultConfigurationEditor.OnInspectorGUI();
                     ShapeShifterConfiguration.Instance.ExternalConfigurationEditor.OnInspectorGUI();
-                }   
+                }
 
                 AssetSwitcherGUI.OnGUI();
                 AssetSkinnerGUI.OnGUI();
                 ExternalAssetSkinnerGUI.OnGUI();
+                PreMergeCheckGUI.OnGUI();
 
+                GUILayout.FlexibleSpace();
+                
                 if (GUILayout.Button("Restore missing assets"))
                 {
                     AssetSwitcher.RestoreMissingAssets();
                 }
-
-                GUILayout.FlexibleSpace();
 
                 OnDangerousOperationsGUI();
             }
@@ -89,15 +90,14 @@ namespace Miniclip.ShapeShifter
 
         private static void OnDangerousOperationsGUI()
         {
-
             GUILayout.BeginVertical(StyleUtils.BoxStyle);
             GUILayout.Label("Dangerous Operations");
+
             // AssetSwitcherGUI.OnOverwriteAllSkinsGUI();
             GUILayout.Space(20);
             OnRemoveAllSkinsGUI();
             GUILayout.EndVertical();
         }
-        
 
         private static void OnRemoveAllSkinsGUI()
         {

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Miniclip.ShapeShifter.Skinner;
+using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using NUnit.Framework;
 using UnityEditor;
@@ -24,7 +25,6 @@ namespace Miniclip.ShapeShifter.Tests
             string branch_2 = "test/test_merge_cases_2";
 
             GitUtils.CreateBranch(repoDirectoryInfo, branch_1);
-
             Assert.IsTrue(GitUtils.GetCurrentBranch(repoDirectoryInfo) == branch_1);
             StageAndCommitTextFile(textAsset, repoDirectoryInfo, branch_1);
 
@@ -32,13 +32,23 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(GitUtils.GetCurrentBranch(repoDirectoryInfo) == branch_2);
             AssetSkinner.SkinAsset(textAsset.GetAssetPath());
             GitUtils.Commit(repoDirectoryInfo, branch_2, "Commit skinning of text file", false);
+            ChangeTextFileContentAndSave(textAsset, "@@@@@@@@@@");
+            // AssetSwitcher.SwitchToGame(TestUtils.game1);
+            // ChangeTextFileContentAndSave(textAsset, "##########");
+            GitUtils.Commit(repoDirectoryInfo, branch_2, "Change skinned text file", false);
 
             GitUtils.SwitchBranch(branch_1, repoDirectoryInfo);
             Assert.IsTrue(GitUtils.GetCurrentBranch(repoDirectoryInfo) == branch_1);
+            
+            File.WriteAllText(Path.GetFullPath(textAsset.GetAssetPath()), "!!!!!!!!!!");
+            StageAndCommitTextFile(textAsset, repoDirectoryInfo, branch_1);
+        }
 
-            //switch to branch 1
-
-            //do 50+% change on file
+        private static void ChangeTextFileContentAndSave(TextAsset textAsset, string newContent)
+        {
+            File.WriteAllText(Path.GetFullPath(textAsset.GetAssetPath()), newContent);
+            AssetDatabase.Refresh();
+            AssetDatabase.SaveAssets();
         }
 
         private static void StageAndCommitTextFile(TextAsset textAsset, DirectoryInfo repoDirectoryInfo,
@@ -47,7 +57,7 @@ namespace Miniclip.ShapeShifter.Tests
             string textAssetPath = AssetDatabase.GetAssetPath(textAsset);
             GitUtils.Stage(textAssetPath);
             GitUtils.Stage(textAssetPath + ".meta");
-            GitUtils.Commit(repoDirectoryInfo, branch_1, "Commited text test file", false);
+            GitUtils.Commit(repoDirectoryInfo, branch_1, "Committed text test file", false);
         }
     }
 }
