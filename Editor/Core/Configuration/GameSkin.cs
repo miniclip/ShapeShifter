@@ -44,8 +44,6 @@ namespace Miniclip.ShapeShifter
 
         public GameSkin(string name)
         {
-            Debug.Log("##! Creating GameSkin Instance"); //TODO Optimize this
-
             SetUpGameSkin(name);
         }
 
