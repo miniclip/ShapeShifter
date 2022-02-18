@@ -10,7 +10,7 @@ namespace Miniclip.ShapeShifter.Tests
 {
     public class TestMergeCases : TestBase
     {
-        [Test]
+        // [Test]
         public void TestMergeUnskinnedWithChangesIntoSkinned()
         {
             TextAsset textAsset = TestUtils.GetAsset<TextAsset>(TestUtils.TextFileAssetName);
