@@ -7,13 +7,13 @@ namespace Miniclip.ShapeShifter
 {
     public static class PreMergeCheck
     {
-        public static int HasShapeShifterConflictsBetweenBranches(string currentBranch,
-            string targetBranch,
+        public static int HasShapeShifterConflictsBetweenBranches(string mainBranch,
+            string branchToMergeIntoMainBranch,
             out List<string> possibleConflictingFiles)
         {
             List<string> skinnedPaths = GetCurrentSkinnedPaths();
 
-            possibleConflictingFiles = GetPossibleConflictingFiles(currentBranch, targetBranch, skinnedPaths);
+            possibleConflictingFiles = GetPossibleConflictingFiles(mainBranch, branchToMergeIntoMainBranch, skinnedPaths);
 
             return possibleConflictingFiles.Count > 0 ? 1 : 0;
         }

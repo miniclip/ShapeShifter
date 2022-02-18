@@ -12,7 +12,7 @@ namespace Miniclip.ShapeShifter
         private static string DIALOG_TITLE = "ShapeShifter Pre Merge Checker";
 
         private static bool showSection = true;
-        private static string targetBranch = "develop";
+        private static string branchToMergeIntoCurrentBranch = "develop";
         private static List<string> changedFiles = null;
         private static bool isTargetBranchOnLatest = false;
         private static int conflictCheckResult;
@@ -31,13 +31,13 @@ namespace Miniclip.ShapeShifter
             using (new GUILayout.VerticalScope(StyleUtils.BoxStyle, Array.Empty<GUILayoutOption>()))
             {
                 EditorGUILayout.PrefixLabel("Target Branch");
-                targetBranch = EditorGUILayout.TextField(targetBranch);
+                branchToMergeIntoCurrentBranch = EditorGUILayout.TextField(branchToMergeIntoCurrentBranch);
 
                 if (GUILayout.Button("Check for possible conflicts"))
                 {
                     conflictCheckResult = 0;
 
-                    if (string.IsNullOrEmpty(targetBranch))
+                    if (string.IsNullOrEmpty(branchToMergeIntoCurrentBranch))
                     {
                         return;
                     }
@@ -61,7 +61,7 @@ namespace Miniclip.ShapeShifter
                         return;
                     }
 
-                    if (!CheckIfTargetBranchIsOnLatest(targetBranch))
+                    if (!IsBranchOnLatest(branchToMergeIntoCurrentBranch))
                     {
                         return;
                     }
@@ -94,20 +94,20 @@ namespace Miniclip.ShapeShifter
 
             return PreMergeCheck.HasShapeShifterConflictsBetweenBranches(
                 GitUtils.GetCurrentBranch(new DirectoryInfo(GitUtils.MainRepositoryPath)),
-                targetBranch,
+                branchToMergeIntoCurrentBranch,
                 out changedFiles
             );
         }
 
-        private static bool CheckIfTargetBranchIsOnLatest(string targetBranch)
+        private static bool IsBranchOnLatest(string branch)
         {
             EditorUtility.DisplayProgressBar(
                 "Shape Shifter Pre Merge Checker",
-                $"Checking is {targetBranch} is up to date with remote",
+                $"Checking is {branch} is up to date with remote",
                 0.2f
             );
 
-            string result = GitUtils.RunGitCommand($"git diff {targetBranch} origin/{targetBranch} --name-only");
+            string result = GitUtils.RunGitCommand($"git diff {branch} origin/{branch} --name-only");
 
             bool isOnLatest = string.IsNullOrEmpty(result);
 
@@ -117,7 +117,7 @@ namespace Miniclip.ShapeShifter
 
                 EditorUtility.DisplayDialog(
                     DIALOG_TITLE,
-                    $"Your local branch {targetBranch} is not up to date with remote",
+                    $"Your local branch {branch} is not up to date with remote",
                     "OK"
                 );
             }
