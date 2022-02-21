@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_2019
+using System;
 using System.Reflection;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
@@ -117,3 +118,4 @@ namespace Miniclip.ShapeShifter
         }
     }
 }
+#endif
