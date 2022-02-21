@@ -308,15 +308,14 @@ namespace Miniclip.ShapeShifter.Switcher
         private static void RefreshAllAssets()
         {
 #if UNITY_2020
-            throw new NotImplementedException("// TODO: Replace this in Unity 2020 with PackageManager.Client.Resolve");
-#else
+            Debug.LogWarning("// TODO: Replace this in Unity 2020 with PackageManager.Client.Resolve");
+#endif
             if (HasAnyPackageRelatedSkin())
             {
                 ForceUnityToLoseAndRegainFocus();
 
                 //try  EditorUtility.RequestScriptReload();
             }
-#endif
 
             AssetDatabase.Refresh();
         }
