@@ -33,8 +33,6 @@ namespace Miniclip.ShapeShifter.Saver
                 ShapeShifterLogger.Log($"Pushing changes to {ShapeShifter.ActiveGameName} skin folder");
                 isSaving = true;
                 AssetSwitcher.OverwriteSelectedSkin(ShapeShifter.ActiveGameSkin);
-                isSaving = false;
-                return;
             }
 
             isSaving = false;
