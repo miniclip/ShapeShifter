@@ -108,7 +108,7 @@ namespace Miniclip.ShapeShifter
                 AssetSkinner.RemoveAllInternalSkins();
                 ExternalAssetSkinner.RemoveAllExternalSkins();
                 GitIgnore.ClearShapeShifterEntries();
-                if (ShapeShifter.SkinsFolder.Exists)
+                if (Directory.Exists(ShapeShifter.SkinsFolder.FullName))
                 {
                     ShapeShifter.SkinsFolder.Delete(true);
                 }
