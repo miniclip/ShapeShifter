@@ -69,8 +69,9 @@ namespace Miniclip.ShapeShifter.Skinner
 
                 Object[] assets = Selection.GetFiltered<Object>(SelectionMode.Assets);
                 
-                using (new GUILayout.ScrollViewScope(scrollPosition))
+                using (EditorGUILayout.ScrollViewScope scrollView = new EditorGUILayout.ScrollViewScope(scrollPosition))
                 {
+                    scrollPosition = scrollView.scrollPosition;
                     foreach ((Object asset, bool isSupported, string reason) assetSupportInfo in
                              assets.GetAssetsSupportInfo())
                     {
