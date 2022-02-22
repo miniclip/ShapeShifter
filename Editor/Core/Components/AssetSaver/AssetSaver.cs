@@ -1,6 +1,8 @@
 using JetBrains.Annotations;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
+using UnityEditor;
+using UnityEditor.Experimental.SceneManagement;
 using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Saver
@@ -13,10 +15,16 @@ namespace Miniclip.ShapeShifter.Saver
         [UsedImplicitly]
         public static void OnWillSaveAssets(string[] files)
         {
-            Debug.Log("Saving: " + string.Join("\n", files));
-
             if (!ShapeShifterConfiguration.IsInitialized())
             {
+                return;
+            }
+
+            PrefabStage stage = PrefabStageUtility.GetCurrentPrefabStage();
+            if (stage != null)
+            {
+                //Skipping saving as we're in prefab mode. Due To the auto save, this method is called every frame
+                //The solution is to only save the changes after leaving the prefab mode.
                 return;
             }
 
@@ -26,7 +34,10 @@ namespace Miniclip.ShapeShifter.Saver
                 isSaving = true;
                 AssetSwitcher.OverwriteSelectedSkin(ShapeShifter.ActiveGameSkin);
                 isSaving = false;
+                return;
             }
+
+            isSaving = false;
         }
     }
 }
