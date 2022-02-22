@@ -193,8 +193,6 @@ namespace Miniclip.ShapeShifter.Switcher
 
         internal static void OverwriteSelectedSkin(GameSkin selected, bool forceOverwrite = false)
         {
-            ShapeShifterUtils.SavePendingChanges();
-
             string name = selected.Name;
 
             if (ShapeShifter.ActiveGameSkin != selected)

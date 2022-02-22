@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
+using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Saver
 {
@@ -12,6 +13,8 @@ namespace Miniclip.ShapeShifter.Saver
         [UsedImplicitly]
         public static void OnWillSaveAssets(string[] files)
         {
+            Debug.Log("Saving: " + string.Join("\n", files));
+
             if (!ShapeShifterConfiguration.IsInitialized())
             {
                 return;
