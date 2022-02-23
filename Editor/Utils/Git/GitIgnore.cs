@@ -80,6 +80,7 @@ namespace Miniclip.ShapeShifter.Utils.Git
 
             private GitIgnoreWrapper()
             {
+                // EditorUtility.DisplayProgressBar("Git Ignore", "Fetching current git ignore contents", 0f);
                 List<string> ignoredContent = IOUtils.ReadAllLines(GitIgnorePath);
 
                 string currentKey = string.Empty;
@@ -116,6 +117,7 @@ namespace Miniclip.ShapeShifter.Utils.Git
 
                     this[currentKey].Add(line);
                 }
+                // EditorUtility.ClearProgressBar();
             }
 
             internal void WriteToFile()

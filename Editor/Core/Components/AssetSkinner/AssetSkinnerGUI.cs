@@ -290,6 +290,7 @@ namespace Miniclip.ShapeShifter.Skinner
             if (GUILayout.Button("Remove skins"))
             {
                 AssetSkinner.RemoveSkins(assetPath);
+                GUIUtility.ExitGUI();
             }
         }
 
@@ -300,6 +301,7 @@ namespace Miniclip.ShapeShifter.Skinner
             if (GUILayout.Button("Skin it!"))
             {
                 AssetSkinner.SkinAsset(assetPath);
+                GUIUtility.ExitGUI();
             }
         }
 

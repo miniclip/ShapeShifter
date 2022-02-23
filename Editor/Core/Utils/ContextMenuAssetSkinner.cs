@@ -16,5 +16,15 @@ namespace Miniclip.ShapeShifter.Utils
 
             AssetSkinner.SkinAssets(selectedAssetPaths);
         }
+        
+        [MenuItem("Assets/ShapeShifter/Remove Skins From Selected Assets")]
+        private static void RemoveSkinSelectedAssets()
+        {
+            Object[] selectedAssets = Selection.GetFiltered<Object>(SelectionMode.Assets);
+
+            string[] selectedAssetPaths = selectedAssets.Select(AssetDatabase.GetAssetPath).ToArray();
+
+            AssetSkinner.RemoveSkins(selectedAssetPaths);
+        }
     }
 }
