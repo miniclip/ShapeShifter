@@ -383,14 +383,14 @@ namespace Miniclip.ShapeShifter.Switcher
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
             ShapeShifterConfiguration.Instance.SetDirty(false);
 
-            GameSkin gameSkin = ShapeShifter.ActiveGameSkin;
-
-            foreach (AssetSkin assetSkin in gameSkin.GetAssetSkins())
-            {
-                string guid = assetSkin.Guid;
-
-                AssetDatabase.ImportAsset(AssetDatabase.GUIDToAssetPath(guid), ImportAssetOptions.ForceUpdate);
-            }
+            // GameSkin gameSkin = ShapeShifter.ActiveGameSkin;
+            //
+            // foreach (AssetSkin assetSkin in gameSkin.GetAssetSkins())
+            // {
+            //     string guid = assetSkin.Guid;
+            //
+            //     AssetDatabase.ImportAsset(AssetDatabase.GUIDToAssetPath(guid), ImportAssetOptions.ForceUpdate);
+            // }
         }
 
         private static void CopyIfMissingInternal(DirectoryInfo directory)
@@ -463,6 +463,20 @@ namespace Miniclip.ShapeShifter.Switcher
 
                 IOUtils.CopyFolder(directories[0], new DirectoryInfo(targetPath));
             }
+        }
+
+        public static void RefreshAsset(string guid)
+        {
+            if (string.IsNullOrEmpty(guid))
+                return;
+
+            GameSkin currentGameSkin = ShapeShifter.ActiveGameSkin;
+
+            AssetSkin assetSkin = currentGameSkin.GetAssetSkin(guid);
+
+            CopyFromSkinsToUnity(new DirectoryInfo(assetSkin.FolderPath));
+
+            RefreshAllAssets();
         }
     }
 }

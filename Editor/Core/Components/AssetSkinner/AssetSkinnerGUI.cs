@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Saver;
+using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
@@ -178,7 +179,8 @@ namespace Miniclip.ShapeShifter.Skinner
             }
         }
 
-        internal static void DrawAssetPreview(string key, string game, string path, bool drawDropAreaToReplace = true)
+        internal static void DrawAssetPreview(string key, string game, string path, string guid,
+            bool drawDropAreaToReplace = true)
         {
             GUIStyle boxStyle = StyleUtils.BoxStyle;
 
@@ -198,19 +200,7 @@ namespace Miniclip.ShapeShifter.Skinner
                         GUILayout.MaxHeight(buttonWidth)
                     );
 
-                    if (drawDropAreaToReplace && DropAreaGUI(out string replacementFilePath))
-                    {
-                        if (Path.GetExtension(replacementFilePath) == Path.GetExtension(path)
-                            && !PathUtils.IsDirectory(replacementFilePath))
-                        {
-                            FileUtil.DeleteFileOrDirectory(path);
-                            FileUtil.CopyFileOrDirectory(replacementFilePath, path);
-                        }
-                        else
-                        {
-                            ShapeShifterLogger.LogWarning("Unable to replace asset.");
-                        }
-                    }
+                    AssetPreviewDropArea(game, path, guid, drawDropAreaToReplace);
                 }
                 else
                 {
@@ -224,6 +214,28 @@ namespace Miniclip.ShapeShifter.Skinner
                 if (clicked)
                 {
                     EditorUtility.RevealInFinder(path);
+                }
+            }
+        }
+
+        private static void AssetPreviewDropArea(string game, string path, string guid, bool drawDropAreaToReplace)
+        {
+            if (drawDropAreaToReplace && DropAreaGUI(out string replacementFilePath))
+            {
+                if (Path.GetExtension(replacementFilePath) == Path.GetExtension(path)
+                    && !PathUtils.IsDirectory(replacementFilePath))
+                {
+                    FileUtil.DeleteFileOrDirectory(path);
+                    FileUtil.CopyFileOrDirectory(replacementFilePath, path);
+
+                    if (ShapeShifter.ActiveGameName == game)
+                    {
+                        AssetSwitcher.RefreshAsset(guid);
+                    }
+                }
+                else
+                {
+                    ShapeShifterLogger.LogWarning("Unable to replace asset.");
                 }
             }
         }
@@ -290,7 +302,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
                     string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
                     GenerateAssetPreview(key, skinnedPath);
-                    DrawAssetPreview(key, game, skinnedPath);
+                    DrawAssetPreview(key, game, skinnedPath, guid);
                 }
             }
 

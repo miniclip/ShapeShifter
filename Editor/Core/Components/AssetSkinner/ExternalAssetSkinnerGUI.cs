@@ -20,7 +20,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
                 {
                     string key = ExternalAssetSkinner.GenerateKeyFromRelativePath(relativePath);
-                    string assetPath = Path.Combine(
+                    string assetSkinPath = Path.Combine(
                         ShapeShifter.SkinsFolder.FullName,
                         game,
                         ShapeShifterConstants.EXTERNAL_ASSETS_FOLDER,
@@ -28,8 +28,8 @@ namespace Miniclip.ShapeShifter.Skinner
                         Path.GetFileName(relativePath)
                     );
 
-                    AssetSkinnerGUI.GenerateAssetPreview(key, assetPath);
-                    AssetSkinnerGUI.DrawAssetPreview(key, game, assetPath, false);
+                    AssetSkinnerGUI.GenerateAssetPreview(key, assetSkinPath);
+                    AssetSkinnerGUI.DrawAssetPreview(key, game, assetSkinPath, null, false);
                 }
             }
 
