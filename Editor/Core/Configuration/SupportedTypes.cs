@@ -28,7 +28,12 @@ namespace Miniclip.ShapeShifter
             typeof(MonoScript),
         };
 
-        private static bool IsSupported(Object asset, out string reason)
+        public static bool IsSupported(string assetPath, out string reason)
+        {
+            return IsSupported(AssetDatabase.LoadAssetAtPath<Object>(assetPath), out reason);
+        }
+
+        public static bool IsSupported(Object asset, out string reason)
         {
             Type assetType = asset.GetType();
 

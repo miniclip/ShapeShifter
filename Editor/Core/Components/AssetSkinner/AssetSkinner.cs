@@ -45,7 +45,7 @@ namespace Miniclip.ShapeShifter.Skinner
             }
         }
 
-        private static void SkinAssets(string[] assetPaths, bool saveFirst = true)
+        public static void SkinAssets(string[] assetPaths, bool saveFirst = true)
         {
             if (saveFirst)
             {
@@ -54,12 +54,17 @@ namespace Miniclip.ShapeShifter.Skinner
 
             foreach (string assetPath in assetPaths)
             {
-                SkinAsset(assetPath);
+                SkinAsset(assetPath, false);
             }
         }
 
         public static void SkinAsset(string assetPath, bool saveFirst = true)
         {
+            if (!SupportedTypes.IsSupported(assetPath, out string reason))
+            {
+                return;
+            }
+            
             if (saveFirst)
             {
                 // make sure any pending changes are saved before generating copies
