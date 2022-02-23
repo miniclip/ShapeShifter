@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Utils
 {
-    public static class ContextMenuAssetSkinner
+    public static class AssetSkinnerMenuItem
     {
         [MenuItem("Assets/ShapeShifter/Skin Selected Assets")]
         private static void SkinSelectedAssets()
