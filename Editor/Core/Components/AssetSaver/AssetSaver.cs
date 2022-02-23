@@ -1,9 +1,7 @@
 using JetBrains.Annotations;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
-using UnityEditor;
 using UnityEditor.Experimental.SceneManagement;
-using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Saver
 {
@@ -28,13 +26,20 @@ namespace Miniclip.ShapeShifter.Saver
                 return;
             }
 
-            if (!isSaving && (ShapeShifter.ActiveGameSkin.HasExternalSkins() || CanSave))
+            SaveToActiveGameSkin();
+        }
+
+        public static void SaveToActiveGameSkin()
+        {
+            if (isSaving || (!ShapeShifter.ActiveGameSkin.HasExternalSkins() && !CanSave))
             {
-                ShapeShifterLogger.Log($"Pushing changes to {ShapeShifter.ActiveGameName} skin folder");
-                isSaving = true;
-                AssetSwitcher.OverwriteSelectedSkin(ShapeShifter.ActiveGameSkin);
-                isSaving = false;
+                return;
             }
+
+            ShapeShifterLogger.Log($"Pushing changes to {ShapeShifter.ActiveGameName} skin folder");
+            isSaving = true;
+            AssetSwitcher.OverwriteSelectedSkin(ShapeShifter.ActiveGameSkin);
+            isSaving = false;
         }
     }
 }
