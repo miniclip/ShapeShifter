@@ -383,14 +383,15 @@ namespace Miniclip.ShapeShifter.Switcher
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
             ShapeShifterConfiguration.Instance.SetDirty(false);
 
-            // GameSkin gameSkin = ShapeShifter.ActiveGameSkin;
-            //
-            // foreach (AssetSkin assetSkin in gameSkin.GetAssetSkins())
-            // {
-            //     string guid = assetSkin.Guid;
-            //
-            //     AssetDatabase.ImportAsset(AssetDatabase.GUIDToAssetPath(guid), ImportAssetOptions.ForceUpdate);
-            // }
+            //TODO: ACPT-2843 make the code below optionable
+            /*GameSkin gameSkin = ShapeShifter.ActiveGameSkin;
+            
+            foreach (AssetSkin assetSkin in gameSkin.GetAssetSkins())
+            {
+                string guid = assetSkin.Guid;
+            
+                AssetDatabase.ImportAsset(AssetDatabase.GUIDToAssetPath(guid), ImportAssetOptions.ForceUpdate);
+            }*/
         }
 
         private static void CopyIfMissingInternal(DirectoryInfo directory)
