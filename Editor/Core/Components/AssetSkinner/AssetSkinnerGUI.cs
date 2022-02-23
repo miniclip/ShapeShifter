@@ -208,7 +208,7 @@ namespace Miniclip.ShapeShifter.Skinner
                         }
                         else
                         {
-                            ShapeShifterLogger.LogWarning("Unable to perform drag and drop replacement.");
+                            ShapeShifterLogger.LogWarning("Unable to replace asset.");
                         }
                     }
                 }
@@ -231,8 +231,9 @@ namespace Miniclip.ShapeShifter.Skinner
         private static bool DropAreaGUI(out string filepath)
         {
             Event evt = Event.current;
-            Rect dropAreaRect = GUILayoutUtility.GetRect(0.0f, 50.0f, GUILayout.ExpandWidth(true));
-            GUI.Box(dropAreaRect, "Drag file here to replace");
+            Rect dropAreaRect = GUILayoutUtility.GetLastRect();
+            GUILayout.Box("Drag file to replace or click here to open file panel");
+            Rect boxRect = GUILayoutUtility.GetLastRect();
             filepath = string.Empty;
             switch (evt.type)
             {
@@ -254,6 +255,14 @@ namespace Miniclip.ShapeShifter.Skinner
                             filepath = dragged_path;
                             return true;
                         }
+                    }
+
+                    break;
+                case EventType.MouseDown:
+                    if (boxRect.Contains(evt.mousePosition))
+                    {
+                        filepath = EditorUtility.OpenFilePanel("File Panel", Application.dataPath, "");
+                        return true;
                     }
 
                     break;
