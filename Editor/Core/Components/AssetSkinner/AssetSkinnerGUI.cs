@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
@@ -16,6 +17,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
         private static readonly string defaultIcon = "WelcomeScreen.AssetStoreLogo";
         private static readonly string errorIcon = "console.erroricon";
+
         private static readonly Dictionary<string, string> iconPerExtension = new Dictionary<string, string>
         {
             {
@@ -68,7 +70,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 GUILayout.Label("Selected assets:", EditorStyles.boldLabel);
 
                 Object[] assets = Selection.GetFiltered<Object>(SelectionMode.Assets);
-                
+
                 using (EditorGUILayout.ScrollViewScope scrollView = new EditorGUILayout.ScrollViewScope(scrollPosition))
                 {
                     scrollPosition = scrollView.scrollPosition;
@@ -98,21 +100,14 @@ namespace Miniclip.ShapeShifter.Skinner
             GUI.backgroundColor = oldColor;
         }
 
-        private static void DrawAssetSection(Object asset, bool useInspectorTitlebarHeader = true)
+        private static void DrawAssetSection(Object asset)
         {
             if (asset == null)
             {
                 return;
             }
 
-            if (useInspectorTitlebarHeader)
-            {
-                EditorGUILayout.InspectorTitlebar(true, asset);
-            }
-            else
-            {
-                EditorGUILayout.InspectorTitlebar(false, asset);
-            }
+            DraAssetHeaderGUI(asset);
 
             string path = AssetDatabase.GetAssetPath(asset);
 
@@ -169,9 +164,17 @@ namespace Miniclip.ShapeShifter.Skinner
 
                     foreach (Texture2D texture2D in texture2Ds.Distinct())
                     {
-                        DrawAssetSection(texture2D, false);
+                        DrawAssetSection(texture2D);
                     }
                 }
+            }
+        }
+
+        private static void DraAssetHeaderGUI(Object asset)
+        {
+            if (EditorGUILayout.InspectorTitlebar(false, targetObj: asset, expandable: false))
+            {
+                EditorGUIUtility.PingObject(asset);
             }
         }
 
@@ -335,7 +338,7 @@ namespace Miniclip.ShapeShifter.Skinner
                             icon = iconPerExtension[extension];
                         }
 
-                        texturePreview = (Texture2D)EditorGUIUtility.IconContent(icon).image;
+                        texturePreview = (Texture2D) EditorGUIUtility.IconContent(icon).image;
                     }
                 }
 
