@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1]
+### Fixed
+- Fixed issue where opening skin folders externally would create DS_Store files that fooled shapeshifter 
+into thinking there was still assets to be restored into the project
+- Fixed external skinning not adding files to git ignore
+
 ## [0.3.0]
 ### Added
 - Drop To Replace: Drag external files on top of selected asset skin preview to quickly replace it
