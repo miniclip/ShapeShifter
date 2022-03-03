@@ -34,12 +34,9 @@ namespace Miniclip.ShapeShifter.Switcher
 
                     string guidToAssetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
                     string metaPath = guidToAssetPath + ".meta";
+                    
                     if (GitUtils.IsTracked(guidToAssetPath) || GitUtils.IsTracked(metaPath))
                     {
-                        // Debug.LogWarning(
-                        //     $"{guidToAssetPath} or its meta file are still being tracked by git, you probably did "
-                        //     + "a merge from a branch with unskinned version"
-                        // );
                         GitUtils.Untrack(assetSkin.Guid, guidToAssetPath, true);
                     }
 
