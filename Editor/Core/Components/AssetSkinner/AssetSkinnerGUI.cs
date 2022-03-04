@@ -14,7 +14,6 @@ namespace Miniclip.ShapeShifter.Skinner
     public class AssetSkinnerGUI
     {
         private static Vector2 scrollPosition;
-        private static bool showSkinner = true;
 
         private static readonly string defaultIcon = "WelcomeScreen.AssetStoreLogo";
         private static readonly string errorIcon = "console.erroricon";
