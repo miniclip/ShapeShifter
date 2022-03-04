@@ -86,7 +86,7 @@ namespace Miniclip.ShapeShifter.Utils.Git
             private GitIgnoreWrapper()
             {
                 // EditorUtility.DisplayProgressBar("Git Ignore", "Fetching current git ignore contents", 0f);
-                List<string> ignoredContent = IOUtils.ReadAllLines(GitIgnorePath);
+                List<string> ignoredContent = FileUtils.ReadAllLines(GitIgnorePath);
 
                 string currentKey = string.Empty;
                 int i;

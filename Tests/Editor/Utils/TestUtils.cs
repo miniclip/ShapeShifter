@@ -73,7 +73,7 @@ namespace Miniclip.ShapeShifter.Tests
 
         private static void CopyAllTestResourcesFromPackagesToAssetsFolder()
         {
-            IOUtils.TryCreateDirectory(TempFolderName, true);
+            FileUtils.TryCreateDirectory(TempFolderName, true);
 
             CopyResourceFromPackagesToAssetsFolder(SpriteAssetName);
             CopyResourceFromPackagesToAssetsFolder(TextFileAssetName);

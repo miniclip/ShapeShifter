@@ -217,8 +217,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 if (Path.GetExtension(replacementFilePath) == Path.GetExtension(path)
                     && !PathUtils.IsDirectory(replacementFilePath))
                 {
-                    FileUtil.DeleteFileOrDirectory(path);
-                    FileUtil.CopyFileOrDirectory(replacementFilePath, path);
+                    FileUtils.SafeCopy(replacementFilePath, path);
 
                     if (ShapeShifter.ActiveGameName == game)
                     {
