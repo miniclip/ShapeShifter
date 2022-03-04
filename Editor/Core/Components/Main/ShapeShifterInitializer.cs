@@ -43,8 +43,14 @@ public class ShapeShifterInitializer
         }
     }
 
-    private static void Init()
+    private static async void Init()
     {
+
+        while (EditorApplication.isCompiling || EditorApplication.isUpdating)
+        {
+            await Task.Delay(1000);
+        }
+        
         ShapeShifterLogger.Log("Setting up");
 
         ShapeShifterConfiguration.Initialise();
