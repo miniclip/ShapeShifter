@@ -14,15 +14,21 @@ namespace Miniclip.ShapeShifter
 {
     class ShapeShifterEditorWindow : EditorWindow
     {
-        private bool showConfiguration;
-        private int selectedTab;
-
         private enum TabOptions
         {
             AssetSkinner = 0,
             ExternalSkinner = 1,
             Configuration = 2,
             Tools = 3
+        }
+
+        private bool showConfiguration;
+        private int selectedTabOption;
+        private string[] tabOptionsNames;
+
+        private void OnEnable()
+        {
+            tabOptionsNames = Enum.GetNames(typeof(TabOptions));
         }
 
         [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, 'G')]
@@ -70,13 +76,9 @@ namespace Miniclip.ShapeShifter
 
             AssetSwitcherGUI.OnGUI();
 
-            selectedTab = GUILayout.Toolbar(
-                selectedTab,
-                Enum.GetNames(typeof(TabOptions))
-            );
-            Debug.Log(selectedTab);
+            selectedTabOption = GUILayout.Toolbar(selectedTabOption, tabOptionsNames);
 
-            switch ((TabOptions) selectedTab)
+            switch ((TabOptions) selectedTabOption)
             {
                 case TabOptions.AssetSkinner:
                     AssetSkinnerGUI.OnGUI();
