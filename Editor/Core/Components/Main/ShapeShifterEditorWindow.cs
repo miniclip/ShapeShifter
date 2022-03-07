@@ -168,7 +168,7 @@ namespace Miniclip.ShapeShifter
                 EditorUtility.DisplayProgressBar("ShapeShifter", "Deleting main skins folder", 1f);
                 if (Directory.Exists(ShapeShifter.SkinsFolder.FullName))
                 {
-                    ShapeShifter.SkinsFolder.Delete(true);
+                    FileUtils.SafeDelete(ShapeShifter.SkinsFolder.FullName);
                 }
 
                 EditorUtility.ClearProgressBar();

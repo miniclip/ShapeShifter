@@ -34,7 +34,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                     string guidToAssetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
                     string metaPath = guidToAssetPath + ".meta";
-                    
+
                     if (GitUtils.IsTracked(guidToAssetPath) || GitUtils.IsTracked(metaPath))
                     {
                         GitUtils.Untrack(assetSkin.Guid, guidToAssetPath, true);
@@ -100,7 +100,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 return;
 
             FileInfo origin = fileInfos[0];
-            origin.CopyTo(target, true);
+            FileUtils.SafeCopy(origin.FullName, target);
         }
 
         private static void CopyFromSkinsToUnity(DirectoryInfo directory)
@@ -119,11 +119,11 @@ namespace Miniclip.ShapeShifter.Switcher
                 {
                     if (fileInfo.Extension == ".meta")
                     {
-                        fileInfo.CopyTo(target + ".meta", true);
+                        FileUtils.SafeCopy(fileInfo.FullName, target + ".meta");
                     }
                     else
                     {
-                        fileInfo.CopyTo(target, true);
+                        FileUtils.SafeCopy(fileInfo.FullName, target);
                     }
                 }
             }

@@ -130,7 +130,7 @@ namespace Miniclip.ShapeShifter
         {
             if (Directory.Exists(mainFolderPath))
             {
-                Directory.Delete(mainFolderPath, true);
+                FileUtils.SafeDelete(mainFolderPath);
             }
         }
 
