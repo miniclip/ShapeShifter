@@ -41,7 +41,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             Directory.CreateDirectory(directoryPath);
         }
-        
+
         public static void SafeDelete(string path)
         {
             ValidatePathSafety(path);
@@ -50,25 +50,53 @@ namespace Miniclip.ShapeShifter.Utils
 
         public static void SafeCopy(string source, string destination)
         {
-            ValidatePathSafety(source,destination);
+            ValidatePathSafety(source, destination);
             SafeDelete(destination);
             FileUtil.CopyFileOrDirectory(source, destination);
         }
 
-        private static void ValidatePathSafety(params string[] paths)
+        public static void ValidatePathSafety(params string[] paths)
         {
+            DirectoryInfo assets = new DirectoryInfo(Application.dataPath);
+            DirectoryInfo project = assets.Parent;
+            string repositoryPath = GitUtils.MainRepositoryPath;
+
             foreach (string path in paths)
             {
+                string fullPath = PathUtils.GetFullPath(path);
+
                 if (string.IsNullOrEmpty(path) || string.IsNullOrWhiteSpace(path))
                 {
                     throw new ArgumentException("Path given is empty or null or whitespace");
                 }
 
-                if (PathUtils.GetFullPath(path) == PathUtils.GetFullPath(Application.dataPath))
+                if (NormalizePath(fullPath) == NormalizePath(assets.FullName))
                 {
                     throw new ArgumentException("Path given is Application.DataPath");
                 }
+
+                if (NormalizePath(fullPath) == NormalizePath(project?.FullName))
+                {
+                    throw new ArgumentException("Path given is the project root folder");
+                }
+
+                if (NormalizePath(fullPath) == NormalizePath(repositoryPath))
+                {
+                    throw new ArgumentException("Path given is the repository root folder");
+                }
+
+                if (!NormalizePath(fullPath).Contains(NormalizePath(repositoryPath)))
+                {
+                    throw new ArgumentException("Path given is outside the repository folder");
+                }
             }
+        }
+
+        private static string NormalizePath(string path)
+        {
+            return Path.GetFullPath(new Uri(path).LocalPath)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .ToUpperInvariant();
         }
 
         internal static List<string> ReadAllLines(string filepath)

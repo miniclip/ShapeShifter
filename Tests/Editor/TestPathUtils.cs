@@ -98,5 +98,26 @@ namespace Miniclip.ShapeShifter.Tests
             int assetCountInFolder = PathUtils.GetAssetCountInFolder(TestUtils.TempFolderName);
             Assert.IsTrue(assetCountInFolder == 2, $"Counted {assetCountInFolder} assets in folder. Expected 2.");
         }
+
+        [Test]
+        public void TestValidatePathSafety()
+        {
+            DirectoryInfo assets = new DirectoryInfo(Application.dataPath);
+            DirectoryInfo project = assets.Parent;
+            string repositoryPath = GitUtils.MainRepositoryPath;
+            
+            Assert.Throws<ArgumentException>(() => FileUtils.ValidatePathSafety("/Users"));
+            Assert.Throws<ArgumentException>(() => FileUtils.ValidatePathSafety(repositoryPath));
+            Assert.Throws<ArgumentException>(() => FileUtils.ValidatePathSafety(string.Empty));
+            Assert.Throws<ArgumentException>(() => FileUtils.ValidatePathSafety(assets.FullName));
+            Assert.Throws<ArgumentException>(() => FileUtils.ValidatePathSafety(project?.FullName));
+
+            Assert.Throws<ArgumentException>(
+                () => FileUtils.ValidatePathSafety(assets.FullName + Path.DirectorySeparatorChar)
+            );
+            Assert.Throws<ArgumentException>(
+                () => FileUtils.ValidatePathSafety(project?.FullName + Path.DirectorySeparatorChar)
+            );
+        }
     }
 }
