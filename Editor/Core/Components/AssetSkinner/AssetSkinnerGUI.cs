@@ -192,7 +192,10 @@ namespace Miniclip.ShapeShifter.Skinner
                         GUILayout.MaxHeight(buttonWidth)
                     );
 
-                    AssetPreviewDropArea(game, path, guid, drawDropAreaToReplace);
+                    if (IsDragAndDroppable(path))
+                    {
+                        AssetPreviewDropArea(game, path, guid, drawDropAreaToReplace);
+                    }
                 }
                 else
                 {
@@ -210,6 +213,11 @@ namespace Miniclip.ShapeShifter.Skinner
             }
         }
 
+        private static bool IsDragAndDroppable(string path)
+        {
+            return IsValidImageFormat(Path.GetExtension(path));
+        }
+
         private static void AssetPreviewDropArea(string game, string path, string guid, bool drawDropAreaToReplace)
         {
             if (drawDropAreaToReplace && DropAreaGUI(out string replacementFilePath))
@@ -217,7 +225,8 @@ namespace Miniclip.ShapeShifter.Skinner
                 if (Path.GetExtension(replacementFilePath) == Path.GetExtension(path)
                     && !PathUtils.IsDirectory(replacementFilePath))
                 {
-                    FileUtils.SafeCopy(replacementFilePath, path);
+                    FileUtils.ValidatePathSafety(path);
+                    FileUtil.ReplaceFile(replacementFilePath, path);
 
                     if (ShapeShifter.ActiveGameName == game)
                     {
