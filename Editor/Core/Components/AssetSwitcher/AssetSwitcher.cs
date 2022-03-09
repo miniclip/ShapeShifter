@@ -32,28 +32,24 @@ namespace Miniclip.ShapeShifter.Switcher
                         // assetSkin.Delete();
                     }
 
-                    string guidToAssetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
-                    string metaPath = guidToAssetPath + ".meta";
+                    string assetDatabasePath = "";
 
-                    if (GitUtils.IsTracked(guidToAssetPath) || GitUtils.IsTracked(metaPath))
+                    if (!string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath(assetSkin.Guid)))
                     {
-                        GitUtils.Untrack(assetSkin.Guid, guidToAssetPath, true);
+                        assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(assetSkin.Guid));
                     }
 
-                    string guid = assetSkin.Guid;
-
-                    string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
-                    string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(guid));
+                    string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(assetSkin.Guid));
 
                     if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
                     {
-                        missingAssets.Add(guid);
+                        missingAssets.Add(assetSkin.Guid);
                         continue;
                     }
 
                     if (!PathUtils.FileOrDirectoryExists(assetDatabasePath))
                     {
-                        missingAssets.Add(guid);
+                        missingAssets.Add(assetSkin.Guid);
                     }
                 }
 
@@ -426,7 +422,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
             }
 
-            string searchPattern = Path.GetFileName(targetPath) + "*";
+            string searchPattern = Path.GetFileName(assetFolder) + "*";
 
             FileInfo[] files = directory.GetFiles(searchPattern);
 
@@ -434,7 +430,7 @@ namespace Miniclip.ShapeShifter.Switcher
             {
                 if (fileInfo.Extension == ".meta")
                 {
-                    string metaFile = targetPath + ".meta";
+                    string metaFile = assetFolder + ".meta";
                     if (File.Exists(PathUtils.GetFullPath(metaFile)))
                     {
                         continue;

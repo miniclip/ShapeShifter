@@ -100,15 +100,6 @@ namespace Miniclip.ShapeShifter
             {
                 OnShowComponentsGUI();
             }
-
-            if (GUILayout.Button("Test"))
-            {
-                string path = EditorUtility.OpenFolderPanel("", Application.dataPath, "");
-
-                Debug.Log(path);
-                
-                FileUtils.TryCreateDirectory("", true);
-            }
             
             Repaint();
         }

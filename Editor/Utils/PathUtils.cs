@@ -141,7 +141,7 @@ namespace Miniclip.ShapeShifter.Utils
         {
             if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentException("Path is empty");
+                return "";
             }
 
             if (Path.IsPathRooted(path))
