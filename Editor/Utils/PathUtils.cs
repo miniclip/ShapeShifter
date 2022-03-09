@@ -9,6 +9,7 @@ namespace Miniclip.ShapeShifter.Utils
     class PathUtils
     {
         private static string ASSETS_FOLDER_NAME => "Assets";
+
         private static string PACKAGES_FOLDER_NAME => "Packages";
 
         internal static bool IsInternalPath(string path)
@@ -224,7 +225,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             return false;
         }
-        
+
         public static bool ArePathsEqual(string pathA, string pathB)
         {
             return string.Equals(NormalizePath(pathA), NormalizePath(pathB), StringComparison.Ordinal);
@@ -232,9 +233,7 @@ namespace Miniclip.ShapeShifter.Utils
 
         public static string NormalizePath(string path)
         {
-            return Path.GetFullPath(new Uri(path).LocalPath)
-                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                .ToUpperInvariant();
+            return path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
     }
 }
