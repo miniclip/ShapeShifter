@@ -41,7 +41,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                     string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(assetSkin.Guid));
 
-                    if (!string.Equals(assetDatabasePath.Trim(Path.DirectorySeparatorChar), assetGitIgnorePath.Trim(Path.DirectorySeparatorChar)))
+                    if (!PathUtils.ArePathsEqual(assetDatabasePath, assetGitIgnorePath))
                     {
                         missingAssets.Add(assetSkin.Guid);
                         continue;
@@ -422,7 +422,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
             }
 
-            string searchPattern = Path.GetFileName(assetFolder) + "*";
+            string searchPattern = Path.GetFileName(PathUtils.NormalizePath(targetPath)) + "*";
 
             FileInfo[] files = directory.GetFiles(searchPattern);
 

@@ -65,7 +65,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             string assetIgnoredPathBeforeRename =
                 GitIgnore.GetIgnoredPathByGuid(AssetDatabase.AssetPathToGUID(assetPathBeforeRename));
-
+            
             Assert.IsTrue(
                 PathUtils.ArePathsEqual(fullAssetPathBeforeRename, PathUtils.GetFullPath(assetIgnoredPathBeforeRename)),
                 "Asset path in .gitignore is not correct"
@@ -81,7 +81,7 @@ namespace Miniclip.ShapeShifter.Tests
             string assetIgnorePathAfterRename =
                 GitIgnore.GetIgnoredPathByGuid(guid);
 
-            Assert.IsTrue(PathUtils.ArePathsEqual(fullAssetPathAfterRename, PathUtils.GetFullPath(assetIgnorePathAfterRename)), "Expected path from asset and path on git ignore to be the same");
+            Assert.IsTrue(fullAssetPathAfterRename == PathUtils.GetFullPath(assetIgnorePathAfterRename));
 
             foreach (string gameName in ShapeShifterConfiguration.Instance.GameNames)
             {
