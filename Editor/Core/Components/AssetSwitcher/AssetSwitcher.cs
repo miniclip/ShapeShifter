@@ -41,7 +41,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                     string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(assetSkin.Guid));
 
-                    if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
+                    if (!string.Equals(assetDatabasePath.Trim(Path.DirectorySeparatorChar), assetGitIgnorePath.Trim(Path.DirectorySeparatorChar)))
                     {
                         missingAssets.Add(assetSkin.Guid);
                         continue;
