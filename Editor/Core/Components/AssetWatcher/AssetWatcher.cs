@@ -82,6 +82,11 @@ namespace Miniclip.ShapeShifter.Watcher
                 assetSkin.Stage();
             }
 
+            if (AssetDatabase.IsValidFolder(assetPath))
+            {
+                assetPath += Path.DirectorySeparatorChar;
+            }
+            
             GitIgnore.Add(guid, assetPath);
         }
 
