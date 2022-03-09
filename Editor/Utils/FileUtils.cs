@@ -70,33 +70,26 @@ namespace Miniclip.ShapeShifter.Utils
                     throw new ArgumentException("Path given is empty or null or whitespace");
                 }
 
-                if (NormalizePath(fullPath) == NormalizePath(assets.FullName))
+                if (PathUtils.NormalizePath(fullPath) == PathUtils.NormalizePath(assets.FullName))
                 {
                     throw new ArgumentException("Path given is Application.DataPath");
                 }
 
-                if (NormalizePath(fullPath) == NormalizePath(project?.FullName))
+                if (PathUtils.NormalizePath(fullPath) == PathUtils.NormalizePath(project?.FullName))
                 {
                     throw new ArgumentException("Path given is the project root folder");
                 }
 
-                if (NormalizePath(fullPath) == NormalizePath(repositoryPath))
+                if (PathUtils.NormalizePath(fullPath) == PathUtils.NormalizePath(repositoryPath))
                 {
                     throw new ArgumentException("Path given is the repository root folder");
                 }
 
-                if (!NormalizePath(fullPath).Contains(NormalizePath(repositoryPath)))
+                if (!PathUtils.NormalizePath(fullPath).Contains(PathUtils.NormalizePath(repositoryPath)))
                 {
                     throw new ArgumentException("Path given is outside the repository folder");
                 }
             }
-        }
-
-        private static string NormalizePath(string path)
-        {
-            return Path.GetFullPath(new Uri(path).LocalPath)
-                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
-                .ToUpperInvariant();
         }
 
         internal static List<string> ReadAllLines(string filepath)

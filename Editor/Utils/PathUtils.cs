@@ -224,5 +224,17 @@ namespace Miniclip.ShapeShifter.Utils
 
             return false;
         }
+        
+        public static bool ArePathsEqual(string pathA, string pathB)
+        {
+            return string.Equals(NormalizePath(pathA), NormalizePath(pathB), StringComparison.Ordinal);
+        }
+
+        public static string NormalizePath(string path)
+        {
+            return Path.GetFullPath(new Uri(path).LocalPath)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .ToUpperInvariant();
+        }
     }
 }
