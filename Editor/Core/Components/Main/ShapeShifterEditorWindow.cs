@@ -72,6 +72,16 @@ namespace Miniclip.ShapeShifter
                 GUILayout.FlexibleSpace();
                 
                 ShapeShifterLogger.OnGUI();
+                
+                if (GUILayout.Button("Badminton"))
+                {
+                    GameSwitch.FakeSwitchToBadminton();
+                }
+                
+                if (GUILayout.Button("Volley"))
+                {
+                    GameSwitch.FakeSwitchToVolley();
+                }
             }
             
             Repaint();

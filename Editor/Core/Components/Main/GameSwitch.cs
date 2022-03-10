@@ -9,13 +9,39 @@ namespace Miniclip.ShapeShifter
     [InitializeOnLoad]
     public static class GameSwitch
     {
-
         private const string GAME_NAME_COMMAND_LINE_ARGUMENT = "-gameName";
+
+        public static void FakeSwitchToVolley()
+        {
+            string[] fakeArgs = new[]
+            {
+                GAME_NAME_COMMAND_LINE_ARGUMENT, "Volleyball Arena"
+            };
+            
+            SwitchInternal(fakeArgs);
+        }
         
+        public static void FakeSwitchToBadminton()
+        {
+            string[] fakeArgs = new[]
+            {
+                GAME_NAME_COMMAND_LINE_ARGUMENT, "Badminton"
+            };
+            
+            SwitchInternal(fakeArgs);
+        }
+
         public static void Switch()
         {
-            string[] commandLineArgs = Environment.GetCommandLineArgs();
+            SwitchInternal(Environment.GetCommandLineArgs());
+        }
+
+        private static void SwitchInternal(string[] commandLineArgs)
+        {
             Debug.Log("HELLO");
+
+            return;
+
             if (!commandLineArgs.Contains(GAME_NAME_COMMAND_LINE_ARGUMENT))
             {
                 Debug.Log("1");
@@ -43,7 +69,7 @@ namespace Miniclip.ShapeShifter
             {
                 ShapeShifterInitializer.Init();
             }
-            
+
             if (!ShapeShifterConfiguration.Instance.GameNames.Contains(gameName))
             {
                 Debug.Log("3");
@@ -51,8 +77,8 @@ namespace Miniclip.ShapeShifter
             }
 
             GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
-            
+
             AssetSwitcher.SwitchToGame(gameSkin, true);
-        }       
+        }
     }
 }
