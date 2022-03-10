@@ -43,7 +43,7 @@ public class ShapeShifterInitializer
         }
     }
 
-    private static async void Init()
+    public static async void Init()
     {
 
         while (EditorApplication.isCompiling || EditorApplication.isUpdating)
