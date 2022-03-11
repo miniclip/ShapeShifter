@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using JetBrains.Annotations;
 using Miniclip.ShapeShifter.Switcher;
 using UnityEditor;
 using UnityEngine;
@@ -11,26 +12,7 @@ namespace Miniclip.ShapeShifter
     {
         private const string GAME_NAME_COMMAND_LINE_ARGUMENT = "-gameName";
 
-        public static void FakeSwitchToVolley()
-        {
-            string[] fakeArgs = new[]
-            {
-                GAME_NAME_COMMAND_LINE_ARGUMENT, "Volleyball Arena"
-            };
-            
-            SwitchInternal(fakeArgs);
-        }
-        
-        public static void FakeSwitchToBadminton()
-        {
-            string[] fakeArgs = new[]
-            {
-                GAME_NAME_COMMAND_LINE_ARGUMENT, "Badminton"
-            };
-            
-            SwitchInternal(fakeArgs);
-        }
-
+        [UsedImplicitly]
         public static void Switch()
         {
             SwitchInternal(Environment.GetCommandLineArgs());
@@ -38,13 +20,8 @@ namespace Miniclip.ShapeShifter
 
         private static void SwitchInternal(string[] commandLineArgs)
         {
-            Debug.Log("HELLO");
-
-            return;
-
             if (!commandLineArgs.Contains(GAME_NAME_COMMAND_LINE_ARGUMENT))
             {
-                Debug.Log("1");
                 throw new Exception("Missing game name command to continue with switch operation");
             }
 
@@ -57,9 +34,8 @@ namespace Miniclip.ShapeShifter
                     )
                 );
 
-            if (gameNameCommandLineArgumentIndex + 1 >= commandLineArgs.Length)
+            if ((gameNameCommandLineArgumentIndex + 1) >= commandLineArgs.Length)
             {
-                Debug.Log("2");
                 throw new Exception("Missing argument value with target game to switch to");
             }
 
@@ -72,13 +48,15 @@ namespace Miniclip.ShapeShifter
 
             if (!ShapeShifterConfiguration.Instance.GameNames.Contains(gameName))
             {
-                Debug.Log("3");
                 throw new Exception($"Shapeshifter unable to find {gameName} in configuration");
             }
 
             GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
 
             AssetSwitcher.SwitchToGame(gameSkin, true);
+            
+            // Temporary fix until GICache freezing execution bug gets fixed
+            EditorApplication.Exit(0);
         }
     }
 }
