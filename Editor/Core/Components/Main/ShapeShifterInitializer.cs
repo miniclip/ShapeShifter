@@ -1,17 +1,15 @@
-using System.Collections;
 using System.Threading.Tasks;
 using Miniclip.ShapeShifter;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
-using UnityEngine;
 
 [InitializeOnLoad]
 public class ShapeShifterInitializer
 {
     static ShapeShifterInitializer()
     {
-        EditorApplication.delayCall += Init;
+        EditorApplication.delayCall += OnDelayedCall;
         EditorApplication.quitting += EditorApplicationOnQuitting;
         WindowFocusUtility.OnUnityEditorFocus -= OnEditorFocus;
         WindowFocusUtility.OnUnityEditorFocus += OnEditorFocus;
@@ -43,14 +41,18 @@ public class ShapeShifterInitializer
         }
     }
 
-    public static async void Init()
+    private static async void OnDelayedCall()
     {
+        await Init();
+    }
 
+    public static async Task Init()
+    {
         while (EditorApplication.isCompiling || EditorApplication.isUpdating)
         {
             await Task.Delay(1000);
         }
-        
+
         ShapeShifterLogger.Log("Setting up");
 
         ShapeShifterConfiguration.Initialise();
@@ -59,7 +61,7 @@ public class ShapeShifterInitializer
 
     private static void EditorApplicationOnQuitting()
     {
-        EditorApplication.delayCall -= Init;
+        EditorApplication.delayCall -= OnDelayedCall;
         EditorApplication.quitting -= EditorApplicationOnQuitting;
         WindowFocusUtility.OnUnityEditorFocus -= OnEditorFocus;
     }

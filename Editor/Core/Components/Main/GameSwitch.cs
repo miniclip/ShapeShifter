@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Miniclip.ShapeShifter.Switcher;
 using UnityEditor;
@@ -18,7 +19,7 @@ namespace Miniclip.ShapeShifter
             SwitchInternal(Environment.GetCommandLineArgs());
         }
 
-        private static void SwitchInternal(string[] commandLineArgs)
+        private static async Task SwitchInternal(string[] commandLineArgs)
         {
             if (!commandLineArgs.Contains(GAME_NAME_COMMAND_LINE_ARGUMENT))
             {
@@ -43,7 +44,7 @@ namespace Miniclip.ShapeShifter
 
             if (!ShapeShifterConfiguration.IsInitialized())
             {
-                ShapeShifterInitializer.Init();
+                await ShapeShifterInitializer.Init();
             }
 
             if (!ShapeShifterConfiguration.Instance.GameNames.Contains(gameName))
