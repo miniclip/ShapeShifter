@@ -56,8 +56,6 @@ namespace Miniclip.ShapeShifter
 
             AssetSwitcher.SwitchToGame(gameSkin, true);
             
-            // Temporary fix until GICache freezing execution bug gets fixed
-            EditorApplication.Exit(0);
         }
     }
 }
