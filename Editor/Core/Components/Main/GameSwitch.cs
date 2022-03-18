@@ -8,7 +8,6 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
-    [InitializeOnLoad]
     public static class GameSwitch
     {
         private const string GAME_NAME_COMMAND_LINE_ARGUMENT = "-gameName";

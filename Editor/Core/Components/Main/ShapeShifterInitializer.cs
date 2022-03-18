@@ -9,6 +9,7 @@ public class ShapeShifterInitializer
 {
     static ShapeShifterInitializer()
     {
+        if (EditorApplication.isPlayingOrWillChangePlaymode) return;
         EditorApplication.delayCall += OnDelayedCall;
         EditorApplication.quitting += EditorApplicationOnQuitting;
         WindowFocusUtility.OnUnityEditorFocus -= OnEditorFocus;

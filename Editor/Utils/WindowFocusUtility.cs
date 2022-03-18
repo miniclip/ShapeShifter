@@ -10,7 +10,11 @@ public class WindowFocusUtility
     private static bool appFocused;
     private static bool IsApplicationActive => InternalEditorUtility.isApplicationActive;
 
-    static WindowFocusUtility() => EditorApplication.update += Update;
+    static WindowFocusUtility()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+        EditorApplication.update += Update;
+    }
 
     private static void Update()
     {
