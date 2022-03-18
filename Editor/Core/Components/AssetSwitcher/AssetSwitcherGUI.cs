@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
@@ -30,17 +31,20 @@ namespace Miniclip.ShapeShifter.Switcher
 
             GUILayout.Space(10.0f);
 
-            HighlightedGame = EditorGUILayout.Popup(
-                "Switch To",
-                HighlightedGame,
-                GameNames.ToArray()
-            );
-
-            if (GUILayout.Button("Switch!", StyleUtils.ButtonStyle))
+            EditorGUILayout.PrefixLabel("Switch To:");
+            using (new EditorGUILayout.HorizontalScope())
             {
-                GameSkin gameSkin = new GameSkin(GameNames[HighlightedGame]);
-                AssetSwitcher.SwitchToGame(gameSkin);
-                GUIUtility.ExitGUI();
+                HighlightedGame = EditorGUILayout.Popup(
+                    HighlightedGame,
+                    GameNames.ToArray(), StyleUtils.ButtonStyle
+                );
+
+                if (GUILayout.Button("Switch!", StyleUtils.ButtonStyle))
+                {
+                    GameSkin gameSkin = new GameSkin(GameNames[HighlightedGame]);
+                    AssetSwitcher.SwitchToGame(gameSkin);
+                    GUIUtility.ExitGUI();
+                }
             }
         }
 
@@ -54,6 +58,11 @@ namespace Miniclip.ShapeShifter.Switcher
             };
 
             GUILayout.Box($"Active game: {ShapeShifter.ActiveGameName}", titleStyle);
+            
+            if (GUILayout.Button($"Force Save To {ShapeShifter.ActiveGameName}", StyleUtils.ButtonStyle))
+            {
+                AssetSaver.SaveToActiveGameSkin();
+            }
         }
     }
 }
