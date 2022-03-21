@@ -246,6 +246,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                 float progress = 0.0f;
                 float progressBarStep = 1.0f / totalDirectories;
+                Debug.Log("##! 5");
 
                 PerformOperationOnPath(
                     gameFolderPath,
@@ -255,6 +256,7 @@ namespace Miniclip.ShapeShifter.Switcher
                     progressBarStep,
                     ref progress
                 );
+                Debug.Log("##! 6");
 
                 PerformOperationOnPath(
                     gameFolderPath,
@@ -264,8 +266,10 @@ namespace Miniclip.ShapeShifter.Switcher
                     progressBarStep,
                     ref progress
                 );
+                Debug.Log("##! 7");
 
                 RefreshAllAssets();
+                Debug.Log("##! 8");
             }
             else
             {
@@ -305,10 +309,7 @@ namespace Miniclip.ShapeShifter.Switcher
         [MenuItem("Window/Shape Shifter/Refresh All Assets", false, 72)]
         private static void RefreshAllAssets()
         {
-#if UNITY_2020
-            Debug.LogWarning("// TODO: Replace this in Unity 2020 with PackageManager.Client.Resolve");
-#endif
-            if (HasAnyPackageRelatedSkin())
+            if (HasAnyPackageRelatedSkin() && !Application.isBatchMode)
             {
                 ForceUnityToLoseAndRegainFocus();
 
@@ -344,11 +345,14 @@ namespace Miniclip.ShapeShifter.Switcher
 
             process.Start();
         }
-        
+
         internal static void SwitchToGame(GameSkin gameToSwitchTo, bool forceSwitch = false)
         {
+            Debug.Log("##! 1");
+
             if (ShapeShifterConfiguration.Instance.IsDirty && !forceSwitch)
             {
+                Debug.Log("##! 1.1");
                 int choice = EditorUtility.DisplayDialogComplex(
                     "Shape Shifter",
                     "There are unsaved changes in your skinned assets. You should make sure to save them into your Active Game folder",
@@ -372,13 +376,16 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
             }
 
+            Debug.Log("##! 2");
             PerformCopiesWithTracking(
                 gameToSwitchTo,
                 "Switch to game",
                 CopyFromSkinsToUnity,
                 CopyFromSkinnedExternalToOrigin
             );
+            Debug.Log("##! 3");
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
+            Debug.Log("##! 4");
             ShapeShifterConfiguration.Instance.SetDirty(false);
 
             //TODO: ACPT-2843 make the code below optionable

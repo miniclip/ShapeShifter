@@ -16,7 +16,17 @@ namespace Miniclip.ShapeShifter
         public static void Switch()
         {
             Debug.Log("##! Before Switch Internal");
-            SwitchInternal(Environment.GetCommandLineArgs());
+
+            try
+            {
+                SwitchInternal(Environment.GetCommandLineArgs());
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+                EditorApplication.Exit(1);
+                throw;
+            }
         }
 
         private static async Task SwitchInternal(string[] commandLineArgs)
