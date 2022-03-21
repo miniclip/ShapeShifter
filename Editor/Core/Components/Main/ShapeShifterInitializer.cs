@@ -20,7 +20,7 @@ public class ShapeShifterInitializer
 
     private static void OnEditorFocus(bool isFocused)
     {
-        RestoreAssetsAfterCompiling(isFocused);
+        //RestoreAssetsAfterCompiling(isFocused);
     }
 
     private static async void RestoreAssetsAfterCompiling(bool isFocused)
@@ -40,7 +40,7 @@ public class ShapeShifterInitializer
 
         if (isFocused && !EditorApplication.isPlayingOrWillChangePlaymode)
         {
-            AssetSwitcher.RestoreMissingAssets();
+            // AssetSwitcher.RestoreMissingAssets();
         }
     }
 
@@ -59,9 +59,11 @@ public class ShapeShifterInitializer
         ShapeShifterLogger.Log("Setting up");
 
         ShapeShifterConfiguration.Initialise();
-        
+
         if (restoreMissingAssets)
-            AssetSwitcher.RestoreMissingAssets();
+        {
+            // AssetSwitcher.RestoreMissingAssets();
+        }
     }
 
     private static void EditorApplicationOnQuitting()
