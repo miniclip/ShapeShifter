@@ -2,17 +2,25 @@ using JetBrains.Annotations;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor.Experimental.SceneManagement;
+using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Saver
 {
     public class AssetSaver : UnityEditor.AssetModificationProcessor
     {
         private static bool CanSave => ShapeShifterConfiguration.Instance.IsDirty;
+
         private static bool isSaving;
 
         [UsedImplicitly]
         public static void OnWillSaveAssets(string[] files)
         {
+            if (Application.isBatchMode)
+            {
+                Debug.Log("##! Skipping save due to being in batch mode");
+                return;
+            }
+
             if (!ShapeShifterConfiguration.IsInitialized())
             {
                 return;
