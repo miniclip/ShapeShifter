@@ -101,13 +101,23 @@ namespace Miniclip.ShapeShifter.Switcher
 
         private static void CopyFromSkinsToUnity(DirectoryInfo directory)
         {
+            
+            Debug.Log($"##! CopyFromSkinsToUnity 1");
+            
             string guid = directory.Name;
 
             // Ensure it has the same name, so we don't end up copying .DS_Store
             string target = AssetDatabase.GUIDToAssetPath(guid);
+
+            if (string.IsNullOrEmpty(target))
+            {
+                return;
+            }
+            
             string searchPattern = Path.GetFileName(target) + "*";
 
             FileInfo[] files = directory.GetFiles(searchPattern);
+            Debug.Log($"##! CopyFromSkinsToUnity 2");
 
             if (files.Length > 0)
             {
@@ -123,8 +133,11 @@ namespace Miniclip.ShapeShifter.Switcher
                     }
                 }
             }
+            Debug.Log($"##! CopyFromSkinsToUnity 3");
 
             DirectoryInfo[] directories = directory.GetDirectories();
+            
+            Debug.Log($"##! CopyFromSkinsToUnity 4");
 
             if (directories.Length > 0)
             {
@@ -132,9 +145,13 @@ namespace Miniclip.ShapeShifter.Switcher
                     Application.dataPath.Replace("/Assets", string.Empty),
                     target
                 );
+                Debug.Log($"##! CopyFromSkinsToUnity 5 {directories[0].FullName} -> {target}");
 
                 FileUtils.SafeCopy(directories[0].FullName, target);
+                Debug.Log($"##! CopyFromSkinsToUnity 6");
             }
+            Debug.Log($"##! CopyFromSkinsToUnity 7");
+
         }
 
         private static void CopyFromUnityToSkins(DirectoryInfo skinDirectory)
@@ -291,14 +308,19 @@ namespace Miniclip.ShapeShifter.Switcher
             ref float progress)
         {
             string assetFolderPath = Path.Combine(gameFolderPath, assetFolder);
-
+            Debug.Log($"##! 5 {assetFolderPath}");
             if (Directory.Exists(assetFolderPath))
             {
                 DirectoryInfo internalFolder = new DirectoryInfo(assetFolderPath);
 
-                foreach (DirectoryInfo directory in internalFolder.GetDirectories())
+                DirectoryInfo[] infos = internalFolder.GetDirectories();
+                for (int index = 0; index < infos.Length; index++)
                 {
+                    DirectoryInfo directory = infos[index];
+                    Debug.Log($"##! 5.{index} {assetFolderPath} Before Operation");
+
                     operation(directory);
+                    Debug.Log($"##! 5.{index} {assetFolderPath} AFter Operation");
 
                     progress += progressBarStep;
                     EditorUtility.DisplayProgressBar("Shape Shifter", $"{description}...", progress);
@@ -380,7 +402,7 @@ namespace Miniclip.ShapeShifter.Switcher
             PerformCopiesWithTracking(
                 gameToSwitchTo,
                 "Switch to game",
-                CopyFromSkinsToUnity,
+                CopyIfMissingInternal,
                 CopyFromSkinnedExternalToOrigin
             );
             Debug.Log("##! 3");
