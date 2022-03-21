@@ -102,8 +102,6 @@ namespace Miniclip.ShapeShifter.Switcher
         private static void CopyFromSkinsToUnity(DirectoryInfo directory)
         {
             
-            Debug.Log($"##! CopyFromSkinsToUnity 1");
-            
             string guid = directory.Name;
 
             // Ensure it has the same name, so we don't end up copying .DS_Store
@@ -117,7 +115,6 @@ namespace Miniclip.ShapeShifter.Switcher
             string searchPattern = Path.GetFileName(target) + "*";
 
             FileInfo[] files = directory.GetFiles(searchPattern);
-            Debug.Log($"##! CopyFromSkinsToUnity 2");
 
             if (files.Length > 0)
             {
@@ -133,25 +130,18 @@ namespace Miniclip.ShapeShifter.Switcher
                     }
                 }
             }
-            Debug.Log($"##! CopyFromSkinsToUnity 3");
 
             DirectoryInfo[] directories = directory.GetDirectories();
             
-            Debug.Log($"##! CopyFromSkinsToUnity 4");
-
             if (directories.Length > 0)
             {
                 target = Path.Combine(
                     Application.dataPath.Replace("/Assets", string.Empty),
                     target
                 );
-                Debug.Log($"##! CopyFromSkinsToUnity 5 {directories[0].FullName} -> {target}");
 
                 FileUtils.SafeCopy(directories[0].FullName, target);
-                Debug.Log($"##! CopyFromSkinsToUnity 6");
             }
-            Debug.Log($"##! CopyFromSkinsToUnity 7");
-
         }
 
         private static void CopyFromUnityToSkins(DirectoryInfo skinDirectory)
@@ -263,7 +253,6 @@ namespace Miniclip.ShapeShifter.Switcher
 
                 float progress = 0.0f;
                 float progressBarStep = 1.0f / totalDirectories;
-                Debug.Log("##! 5");
 
                 PerformOperationOnPath(
                     gameFolderPath,
@@ -273,7 +262,6 @@ namespace Miniclip.ShapeShifter.Switcher
                     progressBarStep,
                     ref progress
                 );
-                Debug.Log("##! 6");
 
                 PerformOperationOnPath(
                     gameFolderPath,
@@ -283,10 +271,8 @@ namespace Miniclip.ShapeShifter.Switcher
                     progressBarStep,
                     ref progress
                 );
-                Debug.Log("##! 7");
 
                 RefreshAllAssets();
-                Debug.Log("##! 8");
             }
             else
             {
@@ -308,7 +294,6 @@ namespace Miniclip.ShapeShifter.Switcher
             ref float progress)
         {
             string assetFolderPath = Path.Combine(gameFolderPath, assetFolder);
-            Debug.Log($"##! 5 {assetFolderPath}");
             if (Directory.Exists(assetFolderPath))
             {
                 DirectoryInfo internalFolder = new DirectoryInfo(assetFolderPath);
@@ -317,10 +302,8 @@ namespace Miniclip.ShapeShifter.Switcher
                 for (int index = 0; index < infos.Length; index++)
                 {
                     DirectoryInfo directory = infos[index];
-                    Debug.Log($"##! 5.{index} {assetFolderPath} Before Operation");
 
                     operation(directory);
-                    Debug.Log($"##! 5.{index} {assetFolderPath} AFter Operation");
 
                     progress += progressBarStep;
                     EditorUtility.DisplayProgressBar("Shape Shifter", $"{description}...", progress);
@@ -370,11 +353,8 @@ namespace Miniclip.ShapeShifter.Switcher
 
         internal static void SwitchToGame(GameSkin gameToSwitchTo, bool forceSwitch = false)
         {
-            Debug.Log("##! 1");
-
             if (ShapeShifterConfiguration.Instance.IsDirty && !forceSwitch)
             {
-                Debug.Log("##! 1.1");
                 int choice = EditorUtility.DisplayDialogComplex(
                     "Shape Shifter",
                     "There are unsaved changes in your skinned assets. You should make sure to save them into your Active Game folder",
@@ -398,16 +378,13 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
             }
 
-            Debug.Log("##! 2");
             PerformCopiesWithTracking(
                 gameToSwitchTo,
                 "Switch to game",
                 CopyIfMissingInternal,
                 CopyFromSkinnedExternalToOrigin
             );
-            Debug.Log("##! 3");
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
-            Debug.Log("##! 4");
             ShapeShifterConfiguration.Instance.SetDirty(false);
 
             //TODO: ACPT-2843 make the code below optionable

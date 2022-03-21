@@ -17,7 +17,6 @@ namespace Miniclip.ShapeShifter.Saver
         {
             if (Application.isBatchMode)
             {
-                Debug.Log("##! Skipping save due to being in batch mode");
                 return;
             }
 
