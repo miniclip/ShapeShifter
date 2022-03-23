@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Switcher;
 using UnityEditor;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace Miniclip.ShapeShifter.Utils
         internal static void SavePendingChanges()
         {
             AssetDatabase.SaveAssets();
-
+            AssetSaver.SaveToActiveGameSkin();
             // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save
             EditorApplication.ExecuteMenuItem("File/Save Project");
         }
