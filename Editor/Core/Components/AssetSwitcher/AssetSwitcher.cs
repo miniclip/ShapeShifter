@@ -231,6 +231,8 @@ namespace Miniclip.ShapeShifter.Switcher
             );
 
             ShapeShifterConfiguration.Instance.SetDirty(false);
+
+            ShapeShifter.SaveDetected = false;
         }
 
         private static void PerformCopiesWithTracking(GameSkin selected,

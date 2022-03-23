@@ -8,6 +8,8 @@ namespace Miniclip.ShapeShifter
 {
     public static class ShapeShifter
     {
+        public static bool SaveDetected { get; set; }
+
         private static DirectoryInfo skinsFolder;
 
         internal static DirectoryInfo SkinsFolder
@@ -27,6 +29,7 @@ namespace Miniclip.ShapeShifter
         }
 
         private static List<string> GameNames => config.GameNames;
+
         internal static HashSet<string> DirtyAssets { get; set; } = new HashSet<string>();
 
         internal static Dictionary<string, Texture2D> CachedPreviewPerAssetDict = new Dictionary<string, Texture2D>();
@@ -58,12 +61,14 @@ namespace Miniclip.ShapeShifter
 
                 return activeGame;
             }
+
             set
             {
                 if (!GameNames.Contains(value))
                 {
                     SetDefaultGameSkin();
                 }
+
                 ShapeShifterLogger.Log(
                     $"Setting active game on EditorPrefs: {value}"
                 );
@@ -92,6 +97,7 @@ namespace Miniclip.ShapeShifter
 
                 return activeGameSkin;
             }
+
             private set => activeGameSkin = value;
         }
 
