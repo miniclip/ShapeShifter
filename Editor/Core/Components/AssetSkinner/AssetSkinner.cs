@@ -79,13 +79,8 @@ namespace Miniclip.ShapeShifter.Skinner
         public static void SkinAsset(string assetPath, bool saveFirst = true)
         {
             EditorUtility.DisplayProgressBar("Asset Skinner", $"Checking if {assetPath} is supported", 0);
-            if (!SupportedTypes.IsSupported(assetPath, out string reason))
-            {
-                EditorUtility.ClearProgressBar();
-                return;
-            }
 
-            if (IsSkinned(assetPath))
+            if (!SupportedTypes.IsSupported(assetPath, out string reason))
             {
                 EditorUtility.ClearProgressBar();
                 return;
@@ -94,8 +89,6 @@ namespace Miniclip.ShapeShifter.Skinner
             if (saveFirst)
             {
                 EditorUtility.DisplayProgressBar("Asset Skinner", $"Saving pending changes", 0.2f);
-
-                // make sure any pending changes are saved before generating copies
                 ShapeShifterUtils.SavePendingChanges();
             }
 
@@ -103,45 +96,57 @@ namespace Miniclip.ShapeShifter.Skinner
 
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
             {
-                string origin = assetPath;
-                string assetFolder = Path.Combine(
-                    ShapeShifter.SkinsFolder.FullName,
-                    game,
-                    ShapeShifterConstants.INTERNAL_ASSETS_FOLDER,
-                    guid
-                );
+                SkinAssetForGame(assetPath, ShapeShifterConfiguration.Instance.GetGameSkinByName(game));
+            }
+        }
 
-                EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Checking if its skinned already", 0.3f);
+        public static void SkinAssetForGame(string assetPath, string game)
+        {
+            SkinAssetForGame(assetPath, ShapeShifterConfiguration.Instance.GetGameSkinByName(game));
+        }
+        
+        public static void SkinAssetForGame(string assetPath, GameSkin gameSkin)
+        {
+            string origin = assetPath;
+            string game = gameSkin.Name;
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
-                if (IsSkinned(origin, game))
-                {
-                    continue;
-                }
+            string assetFolder = Path.Combine(
+                gameSkin.InternalSkinsFolderPath,
+                guid
+            );
 
-                EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Creating directory for asset", 0.3f);
-                FileUtils.TryCreateDirectory(assetFolder, true);
+            EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Checking if its skinned already", 0.3f);
 
-                string target = Path.Combine(assetFolder, Path.GetFileName(origin));
-
-                EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Copying asset to skin directory", 0.3f);
-
-                FileUtils.SafeCopy(origin, target);
-                FileUtils.SafeCopy(origin + ".meta", target + ".meta");
-
-                EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Staging changes", 0.3f);
-
-                GitUtils.Stage(assetFolder);
+            if (IsSkinned(origin, game))
+            {
+                return;
             }
 
+            EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Creating directory for asset", 0.3f);
+            FileUtils.TryCreateDirectory(assetFolder, true);
+
+            string target = Path.Combine(assetFolder, Path.GetFileName(origin));
+
+            EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Copying asset to skin directory", 0.3f);
+
+            FileUtils.SafeCopy(origin, target);
+            FileUtils.SafeCopy(origin + ".meta", target + ".meta");
+
+            EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Staging changes", 0.3f);
+
+            GitUtils.Stage(assetFolder);
+
             EditorUtility.DisplayProgressBar($"Asset Skinner", $"Untracking {assetPath}", 0.5f);
+
             GitUtils.Untrack(guid, assetPath, true);
             EditorUtility.ClearProgressBar();
         }
 
         public static bool IsSkinned(string assetPath) =>
-            ShapeShifterConfiguration.Instance.GameNames.All(game => IsSkinned(assetPath, game));
+            ShapeShifterConfiguration.Instance.GameNames.Any(game => IsSkinned(assetPath, game));
 
-        private static bool IsSkinned(string assetPath, string game)
+        public static bool IsSkinned(string assetPath, string game)
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
 

@@ -291,6 +291,24 @@ namespace Miniclip.ShapeShifter.Skinner
             {
                 foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
                 {
+                    if (!AssetSkinner.IsSkinned(assetPath, game))
+                    {
+                        using (new GUILayout.VerticalScope(boxStyle))
+                        {
+                            float buttonWidth = EditorGUIUtility.currentViewWidth
+                                                * (1.0f / ShapeShifterConfiguration.Instance.GameNames.Count);
+                            buttonWidth -= 20; // to account for a possible scrollbar or some extra padding 
+                            EditorGUILayout.PrefixLabel(game);
+                            GUILayout.Button(
+                                "Not Skinned",
+                                GUILayout.Width(buttonWidth),
+                                GUILayout.MaxHeight(buttonWidth)
+                            );
+                        }
+
+                        continue;
+                    }
+
                     string guid = AssetDatabase.AssetPathToGUID(assetPath);
                     string skinnedPath = Path.Combine(
                         ShapeShifter.SkinsFolder.FullName,
@@ -318,6 +336,19 @@ namespace Miniclip.ShapeShifter.Skinner
         private static void DrawUnskinnedAssetSection(string assetPath)
         {
             GUI.backgroundColor = Color.green;
+            using (new GUILayout.HorizontalScope())
+            {
+                List<string> gameNames = ShapeShifterConfiguration.Instance.GameNames;
+                foreach (string gameName in gameNames)
+                {
+                    if (GUILayout.Button($"Skin {gameName} only"))
+                    {
+                        GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
+                        AssetSkinner.SkinAssetForGame(assetPath, gameSkin);
+                        GUIUtility.ExitGUI();
+                    }
+                }
+            }
 
             if (GUILayout.Button("Skin it!"))
             {
