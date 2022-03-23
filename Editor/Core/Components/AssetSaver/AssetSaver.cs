@@ -15,6 +15,7 @@ namespace Miniclip.ShapeShifter.Saver
         [UsedImplicitly]
         public static void OnWillSaveAssets(string[] files)
         {
+            return;
             if (Application.isBatchMode)
             {
                 return;
