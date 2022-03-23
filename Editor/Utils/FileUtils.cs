@@ -57,8 +57,8 @@ namespace Miniclip.ShapeShifter.Utils
 
         public static void ValidatePathSafety(params string[] paths)
         {
-            DirectoryInfo assets = new DirectoryInfo(Application.dataPath);
-            DirectoryInfo project = assets.Parent;
+            DirectoryInfo assetsDirectoryInfo = new DirectoryInfo(Application.dataPath);
+            DirectoryInfo projectDirectoryInfo = assetsDirectoryInfo.Parent;
             string repositoryPath = GitUtils.MainRepositoryPath;
 
             foreach (string path in paths)
@@ -70,22 +70,24 @@ namespace Miniclip.ShapeShifter.Utils
                     throw new ArgumentException("Path given is empty or null or whitespace");
                 }
 
-                if (PathUtils.NormalizePath(fullPath) == PathUtils.NormalizePath(assets.FullName))
+                string normalizedPath = PathUtils.NormalizePath(fullPath);
+                
+                if (normalizedPath == PathUtils.NormalizePath(assetsDirectoryInfo.FullName))
                 {
                     throw new ArgumentException("Path given is Application.DataPath");
                 }
 
-                if (PathUtils.NormalizePath(fullPath) == PathUtils.NormalizePath(project?.FullName))
+                if (normalizedPath == PathUtils.NormalizePath(projectDirectoryInfo?.FullName))
                 {
                     throw new ArgumentException("Path given is the project root folder");
                 }
 
-                if (PathUtils.NormalizePath(fullPath) == PathUtils.NormalizePath(repositoryPath))
+                if (normalizedPath == PathUtils.NormalizePath(repositoryPath))
                 {
                     throw new ArgumentException("Path given is the repository root folder");
                 }
 
-                if (!PathUtils.NormalizePath(fullPath).Contains(PathUtils.NormalizePath(repositoryPath)))
+                if (!normalizedPath.Contains(PathUtils.NormalizePath(repositoryPath)))
                 {
                     throw new ArgumentException("Path given is outside the repository folder");
                 }

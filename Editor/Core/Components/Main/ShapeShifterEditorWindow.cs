@@ -74,19 +74,7 @@ namespace Miniclip.ShapeShifter
                 }
             }
 
-            if (ShapeShifter.SaveDetected)
-            {
-                Color oldBGColor = GUI.backgroundColor;
-                GUI.backgroundColor = Color.red;
-                using (new GUILayout.HorizontalScope())
-                {
-                    EditorGUILayout.LabelField("Shapeshifter does not save automatically, press the below \"Force Save\" for that");
-                    EditorStyles.label.wordWrap = true;
-                    if (GUILayout.Button("OK"))
-                        ShapeShifter.SaveDetected = false;
-                }
-                GUI.backgroundColor = oldBGColor;
-            }
+            DrawSaveWarning();
             
             AssetSwitcherGUI.OnGUI();
             
@@ -95,6 +83,26 @@ namespace Miniclip.ShapeShifter
             OnSelectedTabGUI();
 
             Repaint();
+        }
+
+        private static void DrawSaveWarning()
+        {
+            if (ShapeShifter.SaveDetected)
+            {
+                Color oldBGColor = GUI.backgroundColor;
+                GUI.backgroundColor = Color.red;
+                using (new GUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.LabelField(
+                        "Shapeshifter does not save automatically, press the below \"Force Save\" for that"
+                    );
+                    EditorStyles.label.wordWrap = true;
+                    if (GUILayout.Button("OK"))
+                        ShapeShifter.SaveDetected = false;
+                }
+
+                GUI.backgroundColor = oldBGColor;
+            }
         }
 
         private void OnSelectedTabGUI()
@@ -133,12 +141,7 @@ namespace Miniclip.ShapeShifter
         private static void OnShowUtilOperationsGUI()
         {
             GUILayout.Space(10);
-
-            if (GUILayout.Button("Restore Missing Assets"))
-            {
-                AssetSwitcher.RestoreMissingAssets();
-            }
-
+            
             PreMergeCheckGUI.OnGUI();
         }
 

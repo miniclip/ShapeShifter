@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Switcher;
-using Miniclip.ShapeShifter.Tests;
 using Miniclip.ShapeShifter.Utils;
 using NUnit.Framework;
 using UnityEditor;

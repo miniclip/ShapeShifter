@@ -26,9 +26,6 @@ namespace Miniclip.ShapeShifter.Switcher
 
         private static void OnSwitchToGUI()
         {
-            if (!ShapeShifterConfiguration.IsInitialized())
-                return;
-
             GUILayout.Space(10.0f);
 
             EditorGUILayout.PrefixLabel("Switch To:");
@@ -36,7 +33,8 @@ namespace Miniclip.ShapeShifter.Switcher
             {
                 HighlightedGame = EditorGUILayout.Popup(
                     HighlightedGame,
-                    GameNames.ToArray(), StyleUtils.ButtonStyle
+                    GameNames.ToArray(),
+                    StyleUtils.ButtonStyle
                 );
 
                 if (GUILayout.Button("Switch!", StyleUtils.ButtonStyle))
@@ -58,10 +56,17 @@ namespace Miniclip.ShapeShifter.Switcher
             };
 
             GUILayout.Box($"Active game: {ShapeShifter.ActiveGameName}", titleStyle);
-            
+
             if (GUILayout.Button($"Force Save To {ShapeShifter.ActiveGameName}", StyleUtils.ButtonStyle))
             {
                 AssetSaver.SaveToActiveGameSkin();
+            }
+
+            GUILayout.Space(5.0f);
+
+            if (GUILayout.Button($"Restore {ShapeShifter.ActiveGameName}"))
+            {
+                AssetSwitcher.RestoreActiveGame();
             }
         }
     }
