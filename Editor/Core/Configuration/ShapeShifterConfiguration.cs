@@ -118,7 +118,6 @@ namespace Miniclip.ShapeShifter
                 );
 
                 EditorUtility.SetDirty(Instance);
-                AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
 
