@@ -77,5 +77,11 @@ namespace Miniclip.ShapeShifter
         {
             GitUtils.Stage(FolderPath);
         }
+
+        public void Delete()
+        {
+            FileUtils.SafeDelete(FolderPath);
+            Stage();
+        }
     }
 }

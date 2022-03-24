@@ -17,6 +17,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
         private static readonly string defaultIcon = "WelcomeScreen.AssetStoreLogo";
         private static readonly string errorIcon = "console.erroricon";
+        private static readonly string trashIcon = "TreeEditor.Trash";
 
         private static readonly Dictionary<string, string> iconPerExtension = new Dictionary<string, string>
         {
@@ -327,7 +328,11 @@ namespace Miniclip.ShapeShifter.Skinner
 
                     string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
                     GenerateAssetPreview(key, skinnedPath);
+                    EditorGUILayout.BeginVertical();
                     DrawAssetPreview(key, game, skinnedPath, guid);
+                    DrawAssetSkinActions(game, assetPath);
+                    EditorGUILayout.EndVertical();
+
                 }
             }
 
@@ -337,6 +342,20 @@ namespace Miniclip.ShapeShifter.Skinner
             {
                 AssetSkinner.RemoveSkins(assetPath);
                 GUIUtility.ExitGUI();
+            }
+        }
+
+        private static void DrawAssetSkinActions(string game, string assetPath)
+        {
+            using (new GUILayout.HorizontalScope())
+            {
+                if (GUILayout.Button(EditorGUIUtility.FindTexture(trashIcon)))
+                {
+                    AssetSkin assetSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game)
+                        .GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath));
+
+                    assetSkin.Delete();
+                }
             }
         }
 
