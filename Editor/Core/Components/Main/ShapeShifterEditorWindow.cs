@@ -91,11 +91,11 @@ namespace Miniclip.ShapeShifter
             if (ShapeShifter.SaveDetected)
             {
                 Color oldBGColor = GUI.backgroundColor;
-                GUI.backgroundColor = Color.red;
+                GUI.backgroundColor = Color.green;
                 using (new GUILayout.HorizontalScope())
                 {
                     EditorGUILayout.LabelField(
-                        "Shapeshifter does not save automatically, press the below \"Force Save\" for that"
+                        "ShapeShifter does not save automatically, press the below \"Save\" button for that"
                     );
                     EditorStyles.label.wordWrap = true;
                     if (GUILayout.Button("OK"))

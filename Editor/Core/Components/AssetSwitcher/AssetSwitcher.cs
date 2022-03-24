@@ -128,7 +128,7 @@ namespace Miniclip.ShapeShifter.Switcher
             }
         }
 
-        private static void DeleteAssetInternalCopy(string guid)
+        public static void DeleteAssetInternalCopy(string guid)
         {
             string assetPathFromAssetDatabase = AssetDatabase.GUIDToAssetPath(guid);
             if (string.IsNullOrEmpty(assetPathFromAssetDatabase)

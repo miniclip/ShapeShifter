@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Miniclip.ShapeShifter.Saver;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
@@ -57,14 +58,24 @@ namespace Miniclip.ShapeShifter.Switcher
 
             GUILayout.Box($"Active game: {ShapeShifter.ActiveGameName}", titleStyle);
 
-            if (GUILayout.Button($"Force Save To {ShapeShifter.ActiveGameName}", StyleUtils.ButtonStyle))
+            GUIContent forceSaveGUIContent = new GUIContent(
+                $"Save Changes To {ShapeShifter.ActiveGameName}",
+                Icons.GetIconTexture(Icons.saveIcon),
+                $"Save your project assets into {ShapeShifter.ActiveGameName} folder"
+            );
+            if (GUILayout.Button(forceSaveGUIContent, StyleUtils.ButtonStyle))
             {
                 AssetSaver.SaveToActiveGameSkin();
             }
 
             GUILayout.Space(5.0f);
 
-            if (GUILayout.Button($"Restore {ShapeShifter.ActiveGameName}"))
+            GUIContent refreshGUIContent = new GUIContent(
+                $"Refresh {ShapeShifter.ActiveGameName}",
+                Icons.GetIconTexture(Icons.refreshIcon),
+                $"This will replace your project assets with the current version in {ShapeShifter.ActiveGameName} folder"
+            );
+            if (GUILayout.Button(refreshGUIContent))
             {
                 AssetSwitcher.RestoreActiveGame();
             }

@@ -4,6 +4,7 @@ using System.Linq;
 using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
+using Miniclip.ShapeShifter.Utils.Git;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
@@ -14,44 +15,6 @@ namespace Miniclip.ShapeShifter.Skinner
     public class AssetSkinnerGUI
     {
         private static Vector2 scrollPosition;
-
-        private static readonly string defaultIcon = "WelcomeScreen.AssetStoreLogo";
-        private static readonly string errorIcon = "console.erroricon";
-        private static readonly string trashIcon = "TreeEditor.Trash";
-
-        private static readonly Dictionary<string, string> iconPerExtension = new Dictionary<string, string>
-        {
-            {
-                ".anim", "AnimationClip Icon"
-            },
-            {
-                ".asset", "ScriptableObject Icon"
-            },
-            {
-                ".controller", "AnimatorController Icon"
-            },
-            {
-                ".cs", "cs Script Icon"
-            },
-            {
-                ".gradle", "TextAsset Icon"
-            },
-            {
-                ".json", "TextAsset Icon"
-            },
-            {
-                ".prefab", "Prefab Icon"
-            },
-            {
-                ".txt", "TextAsset Icon"
-            },
-            {
-                ".unity", "SceneAsset Icon"
-            },
-            {
-                ".xml", "TextAsset Icon"
-            },
-        };
 
         private static readonly Dictionary<object, bool> foldoutDictionary = new Dictionary<object, bool>();
 
@@ -353,27 +316,61 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             using (new GUILayout.HorizontalScope())
             {
-                if (GUILayout.Button(EditorGUIUtility.FindTexture(trashIcon)))
-                {
-                    AssetSkin assetSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game)
-                        .GetAssetSkin(AssetDatabase.AssetPathToGUID(assetPath));
+                OnRemoveSkinFromGame(game, assetPath);
+            }
+        }
 
-                    assetSkin.Delete();
+        private static void OnRemoveSkinFromGame(string game, string assetPath)
+        {
+            if (GUILayout.Button(Icons.GetIconTexture(Icons.trashIcon)))
+            {
+                string guid = AssetDatabase.AssetPathToGUID(assetPath);
+                GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
+
+                AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);
+
+                assetSkin.Delete();
+
+                if (!AssetSkinner.IsSkinned(assetPath))
+                {
+                    GitIgnore.Remove(guid);
                 }
             }
         }
 
         private static void DrawUnskinnedAssetSection(string assetPath)
         {
-            GUI.backgroundColor = Color.green;
 
+            EditorGUILayout.BeginHorizontal();
+            GUI.backgroundColor = Color.red;
+            if (GUILayout.Button($"Exclude from {ShapeShifter.ActiveGameName}"))
+            {
+                var gamesNames = ShapeShifterConfiguration.Instance.GameNames;
+
+                foreach (string gamesName in gamesNames)
+                {
+                    if(gamesName == ShapeShifter.ActiveGameName)
+                        continue;
+                    
+                    AssetSkinner.SkinAssetForGame(assetPath, gamesName);
+                }
+
+                string guid = AssetDatabase.AssetPathToGUID(assetPath);
+                AssetSwitcher.DeleteAssetInternalCopy(guid);
+                AssetDatabase.Refresh();
+            }
+            
+            GUI.backgroundColor = Color.green;
             if (GUILayout.Button($"Skin To {ShapeShifter.ActiveGameName} Only"))
             {
                 GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(ShapeShifter.ActiveGameName);
                 AssetSkinner.SkinAssetForGame(assetPath, gameSkin);
                 GUIUtility.ExitGUI();
             }
-
+            
+            EditorGUILayout.EndHorizontal();
+            
+            GUI.backgroundColor = Color.green;
             if (GUILayout.Button("Skin For All Games"))
             {
                 AssetSkinner.SkinAsset(assetPath);
@@ -387,14 +384,14 @@ namespace Miniclip.ShapeShifter.Skinner
             {
                 ShapeShifter.DirtyAssets.Remove(key);
 
-                Texture2D texturePreview = EditorGUIUtility.FindTexture(errorIcon);
+                Texture2D texturePreview = Icons.GetIconTexture(Icons.errorIcon);
                 if (Directory.Exists(assetPath))
                 {
                     texturePreview = EditorGUIUtility.FindTexture("Folder Icon");
                 }
                 else if (!File.Exists(assetPath))
                 {
-                    texturePreview = EditorGUIUtility.FindTexture(errorIcon);
+                    texturePreview = EditorGUIUtility.FindTexture(Icons.errorIcon);
                 }
                 else
                 {
@@ -409,11 +406,11 @@ namespace Miniclip.ShapeShifter.Skinner
                     }
                     else
                     {
-                        string icon = defaultIcon;
+                        string icon = Icons.defaultIcon;
 
-                        if (iconPerExtension.ContainsKey(extension))
+                        if (Icons.iconPerExtension.ContainsKey(extension))
                         {
-                            icon = iconPerExtension[extension];
+                            icon = Icons.iconPerExtension[extension];
                         }
 
                         texturePreview = (Texture2D) EditorGUIUtility.IconContent(icon).image;
