@@ -74,22 +74,22 @@ namespace Miniclip.ShapeShifter.Utils
                 
                 if (normalizedPath == PathUtils.NormalizePath(assetsDirectoryInfo.FullName))
                 {
-                    throw new ArgumentException("Path given is Application.DataPath");
+                    throw new ArgumentException($"Path given ({normalizedPath}) is Application.DataPath");
                 }
 
                 if (normalizedPath == PathUtils.NormalizePath(projectDirectoryInfo?.FullName))
                 {
-                    throw new ArgumentException("Path given is the project root folder");
+                    throw new ArgumentException($"Path given ({normalizedPath}) is the project root folder");
                 }
 
                 if (normalizedPath == PathUtils.NormalizePath(repositoryPath))
                 {
-                    throw new ArgumentException("Path given is the repository root folder");
+                    throw new ArgumentException($"Path given ({normalizedPath}) is the repository root folder");
                 }
 
                 if (!normalizedPath.Contains(PathUtils.NormalizePath(repositoryPath)))
                 {
-                    throw new ArgumentException("Path given is outside the repository folder");
+                    throw new ArgumentException($"Path given ({normalizedPath}) is outside the repository folder");
                 }
             }
         }

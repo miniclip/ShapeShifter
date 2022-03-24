@@ -184,7 +184,12 @@ namespace Miniclip.ShapeShifter.Skinner
                 buttonWidth -= 20; // to account for a possible scrollbar or some extra padding 
 
                 bool clicked = false;
-                EditorGUILayout.PrefixLabel(game);
+
+                GUIStyle style = StyleUtils.LabelStyle.GetCopy();
+                style.alignment = TextAnchor.MiddleCenter;
+                style.fontStyle = ShapeShifter.ActiveGameName == game ? FontStyle.Bold : FontStyle.Normal;
+                EditorGUILayout.LabelField(game, style);
+
                 if (ShapeShifter.CachedPreviewPerAssetDict.TryGetValue(key, out Texture2D previewImage))
                 {
                     clicked = GUILayout.Button(
@@ -332,7 +337,6 @@ namespace Miniclip.ShapeShifter.Skinner
                     DrawAssetPreview(key, game, skinnedPath, guid);
                     DrawAssetSkinActions(game, assetPath);
                     EditorGUILayout.EndVertical();
-
                 }
             }
 

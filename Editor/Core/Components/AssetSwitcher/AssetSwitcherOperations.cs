@@ -91,9 +91,7 @@ namespace Miniclip.ShapeShifter.Switcher
         public static void CopyFromSkinsToUnity(DirectoryInfo directory)
         {
             string guid = directory.Name;
-
-            DeleteAssetInternalCopy(guid);
-
+            
             (string file, string meta) targetPath = GetTargetPath(guid);
 
             if (string.IsNullOrEmpty(targetPath.file))
@@ -117,7 +115,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
                 else
                 {
-                    ShapeShifterLogger.Log($"Retrieving: {targetPath}");
+                    ShapeShifterLogger.Log($"Retrieving: {targetPath.file}");
                     FileUtils.SafeCopy(fileInfo.FullName, targetPath.file);
                 }
             }
@@ -203,19 +201,6 @@ namespace Miniclip.ShapeShifter.Switcher
                     EditorUtility.DisplayProgressBar("Shape Shifter", $"{description}...", progress);
                 }
             }
-        }
-
-        private static void DeleteAssetInternalCopy(string guid)
-        {
-            string assetPathFromAssetDatabase = AssetDatabase.GUIDToAssetPath(guid);
-            if (string.IsNullOrEmpty(assetPathFromAssetDatabase)
-                || !PathUtils.FileOrDirectoryExists(assetPathFromAssetDatabase))
-            {
-                return;
-            }
-
-            FileUtils.SafeDelete(assetPathFromAssetDatabase);
-            FileUtils.SafeDelete(assetPathFromAssetDatabase + ".meta");
         }
 
         private static (string file, string meta) GetTargetPath(string guid)

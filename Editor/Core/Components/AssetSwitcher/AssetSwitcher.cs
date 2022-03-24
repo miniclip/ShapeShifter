@@ -3,8 +3,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Miniclip.ShapeShifter.Utils;
+using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Switcher
 {
@@ -104,6 +106,8 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
             }
 
+            RemoveSkinnedAssetsFromProject();
+
             AssetSwitcherOperations.PerformCopiesWithTracking(
                 gameToSwitchTo,
                 "Switch to game",
@@ -112,6 +116,29 @@ namespace Miniclip.ShapeShifter.Switcher
             );
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
             ShapeShifterConfiguration.Instance.SetDirty(false);
+        }
+
+        private static void RemoveSkinnedAssetsFromProject()
+        {
+            var currentGitIgnore = GitIgnore.GitIgnoreWrapper.Instance();
+
+            foreach (string skinnedGuid in currentGitIgnore.Keys)
+            {
+                DeleteAssetInternalCopy(skinnedGuid);
+            }
+        }
+
+        private static void DeleteAssetInternalCopy(string guid)
+        {
+            string assetPathFromAssetDatabase = AssetDatabase.GUIDToAssetPath(guid);
+            if (string.IsNullOrEmpty(assetPathFromAssetDatabase)
+                || !PathUtils.FileOrDirectoryExists(assetPathFromAssetDatabase))
+            {
+                return;
+            }
+
+            FileUtils.SafeDelete(assetPathFromAssetDatabase);
+            FileUtils.SafeDelete(assetPathFromAssetDatabase + ".meta");
         }
 
         internal static void RestoreActiveGame()
