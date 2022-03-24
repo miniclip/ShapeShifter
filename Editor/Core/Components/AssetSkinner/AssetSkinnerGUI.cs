@@ -366,21 +366,15 @@ namespace Miniclip.ShapeShifter.Skinner
         private static void DrawUnskinnedAssetSection(string assetPath)
         {
             GUI.backgroundColor = Color.green;
-            using (new GUILayout.HorizontalScope())
+
+            if (GUILayout.Button($"Skin To {ShapeShifter.ActiveGameName} Only"))
             {
-                List<string> gameNames = ShapeShifterConfiguration.Instance.GameNames;
-                foreach (string gameName in gameNames)
-                {
-                    if (GUILayout.Button($"Skin {gameName} only"))
-                    {
-                        GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
-                        AssetSkinner.SkinAssetForGame(assetPath, gameSkin);
-                        GUIUtility.ExitGUI();
-                    }
-                }
+                GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(ShapeShifter.ActiveGameName);
+                AssetSkinner.SkinAssetForGame(assetPath, gameSkin);
+                GUIUtility.ExitGUI();
             }
 
-            if (GUILayout.Button("Skin it!"))
+            if (GUILayout.Button("Skin For All Games"))
             {
                 AssetSkinner.SkinAsset(assetPath);
                 GUIUtility.ExitGUI();
