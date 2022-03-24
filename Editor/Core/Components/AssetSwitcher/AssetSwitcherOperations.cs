@@ -92,6 +92,8 @@ namespace Miniclip.ShapeShifter.Switcher
         {
             string guid = directory.Name;
             
+            AssetSwitcher.DeleteAssetInternalCopy(guid);
+            
             (string file, string meta) targetPath = GetTargetPath(guid);
 
             if (string.IsNullOrEmpty(targetPath.file))

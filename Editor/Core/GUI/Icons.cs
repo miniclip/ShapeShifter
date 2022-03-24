@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-namespace Miniclip.ShapeShifter.Skinner
+namespace Miniclip.ShapeShifter
 {
     public class Icons
     {
