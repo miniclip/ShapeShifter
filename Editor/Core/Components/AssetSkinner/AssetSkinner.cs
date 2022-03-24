@@ -21,35 +21,43 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             EditorUtility.DisplayProgressBar("Asset Skinner", $"Removing {assetPath} skin", 0);
+            
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
             {
-                string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
-                ShapeShifter.DirtyAssets.Remove(key);
-                ShapeShifter.CachedPreviewPerAssetDict.Remove(key);
-
-                string assetFolder = Path.Combine(
-                    ShapeShifter.SkinsFolder.FullName,
-                    game,
-                    ShapeShifterConstants.INTERNAL_ASSETS_FOLDER,
-                    guid
-                );
-
-                AssetWatcher.StopWatchingFolder(assetFolder);
-                EditorUtility.DisplayProgressBar("Asset Skinner", $"Deleting asset skin folder", 0.5f);
-
-                if (Directory.Exists(assetFolder))
-                {
-                    FileUtils.SafeDelete(assetFolder);
-                }
-
-                EditorUtility.DisplayProgressBar("Asset Skinner", $"Staging changes", 0.95f);
-
-                GitUtils.Stage(assetFolder);
+                RemoveSkinFromGame(assetPath, game);
             }
 
             EditorUtility.DisplayProgressBar("Asset Skinner", $"Tracking {assetPath}", 0.95f);
 
             GitUtils.Track(guid, assetPath);
+            EditorUtility.ClearProgressBar();
+        }
+
+        public static void RemoveSkinFromGame(string assetPath, string game)
+        {
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+            GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
+            AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);
+            string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
+            
+            ShapeShifter.DirtyAssets.Remove(key);
+            ShapeShifter.CachedPreviewPerAssetDict.Remove(key);
+            AssetWatcher.StopWatchingFolder(assetSkin.FolderPath);
+            
+            EditorUtility.DisplayProgressBar("Asset Skinner", $"Deleting asset skin folder", 0.5f);
+
+            assetSkin.Delete();
+
+            EditorUtility.DisplayProgressBar("Asset Skinner", $"Staging changes", 0.95f);
+
+            GitUtils.Stage(assetSkin.FolderPath);
+
+            if (!IsSkinned(assetPath))
+            {
+                EditorUtility.DisplayProgressBar("Asset Skinner", $"Tracking {assetPath}", 0.95f);
+                GitUtils.Track(guid, assetPath);
+            }
+
             EditorUtility.ClearProgressBar();
         }
 
@@ -104,7 +112,7 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             SkinAssetForGame(assetPath, ShapeShifterConfiguration.Instance.GetGameSkinByName(game));
         }
-        
+
         public static void SkinAssetForGame(string assetPath, GameSkin gameSkin)
         {
             string origin = assetPath;

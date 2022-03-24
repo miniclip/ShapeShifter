@@ -60,6 +60,36 @@ namespace Miniclip.ShapeShifter.Tests
             AssetSkinner.RemoveSkins(assetPath);
             Assert.IsTrue(!GitIgnore.IsIgnored(guid), "GUID should not be in git ignore");
         }
+
+        [Test]
+        public void TestSkinningSpriteForSingleGame()
+        {
+            Sprite squareSprite = TestUtils.GetAsset<Sprite>(TestUtils.SpriteAssetName);
+            AssetSkinner.SkinAssetForGame(AssetDatabase.GetAssetPath(squareSprite), TestUtils.game0);
+            string assetPath = AssetDatabase.GetAssetPath(squareSprite);
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+            
+            Assert.IsTrue(GitIgnore.IsIgnored(guid));
+            Assert.IsTrue(AssetSkinner.IsSkinned(assetPath, TestUtils.game0.Name));
+            Assert.IsFalse(AssetSkinner.IsSkinned(assetPath, TestUtils.game1.Name));
+            
+            AssetSkinner.SkinAssetForGame(AssetDatabase.GetAssetPath(squareSprite), TestUtils.game1);
+
+            Assert.IsTrue(AssetSkinner.IsSkinned(assetPath, TestUtils.game0.Name));
+            Assert.IsTrue(AssetSkinner.IsSkinned(assetPath, TestUtils.game1.Name));
+            
+            AssetSkinner.RemoveSkinFromGame(AssetDatabase.GetAssetPath(squareSprite), TestUtils.game1.Name);
+
+            Assert.IsTrue(AssetSkinner.IsSkinned(assetPath, TestUtils.game0.Name));
+            Assert.IsFalse(AssetSkinner.IsSkinned(assetPath, TestUtils.game1.Name));
+            
+            AssetSkinner.RemoveSkinFromGame(AssetDatabase.GetAssetPath(squareSprite), TestUtils.game0.Name);
+
+            Assert.IsFalse(AssetSkinner.IsSkinned(assetPath, TestUtils.game0.Name));
+            Assert.IsFalse(AssetSkinner.IsSkinned(assetPath, TestUtils.game1.Name));
+            
+            Assert.IsFalse(GitIgnore.IsIgnored(guid));
+        }
         
     }
 }

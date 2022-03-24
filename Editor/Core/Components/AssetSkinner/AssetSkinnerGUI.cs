@@ -316,31 +316,20 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             using (new GUILayout.HorizontalScope())
             {
-                OnRemoveSkinFromGame(game, assetPath);
+                OnRemoveSkinFromGameGUI(game, assetPath);
             }
         }
 
-        private static void OnRemoveSkinFromGame(string game, string assetPath)
+        private static void OnRemoveSkinFromGameGUI(string game, string assetPath)
         {
             if (GUILayout.Button(Icons.GetIconTexture(Icons.trashIcon)))
             {
-                string guid = AssetDatabase.AssetPathToGUID(assetPath);
-                GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
-
-                AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);
-
-                assetSkin.Delete();
-
-                if (!AssetSkinner.IsSkinned(assetPath))
-                {
-                    GitIgnore.Remove(guid);
-                }
+                AssetSkinner.RemoveSkinFromGame(assetPath, game);
             }
         }
 
         private static void DrawUnskinnedAssetSection(string assetPath)
         {
-
             EditorGUILayout.BeginHorizontal();
             GUI.backgroundColor = Color.red;
             if (GUILayout.Button($"Exclude from {ShapeShifter.ActiveGameName}"))
@@ -349,9 +338,9 @@ namespace Miniclip.ShapeShifter.Skinner
 
                 foreach (string gamesName in gamesNames)
                 {
-                    if(gamesName == ShapeShifter.ActiveGameName)
+                    if (gamesName == ShapeShifter.ActiveGameName)
                         continue;
-                    
+
                     AssetSkinner.SkinAssetForGame(assetPath, gamesName);
                 }
 
@@ -359,7 +348,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 AssetSwitcher.DeleteAssetInternalCopy(guid);
                 AssetDatabase.Refresh();
             }
-            
+
             GUI.backgroundColor = Color.green;
             if (GUILayout.Button($"Skin To {ShapeShifter.ActiveGameName} Only"))
             {
@@ -367,9 +356,9 @@ namespace Miniclip.ShapeShifter.Skinner
                 AssetSkinner.SkinAssetForGame(assetPath, gameSkin);
                 GUIUtility.ExitGUI();
             }
-            
+
             EditorGUILayout.EndHorizontal();
-            
+
             GUI.backgroundColor = Color.green;
             if (GUILayout.Button("Skin For All Games"))
             {
