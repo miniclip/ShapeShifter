@@ -75,11 +75,12 @@ namespace Miniclip.ShapeShifter
             }
 
             DrawSaveWarning();
-            
+
             AssetSwitcherGUI.OnGUI();
-            
+            EditorGUILayout.Separator();
+
             GUILayout.Space(15);
-            
+
             OnSelectedTabGUI();
 
             Repaint();
@@ -137,11 +138,11 @@ namespace Miniclip.ShapeShifter
                 ShapeShifterConfiguration.Instance.ExternalConfigurationEditor.OnInspectorGUI();
             }
         }
-        
+
         private static void OnShowUtilOperationsGUI()
         {
             GUILayout.Space(10);
-            
+
             PreMergeCheckGUI.OnGUI();
         }
 

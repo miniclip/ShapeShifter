@@ -295,15 +295,22 @@ namespace Miniclip.ShapeShifter.Skinner
                     {
                         using (new GUILayout.VerticalScope(boxStyle))
                         {
-                            float buttonWidth = EditorGUIUtility.currentViewWidth
-                                                * (1.0f / ShapeShifterConfiguration.Instance.GameNames.Count);
-                            buttonWidth -= 20; // to account for a possible scrollbar or some extra padding 
+                            float assetSectionWidth = EditorGUIUtility.currentViewWidth
+                                                      / ShapeShifterConfiguration.Instance.GameNames.Count
+                                                      - 20;
                             EditorGUILayout.PrefixLabel(game);
-                            GUILayout.Button(
+                            GUILayout.Box(
                                 "Not Skinned",
-                                GUILayout.Width(buttonWidth),
-                                GUILayout.MaxHeight(buttonWidth)
+                                GUILayout.Width(assetSectionWidth),
+                                GUILayout.MaxHeight(assetSectionWidth)
                             );
+
+                            EditorGUILayout.Separator();
+
+                            if (GUILayout.Button($"Copy from {ShapeShifter.ActiveGameName}"))
+                            {
+                                AssetSkinner.SkinAssetForGame(assetPath, game);
+                            }
                         }
 
                         continue;
