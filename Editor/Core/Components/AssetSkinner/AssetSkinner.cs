@@ -1,14 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
+using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Skinner
 {
     public static class AssetSkinner
     {
+        private static string skinToGameDecisionKey =>
+            ShapeShifterEditorPrefs.GetProjectSpecificKey("DONT_SHOW_GAME_SPECIFIC_SKIN_WARNING_AGAIN");
+
         public static void RemoveSkins(string[] assetPaths, bool saveFirst = true)
         {
             foreach (string assetPath in assetPaths)
@@ -21,7 +26,7 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             EditorUtility.DisplayProgressBar("Asset Skinner", $"Removing {assetPath} skin", 0);
-            
+
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
             {
                 RemoveSkinFromGame(assetPath, game);
@@ -37,20 +42,20 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             string guid = AssetDatabase.AssetPathToGUID(assetPath);
             GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
-            AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);
             string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
-            
+
             ShapeShifter.DirtyAssets.Remove(key);
             ShapeShifter.CachedPreviewPerAssetDict.Remove(key);
-            AssetWatcher.StopWatchingFolder(assetSkin.FolderPath);
-            
-            EditorUtility.DisplayProgressBar("Asset Skinner", $"Deleting asset skin folder", 0.5f);
-
-            assetSkin.Delete();
 
             EditorUtility.DisplayProgressBar("Asset Skinner", $"Staging changes", 0.95f);
 
-            GitUtils.Stage(assetSkin.FolderPath);
+            AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);
+            if (assetSkin != null)
+            {
+                AssetWatcher.StopWatchingFolder(assetSkin.FolderPath);
+                assetSkin.Delete();
+                GitUtils.Stage(assetSkin.FolderPath);
+            }
 
             if (!IsSkinned(assetPath))
             {
@@ -59,6 +64,45 @@ namespace Miniclip.ShapeShifter.Skinner
             }
 
             EditorUtility.ClearProgressBar();
+        }
+
+        public static void ExcludeFromGame(string assetPath, string gameToExclude)
+        {
+            List<string> gameNames = ShapeShifterConfiguration.Instance.GameNames;
+
+            foreach (string gameName in gameNames)
+            {
+                if (gameName == gameToExclude)
+                    continue;
+
+                AssetSkinner.SkinAssetForGame(assetPath, gameName);
+            }
+
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+            AssetSwitcher.DeleteAssetInternalCopy(guid); //TODO: remove method from AssetSwitcher
+            AssetDatabase.Refresh();
+        }
+
+        public static void SkinExclusivelyForGame(string assetPath, string gameToBeExclusive)
+        {
+            bool continueSkin = EditorUtility.DisplayDialog(
+                $"Skin To {ShapeShifter.ActiveGameName} Only",
+                $"This will remove \"{assetPath}\" from the other projects."
+                + " It can cause missing references or errors if its being used elsewhere. "
+                + "Are you sure you want to continue?",
+                "Yes",
+                "NO",
+                DialogOptOutDecisionType.ForThisMachine,
+                skinToGameDecisionKey
+            );
+
+            if (!continueSkin)
+            {
+                return;
+            }
+
+            SkinAssetForGame(assetPath, gameToBeExclusive);
+            GUIUtility.ExitGUI();
         }
 
         internal static void RemoveAllInternalSkins()

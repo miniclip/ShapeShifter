@@ -10,7 +10,7 @@ namespace Miniclip.ShapeShifter.Utils
 
         private static string UniqueProjectID => Path.GetFullPath(Application.dataPath);
 
-        private static string GetProjectSpecificKey(string key) => $"{UniqueProjectID}_{SHAPESHIFTER_KEY}_{key}";
+        public static string GetProjectSpecificKey(string key) => $"{UniqueProjectID}_{SHAPESHIFTER_KEY}_{key}";
 
         [MenuItem("Window/Shape Shifter/Clear Editor Prefs", false, 71)]
         public static void OpenShapeShifter() => EditorPrefs.DeleteAll();

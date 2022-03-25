@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
-using Miniclip.ShapeShifter.Utils.Git;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
@@ -334,27 +332,13 @@ namespace Miniclip.ShapeShifter.Skinner
             GUI.backgroundColor = Color.red;
             if (GUILayout.Button($"Exclude from {ShapeShifter.ActiveGameName}"))
             {
-                var gamesNames = ShapeShifterConfiguration.Instance.GameNames;
-
-                foreach (string gamesName in gamesNames)
-                {
-                    if (gamesName == ShapeShifter.ActiveGameName)
-                        continue;
-
-                    AssetSkinner.SkinAssetForGame(assetPath, gamesName);
-                }
-
-                string guid = AssetDatabase.AssetPathToGUID(assetPath);
-                AssetSwitcher.DeleteAssetInternalCopy(guid);
-                AssetDatabase.Refresh();
+                AssetSkinner.ExcludeFromGame(assetPath, ShapeShifter.ActiveGameName);
             }
 
             GUI.backgroundColor = Color.green;
             if (GUILayout.Button($"Skin To {ShapeShifter.ActiveGameName} Only"))
             {
-                GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(ShapeShifter.ActiveGameName);
-                AssetSkinner.SkinAssetForGame(assetPath, gameSkin);
-                GUIUtility.ExitGUI();
+                AssetSkinner.SkinExclusivelyForGame(assetPath, ShapeShifter.ActiveGame);
             }
 
             EditorGUILayout.EndHorizontal();
