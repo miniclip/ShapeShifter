@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
-using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
 
@@ -52,7 +52,7 @@ namespace Miniclip.ShapeShifter.Skinner
             AssetSkin assetSkin = gameSkin.GetAssetSkin(guid);
             if (assetSkin != null)
             {
-                AssetWatcher.StopWatchingFolder(assetSkin.FolderPath);
+                FileWatcher.StopWatchingFolder(assetSkin.FolderPath);
                 assetSkin.Delete();
                 GitUtils.Stage(assetSkin.FolderPath);
             }
@@ -75,7 +75,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 if (gameName == gameToExclude)
                     continue;
 
-                AssetSkinner.SkinAssetForGame(assetPath, gameName);
+                SkinAssetForGame(assetPath, gameName);
             }
 
             string guid = AssetDatabase.AssetPathToGUID(assetPath);

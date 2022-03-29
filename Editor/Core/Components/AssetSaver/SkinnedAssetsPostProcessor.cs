@@ -1,14 +1,12 @@
-using System.Collections.Generic;
 using System.IO;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
-using UnityEngine;
 
-namespace Miniclip.ShapeShifter.Watcher
+namespace Miniclip.ShapeShifter.Saver
 {
-    public class AssetWatcher : AssetPostprocessor
+    public class SkinnedAssetsPostProcessor : AssetPostprocessor
     {
         private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets,
             string[] movedAssets,
@@ -37,7 +35,6 @@ namespace Miniclip.ShapeShifter.Watcher
             }
         }
 
-#region Internal
         private static void OnModifiedAsset(string modifiedAssetPath)
         {
             if (AssetSkinner.IsSkinned(modifiedAssetPath))
@@ -86,7 +83,7 @@ namespace Miniclip.ShapeShifter.Watcher
             {
                 assetPath += Path.DirectorySeparatorChar;
             }
-            
+
             GitIgnore.Add(guid, assetPath);
         }
 
@@ -108,26 +105,5 @@ namespace Miniclip.ShapeShifter.Watcher
             skinnedParentFolderPath = null;
             return false;
         }
-#endregion
-
-#region External
-        internal static void StartWatchingFolder(string pathToWatch) =>
-            FileSystemWatcherManager.AddPathToWatchlist(pathToWatch, OnFileChanged);
-
-        internal static void StopWatchingFolder(string pathToUnwatch) =>
-            FileSystemWatcherManager.RemovePathFromWatchlist(pathToUnwatch);
-
-        internal static void ClearAllWatchedPaths() => FileSystemWatcherManager.RemoveAllPathsFromWatchlist();
-
-        private static void OnFileChanged(object sender, FileSystemEventArgs args)
-        {
-            DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
-            string game = assetDirectory.Parent.Parent.Name;
-            string guid = assetDirectory.Name;
-            string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
-
-            ShapeShifter.DirtyAssets.Add(key);
-        }
-#endregion
     }
 }

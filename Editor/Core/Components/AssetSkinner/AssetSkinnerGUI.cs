@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
-using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -375,7 +375,7 @@ namespace Miniclip.ShapeShifter.Skinner
                         texturePreview = new Texture2D(0, 0);
                         texturePreview.LoadImage(File.ReadAllBytes(assetPath));
                         string skinFolder = Directory.GetParent(assetPath).FullName;
-                        AssetWatcher.StartWatchingFolder(skinFolder);
+                        FileWatcher.StartWatchingFolder(skinFolder);
                     }
                     else
                     {

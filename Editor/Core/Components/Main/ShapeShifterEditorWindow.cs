@@ -6,7 +6,6 @@ using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
-using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
 
@@ -53,7 +52,7 @@ namespace Miniclip.ShapeShifter
         {
             ShapeShifter.DirtyAssets.Clear();
             ShapeShifter.CachedPreviewPerAssetDict.Clear();
-            AssetWatcher.ClearAllWatchedPaths();
+            FileWatcher.RemoveAllPathsFromWatchlist();
         }
 
         private void OnGUI()
