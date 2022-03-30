@@ -12,7 +12,7 @@ namespace Miniclip.ShapeShifter.Skinner
     public static class AssetSkinner
     {
         private static string skinToGameDecisionKey =>
-            ShapeShifterEditorPrefs.GetProjectSpecificKey("DONT_SHOW_GAME_SPECIFIC_SKIN_WARNING_AGAIN");
+            Persistence.GetProjectSpecificKey("DONT_SHOW_GAME_SPECIFIC_SKIN_WARNING_AGAIN");
 
         public static void RemoveSkins(string[] assetPaths, bool saveFirst = true)
         {

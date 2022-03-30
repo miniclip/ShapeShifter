@@ -40,27 +40,7 @@ namespace Miniclip.ShapeShifter
 
         public static string ActiveGame
         {
-            get
-            {
-                if (!ShapeShifterEditorPrefs.HasKey(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY))
-                {
-                    ShapeShifterLogger.LogWarning(
-                        "Could not find any active game on EditorPrefs, defaulting to game 0"
-                    );
-                    ActiveGame = GameNames.FirstOrDefault();
-                }
-
-                string activeGame =
-                    ShapeShifterEditorPrefs.GetString(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY);
-
-                if (!GameNames.Contains(activeGame))
-                {
-                    ShapeShifterLogger.LogWarning("Current active game doesn't exist, defaulting to game 0.");
-                    SetDefaultGameSkin();
-                }
-
-                return activeGame;
-            }
+            get => GetActiveGame();
 
             set
             {
@@ -72,9 +52,41 @@ namespace Miniclip.ShapeShifter
                 ShapeShifterLogger.Log(
                     $"Setting active game on EditorPrefs: {value}"
                 );
-                ShapeShifterEditorPrefs.SetString(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY, value);
+                Persistence.SetString(
+                    ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY,
+                    value,
+                    PersistenceType.MachinePersistent
+                );
                 ActiveGameSkin = new GameSkin(value);
             }
+        }
+
+        private static string GetActiveGame()
+        {
+            if (!Persistence.HasKey(
+                    ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY,
+                    PersistenceType.MachinePersistent
+                ))
+            {
+                ShapeShifterLogger.LogWarning(
+                    "Could not find any active game on EditorPrefs, defaulting to game 0"
+                );
+                ActiveGame = GameNames.FirstOrDefault();
+            }
+
+            string activeGame =
+                Persistence.GetString(
+                    ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY,
+                    PersistenceType.MachinePersistent
+                );
+
+            if (!GameNames.Contains(activeGame))
+            {
+                ShapeShifterLogger.LogWarning("Current active game doesn't exist, defaulting to game 0.");
+                SetDefaultGameSkin();
+            }
+
+            return activeGame;
         }
 
         private static void SetDefaultGameSkin()
