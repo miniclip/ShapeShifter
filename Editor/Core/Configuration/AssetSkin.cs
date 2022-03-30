@@ -6,17 +6,30 @@ namespace Miniclip.ShapeShifter
 {
     public class AssetSkin
     {
-        public AssetSkin(string guid, string folderPath)
-        {
-            Guid = guid;
-            FolderPath = folderPath;
-        }
+        internal string FolderPath { get; set; }
+
+        internal string Game { get; set; }
 
         internal string Guid { get; set; }
 
-        internal string FolderPath { get; set; }
+        public AssetSkin(string guid, string game)
+        {
+            Guid = guid;
 
-        public bool IsValid() => FileUtils.DoesFolderExistAndHaveFiles(FolderPath);
+            Game = game;
+
+            FolderPath = Path.Combine(
+                ShapeShifter.SkinsFolder.FullName,
+                game,
+                ShapeShifterConstants.INTERNAL_ASSETS_FOLDER,
+                guid
+            );
+        }
+
+        public bool IsValid()
+        {
+            return FileUtils.DoesFolderExistAndHaveFiles(FolderPath);
+        }
 
         public void Rename(string newName)
         {

@@ -2,20 +2,47 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Switcher
 {
     public static class AssetSwitcher
     {
+        public static void DeleteAssetInternalCopy(string guid)
+        {
+            string assetPathFromAssetDatabase = AssetDatabase.GUIDToAssetPath(guid);
+            if (string.IsNullOrEmpty(assetPathFromAssetDatabase)
+                || !PathUtils.FileOrDirectoryExists(assetPathFromAssetDatabase))
+            {
+                return;
+            }
+
+            FileUtils.SafeDelete(assetPathFromAssetDatabase);
+            FileUtils.SafeDelete(assetPathFromAssetDatabase + ".meta");
+        }
+
+        public static void RefreshAsset(string guid)
+        {
+            if (string.IsNullOrEmpty(guid))
+            {
+                return;
+            }
+
+            GameSkin currentGameSkin = ShapeShifter.ActiveGameSkin;
+
+            AssetSkin assetSkin = currentGameSkin.GetAssetSkin(guid);
+
+            AssetSwitcherOperations.CopyFromSkinsToUnity(new DirectoryInfo(assetSkin.FolderPath));
+
+            RefreshAllAssets();
+        }
+
         internal static void OverwriteSelectedSkin(GameSkin selected, bool forceOverwrite = false)
         {
-            ShapeShifterUtils.SavePendingChanges();
-
             string name = selected.Name;
 
             if (ShapeShifter.ActiveGameSkin != selected)
@@ -47,7 +74,7 @@ namespace Miniclip.ShapeShifter.Switcher
             );
 
             ShapeShifterConfiguration.Instance.SetDirty(false);
-
+            AssetSaver.ClearModifiedAssetsList();
             ShapeShifter.SaveDetected = false;
         }
 
@@ -115,6 +142,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 AssetSwitcherOperations.CopyFromSkinnedExternalToOrigin
             );
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
+            AssetSaver.ClearModifiedAssetsList();
             ShapeShifterConfiguration.Instance.SetDirty(false);
         }
 
@@ -128,36 +156,9 @@ namespace Miniclip.ShapeShifter.Switcher
             }
         }
 
-        public static void DeleteAssetInternalCopy(string guid)
-        {
-            string assetPathFromAssetDatabase = AssetDatabase.GUIDToAssetPath(guid);
-            if (string.IsNullOrEmpty(assetPathFromAssetDatabase)
-                || !PathUtils.FileOrDirectoryExists(assetPathFromAssetDatabase))
-            {
-                return;
-            }
-
-            FileUtils.SafeDelete(assetPathFromAssetDatabase);
-            FileUtils.SafeDelete(assetPathFromAssetDatabase + ".meta");
-        }
-
         internal static void RestoreActiveGame()
         {
             SwitchToGame(ShapeShifter.ActiveGameSkin);
-        }
-
-        public static void RefreshAsset(string guid)
-        {
-            if (string.IsNullOrEmpty(guid))
-                return;
-
-            GameSkin currentGameSkin = ShapeShifter.ActiveGameSkin;
-
-            AssetSkin assetSkin = currentGameSkin.GetAssetSkin(guid);
-
-            AssetSwitcherOperations.CopyFromSkinsToUnity(new DirectoryInfo(assetSkin.FolderPath));
-
-            RefreshAllAssets();
         }
 
         private static bool HasAnyPackageRelatedSkin()

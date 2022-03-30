@@ -18,34 +18,17 @@ namespace Miniclip.ShapeShifter
             AssetSkinner = 0,
             ExternalSkinner = 1,
             Configuration = 2,
-            Tools = 3
+            Tools = 3,
         }
 
-        private bool showConfiguration;
         private int selectedTabOption;
+
+        private bool showConfiguration;
         private string[] tabOptionsNames;
 
         private void OnEnable()
         {
             tabOptionsNames = Enum.GetNames(typeof(TabOptions));
-        }
-
-        [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, 'G')]
-        public static void OpenShapeShifter()
-        {
-            ShowNextToInspector(true);
-        }
-
-        private static void ShowNextToInspector(bool focus = false)
-        {
-            Assembly editorAssembly = typeof(Editor).Assembly;
-            Type inspectorWindowType = editorAssembly.GetType("UnityEditor.InspectorWindow");
-
-            GetWindow<ShapeShifterEditorWindow>(
-                "Shape Shifter",
-                focus,
-                inspectorWindowType
-            );
         }
 
         private void OnSelectionChange()
@@ -82,7 +65,29 @@ namespace Miniclip.ShapeShifter
 
             OnSelectedTabGUI();
 
+            GUILayout.Space(15);
+
+            AssetSaverGUI.OnGUI();
+
             Repaint();
+        }
+
+        [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, 'G')]
+        public static void OpenShapeShifter()
+        {
+            ShowNextToInspector(true);
+        }
+
+        private static void ShowNextToInspector(bool focus = false)
+        {
+            Assembly editorAssembly = typeof(Editor).Assembly;
+            Type inspectorWindowType = editorAssembly.GetType("UnityEditor.InspectorWindow");
+
+            GetWindow<ShapeShifterEditorWindow>(
+                "Shape Shifter",
+                focus,
+                inspectorWindowType
+            );
         }
 
         private static void DrawSaveWarning()
@@ -98,7 +103,9 @@ namespace Miniclip.ShapeShifter
                     );
                     EditorStyles.label.wordWrap = true;
                     if (GUILayout.Button("OK"))
+                    {
                         ShapeShifter.SaveDetected = false;
+                    }
                 }
 
                 GUI.backgroundColor = oldBGColor;
@@ -185,7 +192,7 @@ namespace Miniclip.ShapeShifter
         {
             return EditorUtility.DisplayDialog(
                 "ShapeShifter",
-                $"You are about to remove shapeshifter's skin folders.\n Your project assets will remain "
+                "You are about to remove shapeshifter's skin folders.\n Your project assets will remain "
                 + $"the same as the current game skin ({ShapeShifter.ActiveGameName}).\n You will loose the other game skins",
                 "Continue",
                 "Cancel"

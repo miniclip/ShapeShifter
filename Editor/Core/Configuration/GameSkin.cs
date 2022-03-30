@@ -44,14 +44,20 @@ namespace Miniclip.ShapeShifter
             return A.Equals(B);
         }
 
-        public static bool operator !=(GameSkin A, GameSkin B) => !(A == B);
+        public static bool operator !=(GameSkin A, GameSkin B)
+        {
+            return !(A == B);
+        }
 
         public GameSkin(string name)
         {
             SetUpGameSkin(name);
         }
 
-        public bool HasAssetSkin(string guid) => GetAssetSkins().Any(assetSkin => assetSkin.Guid == guid);
+        public bool HasAssetSkin(string guid)
+        {
+            return GetAssetSkins().Any(assetSkin => assetSkin.Guid == guid);
+        }
 
         public AssetSkin GetAssetSkin(string guid)
         {
@@ -89,6 +95,17 @@ namespace Miniclip.ShapeShifter
             return Name == gameSkin.Name;
         }
 
+        public void Duplicate(string newName)
+        {
+            GameSkin newSkin = new GameSkin(newName);
+            if (Directory.Exists(newSkin.MainFolderPath))
+            {
+                Directory.Delete(newSkin.MainFolderPath, true);
+            }
+
+            FileUtil.CopyFileOrDirectory(mainFolderPath, newSkin.MainFolderPath);
+        }
+
         private void SetUpGameSkin(string name)
         {
             Name = name;
@@ -103,7 +120,10 @@ namespace Miniclip.ShapeShifter
             externalSkinsFolderPath = Path.Combine(mainFolderPath, ShapeShifterConstants.EXTERNAL_ASSETS_FOLDER);
         }
 
-        private string GetGameFolderPath(string name) => Path.Combine(ShapeShifter.SkinsFolder.FullName, name);
+        private string GetGameFolderPath(string name)
+        {
+            return Path.Combine(ShapeShifter.SkinsFolder.FullName, name);
+        }
 
         internal List<AssetSkin> GetAssetSkins()
         {
@@ -113,18 +133,27 @@ namespace Miniclip.ShapeShifter
                 DirectoryInfo internalFolder = new DirectoryInfo(InternalSkinsFolderPath);
                 foreach (DirectoryInfo directory in internalFolder.GetDirectories())
                 {
-                    assetSkins.Add(new AssetSkin(directory.Name, directory.FullName));
+                    assetSkins.Add(new AssetSkin(directory.Name, Name));
                 }
             }
 
             return assetSkins;
         }
 
-        internal bool HasValidFolders() => HasInternalSkins() || HasExternalSkins();
+        internal bool HasValidFolders()
+        {
+            return HasInternalSkins() || HasExternalSkins();
+        }
 
-        internal bool HasExternalSkins() => FileUtils.DoesFolderExistAndHaveFiles(ExternalSkinsFolderPath);
+        internal bool HasExternalSkins()
+        {
+            return FileUtils.DoesFolderExistAndHaveFiles(ExternalSkinsFolderPath);
+        }
 
-        internal bool HasInternalSkins() => FileUtils.DoesFolderExistAndHaveFiles(InternalSkinsFolderPath);
+        internal bool HasInternalSkins()
+        {
+            return FileUtils.DoesFolderExistAndHaveFiles(InternalSkinsFolderPath);
+        }
 
         internal void DeleteFolder()
         {
@@ -132,17 +161,6 @@ namespace Miniclip.ShapeShifter
             {
                 FileUtils.SafeDelete(mainFolderPath);
             }
-        }
-
-        public void Duplicate(string newName)
-        {
-            GameSkin newSkin = new GameSkin(newName);
-            if (Directory.Exists(newSkin.MainFolderPath))
-            {
-                Directory.Delete(newSkin.MainFolderPath, true);
-            }
-
-            FileUtil.CopyFileOrDirectory(mainFolderPath, newSkin.MainFolderPath);
         }
     }
 }

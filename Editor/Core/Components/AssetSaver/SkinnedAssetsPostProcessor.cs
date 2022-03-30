@@ -13,7 +13,9 @@ namespace Miniclip.ShapeShifter.Saver
             string[] movedFromAssetPaths)
         {
             if (!ShapeShifterConfiguration.IsInitialized())
+            {
                 return;
+            }
 
             //changed
             foreach (string importedAsset in importedAssets)
@@ -37,32 +39,52 @@ namespace Miniclip.ShapeShifter.Saver
 
         private static void OnModifiedAsset(string modifiedAssetPath)
         {
-            if (AssetSkinner.IsSkinned(modifiedAssetPath))
+            string finalModifiedPath = string.Empty;
+            bool setDirty = false;
+
+            if (AssetSkinner.IsSkinned(modifiedAssetPath, ShapeShifter.ActiveGame))
             {
-                ShapeShifterConfiguration.Instance.SetDirty();
+                setDirty = true;
+                finalModifiedPath = modifiedAssetPath;
             }
             else
             {
                 if (TryGetParentSkinnedFolder(modifiedAssetPath, out string skinnedFolderPath))
                 {
-                    ShapeShifterConfiguration.Instance.SetDirty();
+                    setDirty = true;
+                    finalModifiedPath = skinnedFolderPath;
                 }
+            }
+
+            if (setDirty)
+            {
+                AssetSaver.RegisterModifiedPath(finalModifiedPath);
+                ShapeShifterConfiguration.Instance.SetDirty();
             }
         }
 
         private static void OnAssetRenamed(string newName, string oldName)
         {
-            bool isSkinned = AssetSkinner.IsSkinned(newName);
+            bool isSkinned = AssetSkinner.IsSkinned(newName, ShapeShifter.ActiveGame);
 
-            if (!isSkinned)
-                return;
+            if (isSkinned)
+            {
+                RenameAssetSkins(newName);
 
-            RenameAssetSkins(newName);
+                ShapeShifterConfiguration.Instance.SetDirty();
 
-            ShapeShifterConfiguration.Instance.SetDirty();
+                GitUtils.Stage(newName + ".meta");
+                GitUtils.Stage(oldName + ".meta");
+            }
 
-            GitUtils.Stage(newName + ".meta");
-            GitUtils.Stage(oldName + ".meta");
+            if (TryGetParentSkinnedFolder(
+                    newName,
+                    out string skinnedParentFolderPath,
+                    ShapeShifter.ActiveGame
+                ))
+            {
+                OnModifiedAsset(skinnedParentFolderPath);
+            }
         }
 
         private static void RenameAssetSkins(string assetPath)
@@ -87,7 +109,8 @@ namespace Miniclip.ShapeShifter.Saver
             GitIgnore.Add(guid, assetPath);
         }
 
-        private static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)
+        private static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath,
+            string gameName = null)
         {
             string[] parentFolders = assetPath.Split('/');
 
@@ -95,7 +118,7 @@ namespace Miniclip.ShapeShifter.Saver
             {
                 string parentFolder = string.Join("/", parentFolders, 0, index);
 
-                if (AssetSkinner.IsSkinned(parentFolder))
+                if (AssetSkinner.IsSkinned(parentFolder, gameName))
                 {
                     skinnedParentFolderPath = parentFolder;
                     return true;
