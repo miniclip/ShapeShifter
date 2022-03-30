@@ -1,6 +1,9 @@
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
+using UnityEditor;
+using UnityEngine.WSA;
 
 namespace Miniclip.ShapeShifter
 {
@@ -95,6 +98,24 @@ namespace Miniclip.ShapeShifter
         {
             FileUtils.SafeDelete(FolderPath);
             Stage();
+        }
+
+        public void SaveFromUnityToSkinFolder()
+        {
+            string origin = AssetDatabase.GUIDToAssetPath(Guid);
+
+            FileUtils.TryCreateDirectory(FolderPath, true);
+
+            if (string.IsNullOrEmpty(origin) || PathUtils.FileOrDirectoryExists(origin))
+            {
+                //nothing else to do as the skin folder was already deleted
+                return;
+            }
+            
+            string target = Path.Combine(FolderPath, Path.GetFileName(origin));
+
+            FileUtils.SafeCopy(origin, target);
+            FileUtils.SafeCopy(origin + ".meta", target + ".meta");
         }
     }
 }

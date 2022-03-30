@@ -64,7 +64,7 @@ namespace Miniclip.ShapeShifter.Saver
             isSaving = false;
         }
 
-        internal static void RegisterModifiedPath(string newModifiedAsset)
+        internal static void AddModifiedPath(string assetPathToAdd)
         {
             var currentModifiedAssets = GetCurrentModifiedAssetsFromEditorPrefs();
 
@@ -73,12 +73,31 @@ namespace Miniclip.ShapeShifter.Saver
                 currentModifiedAssets = new ModifiedAssets();
             }
 
-            if (currentModifiedAssets.Values.Any(modifiedAsset => modifiedAsset == newModifiedAsset))
+            if (currentModifiedAssets.Values.Contains(assetPathToAdd))
             {
                 return;
             }
 
-            currentModifiedAssets.Values.Add(newModifiedAsset);
+            currentModifiedAssets.Values.Add(assetPathToAdd);
+
+            StoreCurrentModifiedAssetsInEditorPrefs(currentModifiedAssets);
+        }
+
+        public static void RemovedModifiedPath(string assetPathToRemove)
+        {
+            var currentModifiedAssets = GetCurrentModifiedAssetsFromEditorPrefs();
+
+            if (currentModifiedAssets == null)
+            {
+                currentModifiedAssets = new ModifiedAssets();
+            }
+
+            if (!currentModifiedAssets.Values.Contains(assetPathToRemove))
+            {
+                return;
+            }
+
+            currentModifiedAssets.Values.Remove(assetPathToRemove);
 
             StoreCurrentModifiedAssetsInEditorPrefs(currentModifiedAssets);
         }
