@@ -9,7 +9,7 @@ namespace Miniclip.ShapeShifter.Saver
     {
         public static void OnGUI()
         {
-            ModifiedAssets modifiedAssets = AssetSaver.GetCurrentModifiedAssetsFromEditorPrefs();
+            ModifiedAssets modifiedAssets = UnsavedAssetsManager.GetCurrentModifiedAssetsFromEditorPrefs();
 
             if (modifiedAssets == null || modifiedAssets?.Values.Count == 0)
             {
@@ -19,34 +19,48 @@ namespace Miniclip.ShapeShifter.Saver
             using (new GUILayout.VerticalScope(StyleUtils.BoxStyle))
             {
                 EditorGUILayout.LabelField("Unsaved Changes", EditorStyles.boldLabel);
+                EditorGUILayout.Separator();
 
                 foreach (var modifiedAsset in modifiedAssets.Values)
                 {
                     DrawUnsavedAssetGUI(modifiedAsset);
+                    EditorGUILayout.Separator();
                 }
             }
         }
 
-        private static void DrawUnsavedAssetGUI(string modifiedAssetPath)
+        private static void DrawUnsavedAssetGUI(ModifiedAssetInfo modifiedAssetInfo)
         {
             using (new EditorGUILayout.HorizontalScope())
             {
-                EditorGUILayout.LabelField(modifiedAssetPath);
+                EditorGUILayout.BeginVertical();
+                EditorGUILayout.LabelField(modifiedAssetInfo.assetPath);
+                EditorGUILayout.LabelField(modifiedAssetInfo.modificationType.ToString());
+                EditorGUILayout.EndVertical();
 
+                GUILayoutOption[] width200 = new GUILayoutOption[] {GUILayout.Width(200)};
+
+                EditorGUILayout.BeginHorizontal(width200);
                 if (GUILayout.Button("Save"))
                 {
                     GameSkin currentGameSkin = ShapeShifter.ActiveGameSkin;
 
-                    string guid = AssetDatabase.AssetPathToGUID(modifiedAssetPath);
+                    string guid = AssetDatabase.AssetPathToGUID(modifiedAssetInfo.assetPath);
 
                     AssetSkin assetSkin = currentGameSkin.GetAssetSkin(guid);
 
                     assetSkin.SaveFromUnityToSkinFolder();
 
-                    AssetSaver.RemovedModifiedPath(modifiedAssetPath);
+                    UnsavedAssetsManager.RemovedModifiedPath(modifiedAssetInfo.assetPath);
                 }
 
-                if (GUILayout.Button("Discard")) { }
+                if (GUILayout.Button("Discard"))
+                {
+                    
+                }
+                
+                EditorGUILayout.EndHorizontal();
+
             }
         }
     }

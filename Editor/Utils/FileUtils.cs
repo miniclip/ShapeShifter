@@ -20,6 +20,8 @@ namespace Miniclip.ShapeShifter.Utils
 
             IEnumerable<string> enumerateFiles = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories);
 
+            enumerateFiles = enumerateFiles.Where(file => !file.Contains(".DS_Store"));
+            
             bool directoryContainsFiles = enumerateFiles.Any();
 
             return directoryContainsFiles;

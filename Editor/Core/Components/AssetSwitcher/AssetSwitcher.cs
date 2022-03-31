@@ -74,7 +74,7 @@ namespace Miniclip.ShapeShifter.Switcher
             );
 
             ShapeShifterConfiguration.Instance.SetDirty(false);
-            AssetSaver.ClearModifiedAssetsList();
+            UnsavedAssetsManager.ClearModifiedAssetsList();
             ShapeShifter.SaveDetected = false;
         }
 
@@ -142,7 +142,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 AssetSwitcherOperations.CopyFromSkinnedExternalToOrigin
             );
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
-            AssetSaver.ClearModifiedAssetsList();
+            UnsavedAssetsManager.ClearModifiedAssetsList();
             ShapeShifterConfiguration.Instance.SetDirty(false);
         }
 

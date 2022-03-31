@@ -58,7 +58,7 @@ namespace Miniclip.ShapeShifter.Saver
 
             if (setDirty)
             {
-                AssetSaver.AddModifiedPath(finalModifiedPath);
+                UnsavedAssetsManager.AddModifiedPath(finalModifiedPath);
                 ShapeShifterConfiguration.Instance.SetDirty();
             }
         }
