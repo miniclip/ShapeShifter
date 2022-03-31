@@ -106,7 +106,7 @@ namespace Miniclip.ShapeShifter
 
             FileUtils.TryCreateDirectory(FolderPath, true);
 
-            if (string.IsNullOrEmpty(origin) || PathUtils.FileOrDirectoryExists(origin))
+            if (string.IsNullOrEmpty(origin) || !PathUtils.FileOrDirectoryExists(origin))
             {
                 //nothing else to do as the skin folder was already deleted
                 return;
