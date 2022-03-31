@@ -14,7 +14,6 @@ namespace Miniclip.ShapeShifter.Saver
     {
         private static bool CanSave => ShapeShifterConfiguration.Instance.IsDirty;
 
-
         private static bool isSaving;
 
         [UsedImplicitly]
@@ -55,6 +54,25 @@ namespace Miniclip.ShapeShifter.Saver
             isSaving = true;
             AssetSwitcher.OverwriteSelectedSkin(ShapeShifter.ActiveGameSkin);
             isSaving = false;
+        }
+
+        public static void SaveAssetForGame(string assetPath, string game)
+        {
+            GameSkin currentGameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
+
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+
+            AssetSkin assetSkin = currentGameSkin.GetAssetSkin(guid);
+
+            if (assetSkin == null)
+            {
+                ShapeShifterLogger.LogWarning($"Something went wrong. Asset ({assetPath} | {guid}) not found in skins folder");
+                return;
+            }
+            
+            assetSkin.SaveFromUnityToSkinFolder();
+
+            UnsavedAssetsManager.RemovedModifiedPath(assetPath);
         }
     }
 }
