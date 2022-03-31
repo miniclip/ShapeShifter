@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Skinner;
+using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine.WSA;
@@ -100,8 +101,13 @@ namespace Miniclip.ShapeShifter
             Stage();
         }
 
-        public void SaveFromUnityToSkinFolder()
+        public void CopyFromUnityToSkinFolder()
         {
+            
+            AssetSwitcherOperations.CopyFromUnityToSkins(new DirectoryInfo(FolderPath));
+
+            return;
+            
             string origin = AssetDatabase.GUIDToAssetPath(Guid);
 
             FileUtils.TryCreateDirectory(FolderPath, true);
@@ -116,6 +122,11 @@ namespace Miniclip.ShapeShifter
 
             FileUtils.SafeCopy(origin, target);
             FileUtils.SafeCopy(origin + ".meta", target + ".meta");
+        }
+
+        public void CopyFromSkinFolderToUnity()
+        {
+            AssetSwitcherOperations.CopyFromSkinsToUnity(new DirectoryInfo(FolderPath));
         }
     }
 }

@@ -55,14 +55,13 @@ public class ShapeShifterInitializer
         {
             await Task.Delay(1000);
         }
-
-        ShapeShifterLogger.Log("Setting up");
-
+        
         ShapeShifterConfiguration.Initialise();
 
         if (restoreMissingAssets)
         {
-            // AssetSwitcher.RestoreMissingAssets();
+            //TODO: Revisit after save improvements.
+            //AssetSwitcher.RestoreMissingAssets();
         }
     }
 

@@ -70,8 +70,29 @@ namespace Miniclip.ShapeShifter.Saver
                 return;
             }
             
-            assetSkin.SaveFromUnityToSkinFolder();
+            assetSkin.CopyFromUnityToSkinFolder();
 
+            UnsavedAssetsManager.RemovedModifiedPath(assetPath);
+        }
+
+        public static void DiscardAssetChanges(string assetPath, string game)
+        {
+            GameSkin currentGameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
+
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+
+            AssetSkin assetSkin = currentGameSkin.GetAssetSkin(guid);
+
+            if (assetSkin == null)
+            {
+                ShapeShifterLogger.LogWarning($"Something went wrong. Asset ({assetPath} | {guid}) not found in skins folder");
+                return;
+            }
+            
+            assetSkin.CopyFromSkinFolderToUnity();
+
+            AssetDatabase.Refresh();
+            
             UnsavedAssetsManager.RemovedModifiedPath(assetPath);
         }
     }

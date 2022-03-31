@@ -38,12 +38,16 @@ namespace Miniclip.ShapeShifter.Saver
                 EditorGUILayout.EndVertical();
                 
                 EditorGUILayout.BeginHorizontal(GUILayout.Width(200));
+                
                 if (GUILayout.Button("Save"))
                 {
                     AssetSaver.SaveAssetForGame(modifiedAssetInfo.assetPath, ShapeShifter.ActiveGame);
                 }
 
-                if (GUILayout.Button("Discard")) { }
+                if (GUILayout.Button("Discard"))
+                {
+                    AssetSaver.DiscardAssetChanges(modifiedAssetInfo.assetPath, ShapeShifter.ActiveGame);
+                }
 
                 EditorGUILayout.EndHorizontal();
             }
