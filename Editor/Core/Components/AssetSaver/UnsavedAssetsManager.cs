@@ -26,6 +26,16 @@ namespace Miniclip.ShapeShifter.Saver
     public class ModifiedAssets
     {
         public List<ModifiedAssetInfo> Values = new List<ModifiedAssetInfo>();
+
+        public bool ContainsAssetPath(string assetPath)
+        {
+            return Values.Any(modifiedAssetInfo => string.Equals(
+                    modifiedAssetInfo.assetPath,
+                    assetPath,
+                    StringComparison.Ordinal
+                )
+            );
+        }
     }
 
     [Serializable]
@@ -33,7 +43,7 @@ namespace Miniclip.ShapeShifter.Saver
     {
         private const string MODIFIED_ASSETS_PERSISTENCE_KEY = "SHAPESHIFTER_UNSAVED_MODIFIED_ASSETS";
 
-        internal static void AddModifiedPath(string assetPathToAdd)
+        internal static void AddModifiedPath(string assetPathToAdd, ModificationType modificationType)
         {
             var currentModifiedAssets = GetCurrentModifiedAssetsFromEditorPrefs();
 
@@ -51,7 +61,7 @@ namespace Miniclip.ShapeShifter.Saver
                 return;
             }
 
-            currentModifiedAssets.Values.Add(new ModifiedAssetInfo(assetPathToAdd, ModificationType.Modified));
+            currentModifiedAssets.Values.Add(new ModifiedAssetInfo(assetPathToAdd, modificationType));
 
             StoreCurrentModifiedAssetsInEditorPrefs(currentModifiedAssets);
         }

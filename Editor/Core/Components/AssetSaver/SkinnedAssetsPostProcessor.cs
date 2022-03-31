@@ -20,7 +20,7 @@ namespace Miniclip.ShapeShifter.Saver
             //changed
             foreach (string importedAsset in importedAssets)
             {
-                OnModifiedAsset(importedAsset);
+                OnModifiedAsset(importedAsset, ModificationType.Modified);
             }
 
             //renamed
@@ -33,11 +33,11 @@ namespace Miniclip.ShapeShifter.Saver
 
             foreach (string deletedAsset in deletedAssets)
             {
-                OnModifiedAsset(deletedAsset);
+                OnModifiedAsset(deletedAsset, ModificationType.Deleted);
             }
         }
 
-        private static void OnModifiedAsset(string modifiedAssetPath)
+        private static void OnModifiedAsset(string modifiedAssetPath, ModificationType modificationType)
         {
             string finalModifiedPath = string.Empty;
             bool setDirty = false;
@@ -53,12 +53,13 @@ namespace Miniclip.ShapeShifter.Saver
                 {
                     setDirty = true;
                     finalModifiedPath = skinnedFolderPath;
+                    modificationType = ModificationType.Modified;
                 }
             }
 
             if (setDirty)
             {
-                UnsavedAssetsManager.AddModifiedPath(finalModifiedPath);
+                UnsavedAssetsManager.AddModifiedPath(finalModifiedPath, modificationType);
                 ShapeShifterConfiguration.Instance.SetDirty();
             }
         }
@@ -83,7 +84,7 @@ namespace Miniclip.ShapeShifter.Saver
                     ShapeShifter.ActiveGame
                 ))
             {
-                OnModifiedAsset(skinnedParentFolderPath);
+                OnModifiedAsset(skinnedParentFolderPath, ModificationType.Modified);
             }
         }
 
