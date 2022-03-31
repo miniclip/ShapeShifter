@@ -91,6 +91,12 @@ namespace Miniclip.ShapeShifter.Switcher
         public static void CopyFromSkinsToUnity(DirectoryInfo directory)
         {
             string guid = directory.Name;
+
+            if (!FileUtils.DoesFolderExistAndHaveFiles(directory.FullName))
+            {
+                FileUtils.SafeDelete(directory.FullName);
+                return;
+            }
             
             AssetSwitcher.DeleteAssetInternalCopy(guid);
             
