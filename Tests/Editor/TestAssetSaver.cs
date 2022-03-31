@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
@@ -31,6 +32,11 @@ namespace Miniclip.ShapeShifter.Tests
             File.WriteAllText(assetFullPath, "new content");
 
             AssetDatabase.Refresh();
+            
+            var modifiedAssets = UnsavedAssetsManager.GetCurrentModifiedAssetsFromEditorPrefs();
+            
+            Assert.IsTrue(modifiedAssets.ContainsAssetPath(assetPath), "AssetPath should be in the modified assets list");
+            
             Assert.IsTrue(ShapeShifterConfiguration.Instance.IsDirty);
 
             ShapeShifterUtils.SavePendingChanges();
@@ -89,6 +95,10 @@ namespace Miniclip.ShapeShifter.Tests
                 "Skinned folder should still have the original file amount"
             );
 
+            var modifiedAssets = UnsavedAssetsManager.GetCurrentModifiedAssetsFromEditorPrefs();
+            
+            Assert.IsTrue(modifiedAssets.ContainsAssetPath(assetPath), "AssetPath should be in the modified assets list");
+            
             ShapeShifterUtils.SavePendingChanges();
 
             Assert.IsTrue(
@@ -132,6 +142,11 @@ namespace Miniclip.ShapeShifter.Tests
             textureImporter.textureType = TextureImporterType.Default;
             Assert.IsTrue(textureImporter.textureType == TextureImporterType.Default);
             textureImporter.SaveAndReimport();
+            
+            var modifiedAssets = UnsavedAssetsManager.GetCurrentModifiedAssetsFromEditorPrefs();
+            
+            Assert.IsTrue(modifiedAssets.ContainsAssetPath(assetPath), "AssetPath should be in the modified assets list");
+            
             ShapeShifterUtils.SavePendingChanges();
 
             AssetSwitcher.SwitchToGame(TestUtils.game1, true);
