@@ -23,7 +23,7 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsNotNull(testAsset, "Text asset not found");
             Assert.IsNotEmpty(assetPath, "Text asset path is empty");
             Assert.IsTrue(!AssetSkinner.IsSkinned(assetPath));
-            Assert.IsTrue(!ShapeShifterConfiguration.Instance.IsDirty);
+            Assert.IsTrue(!UnsavedAssetsManager.HasUnsavedChanges(), "Should not be detecting unsaved changes");
 
             AssetSkinner.SkinAsset(assetPath);
 
@@ -37,7 +37,7 @@ namespace Miniclip.ShapeShifter.Tests
             
             Assert.IsTrue(modifiedAssets.ContainsAssetPath(assetPath), "AssetPath should be in the modified assets list");
             
-            Assert.IsTrue(ShapeShifterConfiguration.Instance.IsDirty);
+            Assert.IsTrue(UnsavedAssetsManager.HasUnsavedChanges(), "Should be detecting unsaved changes");
 
             ShapeShifterUtils.SavePendingChanges();
             string skinnedFileFullPath = Path.Combine(

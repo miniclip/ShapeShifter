@@ -55,9 +55,7 @@ namespace Miniclip.ShapeShifter
                     return;
                 }
             }
-
-            DrawSaveWarning();
-
+            
             AssetSwitcherGUI.OnGUI();
             EditorGUILayout.Separator();
 
@@ -89,29 +87,7 @@ namespace Miniclip.ShapeShifter
                 inspectorWindowType
             );
         }
-
-        private static void DrawSaveWarning()
-        {
-            if (ShapeShifter.SaveDetected)
-            {
-                Color oldBGColor = GUI.backgroundColor;
-                GUI.backgroundColor = Color.green;
-                using (new GUILayout.HorizontalScope())
-                {
-                    EditorGUILayout.LabelField(
-                        "ShapeShifter does not save automatically, press the below \"Save\" button for that"
-                    );
-                    EditorStyles.label.wordWrap = true;
-                    if (GUILayout.Button("OK"))
-                    {
-                        ShapeShifter.SaveDetected = false;
-                    }
-                }
-
-                GUI.backgroundColor = oldBGColor;
-            }
-        }
-
+        
         private void OnSelectedTabGUI()
         {
             selectedTabOption = GUILayout.Toolbar(selectedTabOption, tabOptionsNames);

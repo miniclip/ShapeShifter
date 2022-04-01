@@ -12,14 +12,9 @@ namespace Miniclip.ShapeShifter.Saver
 {
     public class AssetSaver : UnityEditor.AssetModificationProcessor
     {
-        private static bool CanSave => ShapeShifterConfiguration.Instance.IsDirty;
-
-        private static bool isSaving;
-
         [UsedImplicitly]
         public static void OnWillSaveAssets(string[] files)
         {
-            ShapeShifter.SaveDetected = true;
             return;
 
             if (Application.isBatchMode)
@@ -40,20 +35,15 @@ namespace Miniclip.ShapeShifter.Saver
                 return;
             }
 
-            SaveToActiveGameSkin();
+            SaveToActiveGameSkin(forceSave: false);
         }
 
-        public static void SaveToActiveGameSkin()
+        public static void SaveToActiveGameSkin(bool forceSave)
         {
-            if (isSaving || (!ShapeShifter.ActiveGameSkin.HasExternalSkins() && !CanSave))
+            if (forceSave || UnsavedAssetsManager.HasUnsavedChanges())
             {
-                return;
+                AssetSwitcher.OverwriteSelectedSkin(ShapeShifter.ActiveGameSkin);
             }
-
-            ShapeShifterLogger.Log($"Pushing changes to {ShapeShifter.ActiveGameName} skin folder");
-            isSaving = true;
-            AssetSwitcher.OverwriteSelectedSkin(ShapeShifter.ActiveGameSkin);
-            isSaving = false;
         }
 
         public static void SaveAssetForGame(string assetPath, string game)
@@ -66,10 +56,12 @@ namespace Miniclip.ShapeShifter.Saver
 
             if (assetSkin == null)
             {
-                ShapeShifterLogger.LogWarning($"Something went wrong. Asset ({assetPath} | {guid}) not found in skins folder");
+                ShapeShifterLogger.LogWarning(
+                    $"Something went wrong. Asset ({assetPath} | {guid}) not found in skins folder"
+                );
                 return;
             }
-            
+
             assetSkin.CopyFromUnityToSkinFolder();
 
             UnsavedAssetsManager.RemovedModifiedPath(assetPath);
@@ -85,14 +77,16 @@ namespace Miniclip.ShapeShifter.Saver
 
             if (assetSkin == null)
             {
-                ShapeShifterLogger.LogWarning($"Something went wrong. Asset ({assetPath} | {guid}) not found in skins folder");
+                ShapeShifterLogger.LogWarning(
+                    $"Something went wrong. Asset ({assetPath} | {guid}) not found in skins folder"
+                );
                 return;
             }
-            
+
             assetSkin.CopyFromSkinFolderToUnity();
 
             AssetDatabase.Refresh();
-            
+
             UnsavedAssetsManager.RemovedModifiedPath(assetPath);
         }
     }

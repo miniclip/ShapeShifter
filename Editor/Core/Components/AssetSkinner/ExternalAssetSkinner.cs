@@ -134,7 +134,7 @@ namespace Miniclip.ShapeShifter.Skinner
             }
 
             ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Add(relativeAssetPath);
-            ShapeShifterConfiguration.Instance.SetDirty(true);
+            ShapeShifterConfiguration.Instance.SetDirty();
 
             // even though it's an "external" file, it still might be a Unity file (ex: ProjectSettings), so it's
             // still important to make sure any pending changes are saved before generating copies

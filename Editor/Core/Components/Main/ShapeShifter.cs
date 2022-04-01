@@ -8,8 +8,6 @@ namespace Miniclip.ShapeShifter
 {
     public static class ShapeShifter
     {
-        public static bool SaveDetected { get; set; }
-
         private static DirectoryInfo skinsFolder;
 
         internal static DirectoryInfo SkinsFolder

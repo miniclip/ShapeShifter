@@ -7,6 +7,7 @@ using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Switcher
 {
@@ -45,6 +46,8 @@ namespace Miniclip.ShapeShifter.Switcher
         {
             string name = selected.Name;
 
+            ShapeShifterLogger.Log($"Overwriting {name} skins folder");
+
             if (ShapeShifter.ActiveGameSkin != selected)
             {
                 StringBuilder stringBuilder = new StringBuilder();
@@ -73,9 +76,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 AssetSwitcherOperations.CopyFromOriginToSkinnedExternal
             );
 
-            ShapeShifterConfiguration.Instance.SetDirty(false);
-            UnsavedAssetsManager.ClearModifiedAssetsList();
-            ShapeShifter.SaveDetected = false;
+            UnsavedAssetsManager.ClearUnsavedChanges();
         }
 
         internal static void RefreshAllAssets()
@@ -108,7 +109,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
         internal static void SwitchToGame(GameSkin gameToSwitchTo, bool forceSwitch = false)
         {
-            if (ShapeShifterConfiguration.Instance.IsDirty && !forceSwitch)
+            if (UnsavedAssetsManager.HasUnsavedChanges() && !forceSwitch)
             {
                 int choice = EditorUtility.DisplayDialogComplex(
                     "Shape Shifter",
@@ -142,8 +143,8 @@ namespace Miniclip.ShapeShifter.Switcher
                 AssetSwitcherOperations.CopyFromSkinnedExternalToOrigin
             );
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
-            UnsavedAssetsManager.ClearModifiedAssetsList();
-            ShapeShifterConfiguration.Instance.SetDirty(false);
+            Debug.Log("##! Clear");
+            UnsavedAssetsManager.ClearUnsavedChanges();
         }
 
         private static void RemoveSkinnedAssetsFromProject()

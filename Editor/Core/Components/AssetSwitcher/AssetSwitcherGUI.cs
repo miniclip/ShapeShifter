@@ -59,13 +59,13 @@ namespace Miniclip.ShapeShifter.Switcher
             GUILayout.Box($"Active game: {ShapeShifter.ActiveGameName}", titleStyle);
 
             GUIContent forceSaveGUIContent = new GUIContent(
-                $"Save Changes To {ShapeShifter.ActiveGameName}",
+                $"Force Save To {ShapeShifter.ActiveGameName}",
                 Icons.GetIconTexture(Icons.saveIcon),
                 $"Save your project assets into {ShapeShifter.ActiveGameName} folder"
             );
             if (GUILayout.Button(forceSaveGUIContent, StyleUtils.ButtonStyle))
             {
-                AssetSaver.SaveToActiveGameSkin();
+                AssetSaver.SaveToActiveGameSkin(forceSave: true);
             }
 
             GUILayout.Space(5.0f);

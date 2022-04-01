@@ -3,6 +3,7 @@ using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
+using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Saver
 {
@@ -17,13 +18,12 @@ namespace Miniclip.ShapeShifter.Saver
                 return;
             }
 
-            //changed
-            foreach (string importedAsset in importedAssets)
+            for (int index = 0; index < importedAssets.Length; index++)
             {
+                string importedAsset = importedAssets[index];
                 OnModifiedAsset(importedAsset, ModificationType.Modified);
             }
 
-            //renamed
             for (int index = 0; index < movedAssets.Length; index++)
             {
                 string newName = movedAssets[index];
@@ -31,8 +31,9 @@ namespace Miniclip.ShapeShifter.Saver
                 OnAssetRenamed(newName, oldName);
             }
 
-            foreach (string deletedAsset in deletedAssets)
+            for (int index = 0; index < deletedAssets.Length; index++)
             {
+                string deletedAsset = deletedAssets[index];
                 OnModifiedAsset(deletedAsset, ModificationType.Deleted);
             }
         }
@@ -41,6 +42,7 @@ namespace Miniclip.ShapeShifter.Saver
         {
             string finalModifiedPath = string.Empty;
             bool setDirty = false;
+            Debug.Log($"##! Modified {modifiedAssetPath}");
 
             if (AssetSkinner.IsSkinned(modifiedAssetPath, ShapeShifter.ActiveGame))
             {
@@ -60,7 +62,6 @@ namespace Miniclip.ShapeShifter.Saver
             if (setDirty)
             {
                 UnsavedAssetsManager.AddModifiedPath(finalModifiedPath, modificationType);
-                ShapeShifterConfiguration.Instance.SetDirty();
             }
         }
 

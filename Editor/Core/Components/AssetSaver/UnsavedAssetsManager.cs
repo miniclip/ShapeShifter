@@ -29,7 +29,8 @@ namespace Miniclip.ShapeShifter.Saver
 
         public bool ContainsAssetPath(string assetPath)
         {
-            return Values.Any(modifiedAssetInfo => string.Equals(
+            return Values.Any(
+                modifiedAssetInfo => string.Equals(
                     modifiedAssetInfo.assetPath,
                     assetPath,
                     StringComparison.Ordinal
@@ -43,29 +44,6 @@ namespace Miniclip.ShapeShifter.Saver
     {
         private const string MODIFIED_ASSETS_PERSISTENCE_KEY = "SHAPESHIFTER_UNSAVED_MODIFIED_ASSETS";
 
-        internal static void AddModifiedPath(string assetPathToAdd, ModificationType modificationType)
-        {
-            var currentModifiedAssets = GetCurrentModifiedAssetsFromEditorPrefs();
-
-            if (currentModifiedAssets == null)
-            {
-                currentModifiedAssets = new ModifiedAssets();
-            }
-
-            var assetModificationToAdd = currentModifiedAssets.Values.FirstOrDefault(
-                assetModification => assetModification.assetPath == assetPathToAdd
-            );
-            
-            if (assetModificationToAdd != null)
-            {
-                return;
-            }
-
-            currentModifiedAssets.Values.Add(new ModifiedAssetInfo(assetPathToAdd, modificationType));
-
-            StoreCurrentModifiedAssetsInEditorPrefs(currentModifiedAssets);
-        }
-
         public static void RemovedModifiedPath(string assetPathToRemove)
         {
             var currentModifiedAssets = GetCurrentModifiedAssetsFromEditorPrefs();
@@ -78,13 +56,41 @@ namespace Miniclip.ShapeShifter.Saver
             var assetModificationToRemove = currentModifiedAssets.Values.FirstOrDefault(
                 assetModification => assetModification.assetPath == assetPathToRemove
             );
-            
+
             if (assetModificationToRemove == null)
             {
                 return;
             }
-            
+
             currentModifiedAssets.Values.Remove(assetModificationToRemove);
+
+            StoreCurrentModifiedAssetsInEditorPrefs(currentModifiedAssets);
+        }
+
+        public static bool HasUnsavedChanges()
+        {
+            return GetCurrentModifiedAssetsFromEditorPrefs().Values.Count > 0;
+        }
+
+        internal static void AddModifiedPath(string assetPathToAdd, ModificationType modificationType)
+        {
+            var currentModifiedAssets = GetCurrentModifiedAssetsFromEditorPrefs();
+
+            if (currentModifiedAssets == null)
+            {
+                currentModifiedAssets = new ModifiedAssets();
+            }
+
+            var assetModificationToAdd = currentModifiedAssets.Values.FirstOrDefault(
+                assetModification => assetModification.assetPath == assetPathToAdd
+            );
+
+            if (assetModificationToAdd != null)
+            {
+                return;
+            }
+
+            currentModifiedAssets.Values.Add(new ModifiedAssetInfo(assetPathToAdd, modificationType));
 
             StoreCurrentModifiedAssetsInEditorPrefs(currentModifiedAssets);
         }
@@ -116,7 +122,7 @@ namespace Miniclip.ShapeShifter.Saver
         }
 
         [MenuItem("Window/Shape Shifter/Clear Modified Assets List")]
-        internal static void ClearModifiedAssetsList()
+        internal static void ClearUnsavedChanges()
         {
             Persistence.SetString(
                 MODIFIED_ASSETS_PERSISTENCE_KEY,
