@@ -34,9 +34,7 @@ namespace Miniclip.ShapeShifter
             Instance.isDirty = isDirty;
             EditorUtility.SetDirty(this);
         }
-
-        public void Save() => isDirty = false;
-
+        
         public void RenameGame(GameSkin gameSkinToRename, string newName)
         {
             int index = gameNames.IndexOf(gameSkinToRename.Name);

@@ -68,7 +68,7 @@ namespace Miniclip.ShapeShifter.Tests
                 ShapeShifterConfiguration.Instance.AddGame(testGameName);
             }
 
-            ShapeShifterConfiguration.Instance.Save();
+            ShapeShifterConfiguration.Instance.SetDirty(false);
         }
 
         private static void CopyAllTestResourcesFromPackagesToAssetsFolder()
