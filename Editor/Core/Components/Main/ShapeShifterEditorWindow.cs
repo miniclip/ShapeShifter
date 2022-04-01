@@ -19,6 +19,7 @@ namespace Miniclip.ShapeShifter
             ExternalSkinner = 1,
             Configuration = 2,
             Tools = 3,
+            Settings = 4,
         }
 
         private int selectedTabOption;
@@ -63,7 +64,7 @@ namespace Miniclip.ShapeShifter
 
             OnSelectedTabGUI();
 
-            GUILayout.Space(15);
+            GUILayout.FlexibleSpace();
 
             AssetSaverGUI.OnGUI();
 
@@ -108,6 +109,11 @@ namespace Miniclip.ShapeShifter
                     OnDangerousOperationsGUI();
                     ShapeShifterLogger.OnGUI();
                     break;
+                case TabOptions.Settings:
+                    Settings.OnGUI();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 

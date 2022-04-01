@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
-using UnityEditor.Experimental.SceneManagement;
-using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Saver
 {
@@ -20,6 +15,11 @@ namespace Miniclip.ShapeShifter.Saver
                 return;
             }
 
+            if (!Settings.IsAutoSaveEnabled)
+            {
+                return;
+            }
+            
             // PrefabStage stage = PrefabStageUtility.GetCurrentPrefabStage();
             // if (stage != null)
             // {
