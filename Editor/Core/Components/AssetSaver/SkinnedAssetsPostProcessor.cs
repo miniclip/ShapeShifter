@@ -42,7 +42,6 @@ namespace Miniclip.ShapeShifter.Saver
         {
             string finalModifiedPath = string.Empty;
             bool setDirty = false;
-            Debug.Log($"##! Modified {modifiedAssetPath}");
 
             if (AssetSkinner.IsSkinned(modifiedAssetPath, ShapeShifter.ActiveGame))
             {

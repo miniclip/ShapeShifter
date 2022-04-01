@@ -15,25 +15,18 @@ namespace Miniclip.ShapeShifter.Saver
         [UsedImplicitly]
         public static void OnWillSaveAssets(string[] files)
         {
-            return;
-
-            if (Application.isBatchMode)
-            {
-                return;
-            }
-
             if (!ShapeShifterConfiguration.IsInitialized())
             {
                 return;
             }
 
-            PrefabStage stage = PrefabStageUtility.GetCurrentPrefabStage();
-            if (stage != null)
-            {
-                //Skipping saving as we're in prefab mode. Due To the auto save, this method is called every frame
-                //The solution is to only save the changes after leaving the prefab mode.
-                return;
-            }
+            // PrefabStage stage = PrefabStageUtility.GetCurrentPrefabStage();
+            // if (stage != null)
+            // {
+            //     //Skipping saving as we're in prefab mode. Due To the auto save, this method is called every frame
+            //     //The solution is to only save the changes after leaving the prefab mode.
+            //     return;
+            // }
 
             SaveToActiveGameSkin(forceSave: false);
         }

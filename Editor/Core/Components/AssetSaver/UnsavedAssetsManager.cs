@@ -102,14 +102,15 @@ namespace Miniclip.ShapeShifter.Saver
                 PersistenceType.MachinePersistent
             );
 
+            ModifiedAssets modifiedAssets = new ModifiedAssets();
+
             if (string.IsNullOrEmpty(modifiedAssetsJson))
             {
-                return null;
+                return modifiedAssets;
             }
 
-            ModifiedAssets unsavedAssetsManager = new ModifiedAssets();
-            EditorJsonUtility.FromJsonOverwrite(modifiedAssetsJson, unsavedAssetsManager);
-            return unsavedAssetsManager;
+            EditorJsonUtility.FromJsonOverwrite(modifiedAssetsJson, modifiedAssets);
+            return modifiedAssets;
         }
 
         private static void StoreCurrentModifiedAssetsInEditorPrefs(ModifiedAssets unsavedAssetsManager)

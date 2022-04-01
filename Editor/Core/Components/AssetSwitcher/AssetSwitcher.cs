@@ -45,9 +45,7 @@ namespace Miniclip.ShapeShifter.Switcher
         internal static void OverwriteSelectedSkin(GameSkin selected, bool forceOverwrite = false)
         {
             string name = selected.Name;
-
-            ShapeShifterLogger.Log($"Overwriting {name} skins folder");
-
+            
             if (ShapeShifter.ActiveGameSkin != selected)
             {
                 StringBuilder stringBuilder = new StringBuilder();
