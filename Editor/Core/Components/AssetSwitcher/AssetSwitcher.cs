@@ -141,7 +141,6 @@ namespace Miniclip.ShapeShifter.Switcher
                 AssetSwitcherOperations.CopyFromSkinnedExternalToOrigin
             );
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
-            Debug.Log("##! Clear");
             UnsavedAssetsManager.ClearUnsavedChanges();
         }
 

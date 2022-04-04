@@ -53,8 +53,6 @@ namespace Miniclip.ShapeShifter.Utils
                     EditorPrefs.SetInt(GetProjectSpecificKey(key), value);
                     break;
             }
-
-            // ShapeShifterLogger.Log($"Persistence: Setting new value in {key} ({persistenceType.ToString()})");
         }
 
         public static bool GetBool(string key, PersistenceType persistenceType)
@@ -83,8 +81,6 @@ namespace Miniclip.ShapeShifter.Utils
                 default:
                     throw new ArgumentOutOfRangeException(nameof(persistenceType), persistenceType, null);
             }
-
-            // ShapeShifterLogger.Log($"Persistence: Setting new value in {key} ({persistenceType.ToString()})");
         }
 
         public static string GetString(string key, PersistenceType persistenceType)
@@ -113,8 +109,6 @@ namespace Miniclip.ShapeShifter.Utils
                 default:
                     throw new ArgumentOutOfRangeException(nameof(persistenceType), persistenceType, null);
             }
-
-            // ShapeShifterLogger.Log($"Persistence: Setting new value in {key} ({persistenceType.ToString()})");
         }
     }
 }

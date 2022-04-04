@@ -15,7 +15,6 @@ namespace Miniclip.ShapeShifter.Utils
         internal static void SavePendingChanges()
         {
             AssetDatabase.SaveAssets();
-            // AssetSaver.SaveToActiveGameSkin(true);
             // since the above doesn't seem to work with ScriptableObjects, might as well just go for a full save
             EditorApplication.ExecuteMenuItem("File/Save Project");
         }

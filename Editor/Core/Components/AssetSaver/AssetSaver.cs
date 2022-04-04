@@ -19,14 +19,6 @@ namespace Miniclip.ShapeShifter.Saver
             {
                 return;
             }
-            
-            // PrefabStage stage = PrefabStageUtility.GetCurrentPrefabStage();
-            // if (stage != null)
-            // {
-            //     //Skipping saving as we're in prefab mode. Due To the auto save, this method is called every frame
-            //     //The solution is to only save the changes after leaving the prefab mode.
-            //     return;
-            // }
 
             SaveToActiveGameSkin(forceSave: false);
         }
