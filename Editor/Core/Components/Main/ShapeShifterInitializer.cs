@@ -14,8 +14,8 @@ public class ShapeShifterInitializer
 
         EditorApplication.delayCall += OnDelayedCall;
         EditorApplication.quitting += EditorApplicationOnQuitting;
-        WindowFocusUtility.OnUnityEditorFocus -= OnEditorFocus;
-        WindowFocusUtility.OnUnityEditorFocus += OnEditorFocus;
+        WindowFocusUtility.OnUnityEditorFocusEvent -= OnEditorFocus;
+        WindowFocusUtility.OnUnityEditorFocusEvent += OnEditorFocus;
     }
 
     private static void OnEditorFocus(bool isFocused)
@@ -69,6 +69,6 @@ public class ShapeShifterInitializer
     {
         EditorApplication.delayCall -= OnDelayedCall;
         EditorApplication.quitting -= EditorApplicationOnQuitting;
-        WindowFocusUtility.OnUnityEditorFocus -= OnEditorFocus;
+        WindowFocusUtility.OnUnityEditorFocusEvent -= OnEditorFocus;
     }
 }

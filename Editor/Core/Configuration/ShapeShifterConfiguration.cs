@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
@@ -15,7 +16,7 @@ namespace Miniclip.ShapeShifter
         private List<string> gameNames = new List<string>();
 
         public List<string> GameNames => gameNames;
-        
+
         [SerializeField]
         [HideInInspector]
         private List<string> skinnedExternalAssetPaths = new List<string>();
@@ -27,7 +28,7 @@ namespace Miniclip.ShapeShifter
         internal Editor DefaultConfigurationEditor { get; private set; }
 
         internal Editor ExternalConfigurationEditor { get; private set; }
-        
+
         public void SetDirty()
         {
             EditorUtility.SetDirty(this);
@@ -78,6 +79,26 @@ namespace Miniclip.ShapeShifter
 
         internal static void Initialise()
         {
+            LoadInstance();
+
+            AssignConfigurationEditor();
+        }
+
+        private static void AssignConfigurationEditor()
+        {
+            Instance.DefaultConfigurationEditor = Editor.CreateEditor(
+                Instance,
+                typeof(ShapeShifterConfigurationEditor)
+            );
+
+            Instance.ExternalConfigurationEditor = Editor.CreateEditor(
+                Instance,
+                typeof(ShapeShifterExternalConfigurationEditor)
+            );
+        }
+
+        private static void LoadInstance()
+        {
             if (Instance == null)
             {
                 Instance = (ShapeShifterConfiguration) EditorGUIUtility.Load(
@@ -116,16 +137,6 @@ namespace Miniclip.ShapeShifter
                 EditorUtility.SetDirty(Instance);
                 AssetDatabase.Refresh();
             }
-
-            Instance.DefaultConfigurationEditor = Editor.CreateEditor(
-                Instance,
-                typeof(ShapeShifterConfigurationEditor)
-            );
-
-            Instance.ExternalConfigurationEditor = Editor.CreateEditor(
-                Instance,
-                typeof(ShapeShifterExternalConfigurationEditor)
-            );
 
             if (Instance.GameNames.Count == 0)
             {

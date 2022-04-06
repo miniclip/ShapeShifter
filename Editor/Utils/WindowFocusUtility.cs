@@ -6,7 +6,7 @@ using UnityEngine;
 [InitializeOnLoad]
 public class WindowFocusUtility
 {
-    public static event Action<bool> OnUnityEditorFocus;
+    public static event Action<bool> OnUnityEditorFocusEvent;
     private static bool appFocused;
     private static bool IsApplicationActive => InternalEditorUtility.isApplicationActive;
 
@@ -22,6 +22,6 @@ public class WindowFocusUtility
             return;
 
         appFocused = IsApplicationActive;
-        OnUnityEditorFocus.Invoke(appFocused);
+        OnUnityEditorFocusEvent?.Invoke(appFocused);
     }
 }
