@@ -133,7 +133,7 @@ namespace Miniclip.ShapeShifter.Switcher
             }
 
             RemoveSkinnedAssetsFromProject();
-            ExternalAssetsPostProcessor.PauseWatchers();
+            ExternalAssetsPostProcessor.StopWatchers();
             AssetSwitcherOperations.PerformCopiesWithTracking(
                 gameToSwitchTo,
                 "Switch to game",
@@ -142,7 +142,7 @@ namespace Miniclip.ShapeShifter.Switcher
             );
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
             UnsavedAssetsManager.ClearUnsavedChanges();
-            ExternalAssetsPostProcessor.ResumeWatchers();
+            ExternalAssetsPostProcessor.InitializeWatchers();
         }
 
         private static void RemoveSkinnedAssetsFromProject()

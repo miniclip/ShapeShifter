@@ -1,4 +1,7 @@
+using System;
+using System.IO;
 using JetBrains.Annotations;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
@@ -31,7 +34,35 @@ namespace Miniclip.ShapeShifter.Saver
             }
         }
 
-        public static void SaveAssetForGame(string assetPath, string game)
+        public static void SaveModificationForGame(ModifiedAssetInfo modifiedAssetInfo, string game)
+        {
+            switch (modifiedAssetInfo.skinType)
+            {
+                case SkinType.Internal:
+                    SaveInternalAssetForGame(modifiedAssetInfo.assetPath, game);
+                    return;
+                case SkinType.External:
+                    SaveExternalAssetForGame(modifiedAssetInfo.assetPath, game);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static void SaveExternalAssetForGame(string assetPath, string game)
+        {
+            GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
+            string relativePath = ExternalAssetSkinner.ConvertToRelativePath(assetPath);
+            string skinnedVersionFolder = Path.Combine(
+                gameSkin.ExternalSkinsFolderPath,
+                ExternalAssetSkinner.GenerateKeyFromRelativePath(relativePath));
+            
+            AssetSwitcherOperations.CopyFromOriginToSkinnedExternal(new DirectoryInfo(skinnedVersionFolder));
+            
+            UnsavedAssetsManager.RemoveByPath(assetPath);
+        }
+
+        private static void SaveInternalAssetForGame(string assetPath, string game)
         {
             GameSkin currentGameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
 
@@ -52,7 +83,35 @@ namespace Miniclip.ShapeShifter.Saver
             UnsavedAssetsManager.RemoveByPath(assetPath);
         }
 
-        public static void DiscardAssetChanges(string assetPath, string game)
+        public static void DiscardModificationForGame(ModifiedAssetInfo modifiedAssetInfo, string game)
+        {
+            switch (modifiedAssetInfo.skinType)
+            {
+                case SkinType.Internal:
+                    DiscardInternalModificationForGame(modifiedAssetInfo.assetPath, game);
+                    break;
+                case SkinType.External:
+                    DiscardExternalModificationForGame(modifiedAssetInfo.assetPath, game);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static void DiscardExternalModificationForGame(string assetPath, string game)
+        {
+            GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
+            string relativePath = ExternalAssetSkinner.ConvertToRelativePath(assetPath);
+            string skinnedVersionFolder = Path.Combine(
+                gameSkin.ExternalSkinsFolderPath,
+                ExternalAssetSkinner.GenerateKeyFromRelativePath(relativePath));
+            
+            AssetSwitcherOperations.CopyFromSkinnedExternalToOrigin(new DirectoryInfo(skinnedVersionFolder));
+            
+            UnsavedAssetsManager.RemoveByPath(assetPath);
+        }
+
+        private static void DiscardInternalModificationForGame(string assetPath, string game)
         {
             GameSkin currentGameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
 

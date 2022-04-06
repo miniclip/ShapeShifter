@@ -38,22 +38,22 @@ namespace Miniclip.ShapeShifter.Saver
                         ? modifiedAssetInfo.assetPath
                         : modifiedAssetInfo.description
                 );
-                EditorGUILayout.LabelField(modifiedAssetInfo.modificationType.ToString());
+                EditorGUILayout.LabelField(
+                    modifiedAssetInfo.skinType.ToString(),
+                    modifiedAssetInfo.modificationType.ToString()
+                );
                 EditorGUILayout.EndVertical();
-
-                if (modifiedAssetInfo.skinType == SkinType.External)
-                    return;
 
                 EditorGUILayout.BeginHorizontal(GUILayout.Width(200));
 
                 if (GUILayout.Button("Save"))
                 {
-                    AssetSaver.SaveAssetForGame(modifiedAssetInfo.assetPath, ShapeShifter.ActiveGame);
+                    AssetSaver.SaveModificationForGame(modifiedAssetInfo, ShapeShifter.ActiveGame);
                 }
 
                 if (GUILayout.Button("Discard"))
                 {
-                    AssetSaver.DiscardAssetChanges(modifiedAssetInfo.assetPath, ShapeShifter.ActiveGame);
+                    AssetSaver.DiscardModificationForGame(modifiedAssetInfo, ShapeShifter.ActiveGame);
                 }
 
                 EditorGUILayout.EndHorizontal();

@@ -34,7 +34,7 @@ namespace Miniclip.ShapeShifter.Saver
             }
         }
 
-        internal static void PauseWatchers()
+        internal static void StopWatchers()
         {
             for (int index = 0; index < watchers.Count; index++)
             {
@@ -44,11 +44,6 @@ namespace Miniclip.ShapeShifter.Saver
             }
 
             watchers.Clear();
-        }
-
-        internal static void ResumeWatchers()
-        {
-            InitializeWatchers();
         }
 
         private static void OnEditorUpdate()
@@ -74,7 +69,7 @@ namespace Miniclip.ShapeShifter.Saver
                     Path.GetFileName(modifiedAssetInfo.assetPath)
                 );
 
-                if (IsDifferent(modifiedAssetInfo.assetPath, skinnedVersionPath))
+                if (AreFilesDifferent(modifiedAssetInfo.assetPath, skinnedVersionPath))
                 {
                     UnsavedAssetsManager.Add(modifiedAssetInfo);
                 }
@@ -103,7 +98,7 @@ namespace Miniclip.ShapeShifter.Saver
             externalModifiedAssetsQueue.Enqueue(modifiedAssetInfo);
         }
 
-        private static bool IsDifferent(string argsFullPath, string skinnedVersionPath)
+        private static bool AreFilesDifferent(string argsFullPath, string skinnedVersionPath)
         {
             var bytes1 = File.ReadAllBytes(argsFullPath);
             var bytes2 = File.ReadAllBytes(skinnedVersionPath);

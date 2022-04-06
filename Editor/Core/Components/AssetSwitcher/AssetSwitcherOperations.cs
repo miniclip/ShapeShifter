@@ -11,20 +11,20 @@ namespace Miniclip.ShapeShifter.Switcher
 {
     public static class AssetSwitcherOperations
     {
-        public static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory)
+        public static void CopyFromOriginToSkinnedExternal(DirectoryInfo externalSkinDirectory)
         {
-            string relativePath = ExternalAssetSkinner.GenerateRelativePathFromKey(directory.Name);
+            string relativePath = ExternalAssetSkinner.GenerateRelativePathFromKey(externalSkinDirectory.Name);
             string origin = Path.Combine(Application.dataPath, relativePath);
-            string target = Path.Combine(directory.FullName, Path.GetFileName(origin));
+            string target = Path.Combine(externalSkinDirectory.FullName, Path.GetFileName(origin));
             FileUtils.SafeCopy(origin, target);
         }
 
-        public static void CopyFromSkinnedExternalToOrigin(DirectoryInfo directory)
+        public static void CopyFromSkinnedExternalToOrigin(DirectoryInfo externalSkinDirectory)
         {
-            string relativePath = ExternalAssetSkinner.GenerateRelativePathFromKey(directory.Name);
+            string relativePath = ExternalAssetSkinner.GenerateRelativePathFromKey(externalSkinDirectory.Name);
             string target = Path.Combine(Application.dataPath, relativePath);
             string searchPattern = Path.GetFileName(target);
-            FileInfo[] fileInfos = directory.GetFiles(searchPattern);
+            FileInfo[] fileInfos = externalSkinDirectory.GetFiles(searchPattern);
 
             if (fileInfos.Length <= 0)
             {
