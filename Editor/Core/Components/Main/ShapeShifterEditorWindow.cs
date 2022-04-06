@@ -49,7 +49,7 @@ namespace Miniclip.ShapeShifter
 
                     if (GUILayout.Button("Initialize"))
                     {
-                        ShapeShifterConfiguration.Initialise();
+                        ShapeShifterConfiguration.Initialize();
                     }
 
                     Repaint();

@@ -56,7 +56,7 @@ public class ShapeShifterInitializer
             await Task.Delay(1000);
         }
         
-        ShapeShifterConfiguration.Initialise();
+        ShapeShifterConfiguration.Initialize();
 
         if (restoreMissingAssets)
         {

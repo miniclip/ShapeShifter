@@ -77,7 +77,7 @@ namespace Miniclip.ShapeShifter
 
         internal static bool IsInitialized() => Instance != null && Instance.GameNames.Count > 0;
 
-        internal static void Initialise()
+        internal static void Initialize()
         {
             LoadInstance();
 
