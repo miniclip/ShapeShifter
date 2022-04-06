@@ -155,7 +155,7 @@ namespace Miniclip.ShapeShifter.Utils
         {
             if (IsTracked(fullFilePath))
             {
-                RunGitCommand($"rm -r --cached {fullFilePath}");
+                RunGitCommand($"rm -r --cached \"{fullFilePath}\"");
             }
             else if (CanUnstage(fullFilePath))
             {
