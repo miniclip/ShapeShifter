@@ -7,18 +7,21 @@ using UnityEditor;
 namespace Miniclip.ShapeShifter.Saver
 {
     public enum ModificationType { Modified, Deleted }
+    public enum SkinType { Internal, External }
 
     [Serializable]
     public class ModifiedAssetInfo
     {
         public string assetPath;
-
+        public string description;
         public ModificationType modificationType;
+        public SkinType skinType;
 
-        public ModifiedAssetInfo(string assetPath, ModificationType modificationType)
+        public ModifiedAssetInfo(string assetPath, ModificationType modificationType, SkinType skinType)
         {
             this.assetPath = assetPath;
             this.modificationType = modificationType;
+            this.skinType = skinType;
         }
     }
 
@@ -44,16 +47,11 @@ namespace Miniclip.ShapeShifter.Saver
     {
         private const string MODIFIED_ASSETS_PERSISTENCE_KEY = "SHAPESHIFTER_UNSAVED_MODIFIED_ASSETS";
 
-        public static void RemovedModifiedPath(string assetPathToRemove)
+        public static void RemoveByPath(string assetPathToRemove)
         {
             var currentModifiedAssets = GetCurrentModifiedAssetsFromEditorPrefs();
 
-            if (currentModifiedAssets == null)
-            {
-                currentModifiedAssets = new ModifiedAssets();
-            }
-
-            var assetModificationToRemove = currentModifiedAssets.Values.FirstOrDefault(
+            var assetModificationToRemove = currentModifiedAssets?.Values.FirstOrDefault(
                 assetModification => assetModification.assetPath == assetPathToRemove
             );
 
@@ -72,7 +70,7 @@ namespace Miniclip.ShapeShifter.Saver
             return GetCurrentModifiedAssetsFromEditorPrefs().Values.Count > 0;
         }
 
-        internal static void AddModifiedPath(string assetPathToAdd, ModificationType modificationType)
+        internal static void Add(ModifiedAssetInfo modifiedAssetInfo)
         {
             var currentModifiedAssets = GetCurrentModifiedAssetsFromEditorPrefs();
 
@@ -82,7 +80,7 @@ namespace Miniclip.ShapeShifter.Saver
             }
 
             var assetModificationToAdd = currentModifiedAssets.Values.FirstOrDefault(
-                assetModification => assetModification.assetPath == assetPathToAdd
+                assetModification => assetModification.assetPath == modifiedAssetInfo.assetPath
             );
 
             if (assetModificationToAdd != null)
@@ -90,7 +88,8 @@ namespace Miniclip.ShapeShifter.Saver
                 return;
             }
 
-            currentModifiedAssets.Values.Add(new ModifiedAssetInfo(assetPathToAdd, modificationType));
+            currentModifiedAssets.Values.Add(modifiedAssetInfo);
+            ShapeShifterLogger.Log($"Register unsaved changes in {modifiedAssetInfo.assetPath}.");
 
             StoreCurrentModifiedAssetsInEditorPrefs(currentModifiedAssets);
         }

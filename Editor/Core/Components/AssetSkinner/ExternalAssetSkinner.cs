@@ -120,7 +120,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 return;
             }
 
-            string relativeAssetPath = GetRelativeURIPath(absoluteAssetPath, Application.dataPath);
+            string relativeAssetPath = ConvertToRelativePath(absoluteAssetPath);
 
             if (ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Contains(relativeAssetPath))
             {
@@ -168,6 +168,12 @@ namespace Miniclip.ShapeShifter.Skinner
             GitUtils.Untrack(key, origin, false);
 
             GitUtils.Stage(AssetDatabase.GetAssetPath(ShapeShifterConfiguration.Instance));
+        }
+
+        internal static string ConvertToRelativePath(string absoluteAssetPath)
+        {
+            string relativeAssetPath = GetRelativeURIPath(absoluteAssetPath, Application.dataPath);
+            return relativeAssetPath;
         }
     }
 }

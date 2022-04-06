@@ -82,6 +82,8 @@ namespace Miniclip.ShapeShifter
             LoadInstance();
 
             AssignConfigurationEditor();
+            
+            ExternalAssetsPostProcessor.InitializeWatchers();
         }
 
         private static void AssignConfigurationEditor()

@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Saver
 {
-    public class SkinnedAssetsPostProcessor : AssetPostprocessor
+    public class InternalAssetsPostProcessor : AssetPostprocessor
     {
         private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets,
             string[] movedAssets,
@@ -60,7 +60,13 @@ namespace Miniclip.ShapeShifter.Saver
 
             if (setDirty)
             {
-                UnsavedAssetsManager.AddModifiedPath(finalModifiedPath, modificationType);
+                ModifiedAssetInfo modifiedAssetInfo = new ModifiedAssetInfo(
+                    finalModifiedPath,
+                    modificationType,
+                    SkinType.Internal
+                );
+
+                UnsavedAssetsManager.Add(modifiedAssetInfo);
             }
         }
 

@@ -49,7 +49,7 @@ namespace Miniclip.ShapeShifter.Saver
 
             assetSkin.CopyFromUnityToSkinFolder();
 
-            UnsavedAssetsManager.RemovedModifiedPath(assetPath);
+            UnsavedAssetsManager.RemoveByPath(assetPath);
         }
 
         public static void DiscardAssetChanges(string assetPath, string game)
@@ -72,7 +72,7 @@ namespace Miniclip.ShapeShifter.Saver
 
             AssetDatabase.Refresh();
 
-            UnsavedAssetsManager.RemovedModifiedPath(assetPath);
+            UnsavedAssetsManager.RemoveByPath(assetPath);
         }
     }
 }

@@ -33,12 +33,19 @@ namespace Miniclip.ShapeShifter.Saver
             using (new EditorGUILayout.HorizontalScope())
             {
                 EditorGUILayout.BeginVertical();
-                EditorGUILayout.LabelField(modifiedAssetInfo.assetPath);
+                EditorGUILayout.LabelField(
+                    string.IsNullOrEmpty(modifiedAssetInfo.description)
+                        ? modifiedAssetInfo.assetPath
+                        : modifiedAssetInfo.description
+                );
                 EditorGUILayout.LabelField(modifiedAssetInfo.modificationType.ToString());
                 EditorGUILayout.EndVertical();
-                
+
+                if (modifiedAssetInfo.skinType == SkinType.External)
+                    return;
+
                 EditorGUILayout.BeginHorizontal(GUILayout.Width(200));
-                
+
                 if (GUILayout.Button("Save"))
                 {
                     AssetSaver.SaveAssetForGame(modifiedAssetInfo.assetPath, ShapeShifter.ActiveGame);
@@ -52,7 +59,5 @@ namespace Miniclip.ShapeShifter.Saver
                 EditorGUILayout.EndHorizontal();
             }
         }
-
-        
     }
 }
