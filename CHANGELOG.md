@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0]
+### Added
+- New improved Auto save feature supporting internal and external skins
+- Ability to Save/Discard specific skins
+- Ability to skin/remove asset exclusively for a game
+- Overall improved GUI
+
+### Fixed
+- Fixed issue where skinning operation would fail if project path contained space characters
+- Fix issue when skinning where original asset was not being removed from repo
+
+## [0.4.2]
+### Fixed
+- Fixed issue where project in batchmode would timeout while performing game switch operation
+
+
 ## [0.4.3]
 ### Removed
 - Auto save feature as it was causing devs to not be able to revert changes, save is now a manual operation.
