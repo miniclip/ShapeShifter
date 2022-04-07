@@ -9,6 +9,8 @@ namespace Miniclip.ShapeShifter.Utils
 {
     class FileUtils
     {
+        private const int BYTES_TO_READ = sizeof(long);
+
         public static bool DoesFolderExistAndHaveFiles(string path)
         {
             bool directoryExists = Directory.Exists(path);
@@ -21,7 +23,7 @@ namespace Miniclip.ShapeShifter.Utils
             IEnumerable<string> enumerateFiles = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories);
 
             enumerateFiles = enumerateFiles.Where(file => !file.Contains(".DS_Store"));
-            
+
             bool directoryContainsFiles = enumerateFiles.Any();
 
             return directoryContainsFiles;
@@ -38,7 +40,7 @@ namespace Miniclip.ShapeShifter.Utils
                     return;
                 }
 
-                FileUtils.SafeDelete(directoryPath);
+                SafeDelete(directoryPath);
             }
 
             Directory.CreateDirectory(directoryPath);
@@ -73,7 +75,7 @@ namespace Miniclip.ShapeShifter.Utils
                 }
 
                 string normalizedPath = PathUtils.NormalizePath(fullPath);
-                
+
                 if (normalizedPath == PathUtils.NormalizePath(assetsDirectoryInfo.FullName))
                 {
                     throw new ArgumentException($"Path given ({normalizedPath}) is Application.DataPath");
@@ -94,6 +96,38 @@ namespace Miniclip.ShapeShifter.Utils
                     throw new ArgumentException($"Path given ({normalizedPath}) is outside the repository folder");
                 }
             }
+        }
+
+        public static bool FilesAreEqual(string first, string second)
+        {
+            FileInfo firstFileInfo = new FileInfo(first);
+            FileInfo secondFileInfo = new FileInfo(second);
+
+            if (firstFileInfo.Length != secondFileInfo.Length)
+            {
+                return false;
+            }
+
+            int iterations = (int) Math.Ceiling((double) first.Length / BYTES_TO_READ);
+
+            using FileStream fs1 = firstFileInfo.OpenRead();
+            using FileStream fs2 = secondFileInfo.OpenRead();
+
+            byte[] one = new byte[BYTES_TO_READ];
+            byte[] two = new byte[BYTES_TO_READ];
+
+            for (int i = 0; i < iterations; i++)
+            {
+                fs1.Read(one, 0, BYTES_TO_READ);
+                fs2.Read(two, 0, BYTES_TO_READ);
+
+                if (BitConverter.ToInt64(one, 0) != BitConverter.ToInt64(two, 0))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         internal static List<string> ReadAllLines(string filepath)

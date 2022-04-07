@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
+using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Saver
 {
@@ -69,13 +71,13 @@ namespace Miniclip.ShapeShifter.Saver
                     Path.GetFileName(modifiedAssetInfo.assetPath)
                 );
 
-                if (AreFilesDifferent(modifiedAssetInfo.assetPath, skinnedVersionPath))
+                if (FileUtils.FilesAreEqual(modifiedAssetInfo.assetPath, skinnedVersionPath))
                 {
-                    UnsavedAssetsManager.Add(modifiedAssetInfo);
+                    UnsavedAssetsManager.RemoveByPath(modifiedAssetInfo.assetPath);
                 }
                 else
                 {
-                    UnsavedAssetsManager.RemoveByPath(modifiedAssetInfo.assetPath);
+                    UnsavedAssetsManager.Add(modifiedAssetInfo);
                 }
             }
         }
@@ -96,14 +98,6 @@ namespace Miniclip.ShapeShifter.Saver
             }
 
             externalModifiedAssetsQueue.Enqueue(modifiedAssetInfo);
-        }
-
-        private static bool AreFilesDifferent(string argsFullPath, string skinnedVersionPath)
-        {
-            var bytes1 = File.ReadAllBytes(argsFullPath);
-            var bytes2 = File.ReadAllBytes(skinnedVersionPath);
-
-            return !bytes1.SequenceEqual(bytes2);
         }
     }
 }
