@@ -225,5 +225,25 @@ namespace Miniclip.ShapeShifter.Skinner
                 RemoveSkins(assetPath);
             }
         }
+
+        public static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath,
+            string gameName = null)
+        {
+            string[] parentFolders = assetPath.Split('/');
+
+            for (int index = parentFolders.Length - 1; index >= 0; index--)
+            {
+                string parentFolder = string.Join("/", parentFolders, 0, index);
+
+                if (AssetSkinner.IsSkinned(parentFolder, gameName))
+                {
+                    skinnedParentFolderPath = parentFolder;
+                    return true;
+                }
+            }
+
+            skinnedParentFolderPath = null;
+            return false;
+        }
     }
 }
