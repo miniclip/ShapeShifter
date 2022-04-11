@@ -102,12 +102,10 @@ namespace Miniclip.ShapeShifter
                     ExternalAssetSkinnerGUI.OnGUI();
                     break;
                 case TabOptions.Configuration:
-                    OnShowConfigurationGUI();
+                    OnConfigurationGUI();
                     break;
                 case TabOptions.Tools:
-                    OnShowUtilOperationsGUI();
-                    OnDangerousOperationsGUI();
-                    ShapeShifterLogger.OnGUI();
+                    OnToolsGUI();
                     break;
                 case TabOptions.Settings:
                     Settings.OnGUI();
@@ -116,8 +114,8 @@ namespace Miniclip.ShapeShifter
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-        private void OnShowConfigurationGUI()
+        
+        private void OnConfigurationGUI()
         {
             if (ShapeShifterConfiguration.Instance.DefaultConfigurationEditor != null
                 && ShapeShifterConfiguration.Instance.ExternalConfigurationEditor != null)
@@ -127,24 +125,24 @@ namespace Miniclip.ShapeShifter
             }
         }
 
-        private static void OnShowUtilOperationsGUI()
+        private static void OnToolsGUI()
         {
             GUILayout.Space(10);
 
-            PreMergeCheckGUI.OnGUI();
-        }
+            if (GUILayout.Button($"Check for double skins in {ShapeShifter.ActiveGameName}"))
+            {
+                ShapeShifterUtils.CheckForDoubleSkinnedAssetsInGame(ShapeShifter.ActiveGameName);
+            }
+            GUILayout.Space(10);
 
-        private static void OnDangerousOperationsGUI()
-        {
+            PreMergeCheckGUI.OnGUI();
+            GUILayout.Space(10);
             GUILayout.BeginVertical(StyleUtils.BoxStyle);
             GUILayout.Label("Dangerous Operations");
-
-            // AssetSwitcherGUI.OnOverwriteAllSkinsGUI();
-            GUILayout.Space(20);
+            GUILayout.Space(10);
             OnRemoveAllSkinsGUI();
             GUILayout.EndVertical();
         }
-
         private static void OnRemoveAllSkinsGUI()
         {
             Color backgroundColor = GUI.backgroundColor;

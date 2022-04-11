@@ -10,9 +10,9 @@ using Object = UnityEngine.Object;
 
 namespace Miniclip.ShapeShifter
 {
-    public static class SupportedTypes
+    public static class SupportedAssets
     {
-        private static readonly Type[] typesSupported =
+        private static readonly Type[] assetTypesSupported =
         {
             typeof(AnimationClip),
             typeof(AnimatorController),
@@ -35,7 +35,7 @@ namespace Miniclip.ShapeShifter
             return IsSupported(AssetDatabase.LoadAssetAtPath<Object>(assetPath), out reason);
         }
 
-        public static bool IsSupported(Object asset, out string reason)
+        private static bool IsSupported(Object asset, out string reason)
         {
             Type assetType = asset.GetType();
 
@@ -72,7 +72,7 @@ namespace Miniclip.ShapeShifter
                 return false;
             }
 
-            return typesSupported.Any(
+            return assetTypesSupported.Any(
                 typeSupported => assetType == typeSupported || assetType.IsSubclassOf(typeSupported)
             );
         }

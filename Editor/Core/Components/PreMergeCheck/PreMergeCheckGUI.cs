@@ -11,7 +11,7 @@ namespace Miniclip.ShapeShifter
     {
         private static string DIALOG_TITLE = "ShapeShifter Pre Merge Checker";
 
-        private static bool showSection = true;
+        private static bool showSection = false;
         private static string branchToMergeIntoCurrentBranch = "develop";
         private static List<string> changedFiles = null;
         private static bool isTargetBranchOnLatest = false;
