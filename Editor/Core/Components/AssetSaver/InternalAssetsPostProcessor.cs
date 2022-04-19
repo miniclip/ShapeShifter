@@ -104,6 +104,11 @@ namespace Miniclip.ShapeShifter.Saver
 
                 var assetSkin = gameSkin.GetAssetSkin(guid);
 
+                if (assetSkin == null)
+                {
+                    continue;
+                }
+
                 assetSkin.Rename(assetPath);
                 assetSkin.Stage();
             }
