@@ -22,7 +22,8 @@ namespace Miniclip.ShapeShifter
             typeof(ScriptableObject),
             typeof(Texture2D),
             typeof(TextAsset),
-            typeof(MonoScript)
+            typeof(MonoScript),
+            typeof(Shader)
         };
 
         private static readonly Type[] typesForbidden =
@@ -41,7 +42,7 @@ namespace Miniclip.ShapeShifter
 
             string assetPath = AssetDatabase.GetAssetPath(asset);
 
-            reason = "Asset type is supported by shapeshifter.";
+            reason = "Asset type is not supported by shapeshifter.";
 
             if (PathUtils.IsPathRelativeToPackages(assetPath))
             {
