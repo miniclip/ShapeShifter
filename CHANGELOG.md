@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0]
+### Added
+- Prevent skinning assets already inside skinned folder
+- Added shaders to supported types
+- Added icon overlay in project window on top of skinned assets
+
+### Fixed
+- Fixed issue where renaming an asset exclusively skinned to one game would fail
+- Fixed issue where copying assets from skins to unity would fail if an asset parent folder did not exist
+
 ## [0.5.0]
 ### Added
 - New improved Auto save feature supporting internal and external skins
@@ -14,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Fixed issue where skinning operation would fail if project path contained space characters
-- Fix issue when skinning where original asset was not being removed from repo
+- Fixed issue when skinning where original asset was not being removed from repo
 
 ## [0.4.2]
 ### Fixed
@@ -65,5 +75,5 @@ into thinking there was still assets to be restored into the project
 ### Fixed
 - Fixed issue where an infinite save loop would occur when having selected a nested prefab while in prefab mode with Auto Save enabled.
 - Fixed issue when clicking "Remove All Skins" twice
-- Fix Scroll not working on asset skinner section when multiple assets are being previewed
+- Fixed Scroll not working on asset skinner section when multiple assets are being previewed
 
