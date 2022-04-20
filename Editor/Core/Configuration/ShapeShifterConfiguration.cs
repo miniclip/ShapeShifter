@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Switcher;
@@ -20,6 +21,8 @@ namespace Miniclip.ShapeShifter
         [SerializeField]
         [HideInInspector]
         private List<string> skinnedExternalAssetPaths = new List<string>();
+
+        internal static event Action OnInitialised;
 
         public List<string> SkinnedExternalAssetPaths => skinnedExternalAssetPaths;
 
@@ -82,8 +85,10 @@ namespace Miniclip.ShapeShifter
             LoadInstance();
 
             AssignConfigurationEditor();
-            
+
             ExternalAssetsPostProcessor.InitializeWatchers();
+            
+            OnInitialised?.Invoke();
         }
 
         private static void AssignConfigurationEditor()

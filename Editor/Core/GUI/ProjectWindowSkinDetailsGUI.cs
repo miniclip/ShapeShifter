@@ -5,7 +5,6 @@ using UnityEngine;
 namespace Miniclip.ShapeShifter
 {
     [InitializeOnLoad]
-
     public static class ProjectWindowSkinDetailsGUI
     {
         private const string overlayIconPath =
@@ -16,6 +15,18 @@ namespace Miniclip.ShapeShifter
         {
             cachedOverlayIcon = LoadOverlayIcon();
 
+            if (ShapeShifterConfiguration.IsInitialized())
+            {
+                SubscribeToProjectWindowItemOnGUI();
+            }
+            else
+            {
+                ShapeShifterConfiguration.OnInitialised += SubscribeToProjectWindowItemOnGUI;
+            }
+        }
+
+        private static void SubscribeToProjectWindowItemOnGUI()
+        {
             EditorApplication.projectWindowItemOnGUI += DrawSkinIconOverlay;
         }
 
