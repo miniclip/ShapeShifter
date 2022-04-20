@@ -97,9 +97,9 @@ namespace Miniclip.ShapeShifter.Switcher
                 FileUtils.SafeDelete(directory.FullName);
                 return;
             }
-            
+
             AssetSwitcher.DeleteAssetInternalCopy(guid);
-            
+
             (string file, string meta) targetPath = GetTargetPath(guid);
 
             if (string.IsNullOrEmpty(targetPath.file))
@@ -114,19 +114,11 @@ namespace Miniclip.ShapeShifter.Switcher
 
             foreach (FileInfo fileInfo in files)
             {
-                if (fileInfo.Extension == ".meta")
-                {
-                    string metaFile = targetPath.meta;
+                string target = fileInfo.Extension == ".meta" ? targetPath.meta : targetPath.file;
 
-                    ShapeShifterLogger.Log($"Retrieving: {metaFile}");
-                    FileUtils.SafeCopy(fileInfo.FullName, metaFile);
-                }
-                else
-                {
-                    FileUtils.TryCreateDirectory(Path.GetDirectoryName(targetPath.file));
-                    ShapeShifterLogger.Log($"Retrieving: {targetPath.file}");
-                    FileUtils.SafeCopy(fileInfo.FullName, targetPath.file);
-                }
+                ShapeShifterLogger.Log($"Retrieving: {target}");
+                FileUtils.TryCreateDirectory(Path.GetDirectoryName(target));
+                FileUtils.SafeCopy(fileInfo.FullName, target);
             }
 
             DirectoryInfo[] directories = directory.GetDirectories();
