@@ -123,6 +123,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
                 else
                 {
+                    FileUtils.TryCreateDirectory(Path.GetDirectoryName(targetPath.file));
                     ShapeShifterLogger.Log($"Retrieving: {targetPath.file}");
                     FileUtils.SafeCopy(fileInfo.FullName, targetPath.file);
                 }
