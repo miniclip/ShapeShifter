@@ -1,47 +1,51 @@
-using Miniclip.ShapeShifter;
 using Miniclip.ShapeShifter.Skinner;
 using UnityEditor;
 using UnityEngine;
 
-[InitializeOnLoad]
-public static class ProjectWindowSkinDetailsGUI
+namespace Miniclip.ShapeShifter
 {
-    private static Texture2D diamondOverlayTexture;
+    [InitializeOnLoad]
 
-    static ProjectWindowSkinDetailsGUI()
+    public static class ProjectWindowSkinDetailsGUI
     {
-        diamondOverlayTexture = LoadDiamondIcon();
+        private const string overlayIconPath =
+            "Packages/com.miniclip.unity.shapeshifter/Editor/Icons/shapeshifter_icon.png";
+        private static Texture2D cachedOverlayIcon;
 
-        EditorApplication.projectWindowItemOnGUI += DrawSkinIconOverlay;
-    }
-
-    private static void DrawSkinIconOverlay(string guid, Rect rect)
-    {
-        if (Application.isPlaying || Event.current.type != EventType.Repaint)
+        static ProjectWindowSkinDetailsGUI()
         {
-            return;
+            cachedOverlayIcon = LoadOverlayIcon();
+
+            EditorApplication.projectWindowItemOnGUI += DrawSkinIconOverlay;
         }
-        
-        string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-        
-        if (!AssetSkinner.IsSkinned(assetPath))
-            return;
 
-        if (diamondOverlayTexture == null)
-            return;
+        private static void DrawSkinIconOverlay(string guid, Rect rect)
+        {
+            if (Application.isPlaying || Event.current.type != EventType.Repaint)
+            {
+                return;
+            }
 
-        float iconSize = rect.height / 3f;
-        float positionOffset = iconSize / 4f;
-        rect.position -= new Vector2(positionOffset, positionOffset);
-        rect.width = iconSize;
-        rect.height = iconSize;
-        
-        GUI.DrawTexture(rect, diamondOverlayTexture);
-    }
-    
-    
-    public static Texture2D LoadDiamondIcon()
-    {
-        return (Texture2D) EditorGUIUtility.Load("Packages/com.miniclip.unity.shapeshifter/Editor/Icons/diamond_shapeshifter.png");
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+
+            if (!AssetSkinner.IsSkinned(assetPath)
+                && !AssetSkinner.TryGetParentSkinnedFolder(assetPath, out string _))
+                return;
+
+            if (cachedOverlayIcon == null)
+                return;
+
+            float iconSize = rect.height;
+
+            rect.width = iconSize;
+            rect.height = iconSize;
+
+            GUI.DrawTexture(rect, cachedOverlayIcon);
+        }
+
+        private static Texture2D LoadOverlayIcon()
+        {
+            return (Texture2D) EditorGUIUtility.Load(overlayIconPath);
+        }
     }
 }
