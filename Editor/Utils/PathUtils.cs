@@ -114,7 +114,7 @@ namespace Miniclip.ShapeShifter.Utils
             return GetRelativeTo(fullPath, projectFolderName, false);
         }
 
-        private static string GetRelativeTo(string path, string relativeTo, bool includeRelativeToInPath = true)
+        internal static string GetRelativeTo(string path, string relativeTo, bool includeRelativeToInPath = true)
         {
             List<string> split = path.Split(Path.DirectorySeparatorChar).ToList();
 

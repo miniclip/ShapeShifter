@@ -62,21 +62,23 @@ namespace Miniclip.ShapeShifter.Skinner
                 return;
             }
 
-            DraAssetHeaderGUI(asset);
+            DrawAssetHeaderGUI(asset);
 
-            string path = AssetDatabase.GetAssetPath(asset);
-
-            bool skinned = AssetSkinner.IsSkinned(path);
-
+            string assetPath = AssetDatabase.GetAssetPath(asset);
+            
             Color oldColor = GUI.backgroundColor;
 
-            if (skinned)
+            if (AssetSkinner.IsSkinned(assetPath))
             {
-                DrawSkinnedAssetSection(path);
+                DrawSkinnedAssetSection(assetPath);
+            }
+            else if (AssetSkinner.TryGetParentSkinnedFolder(assetPath, out string _))
+            {
+                DrawExtractableAssetSection(assetPath);
             }
             else
             {
-                DrawUnskinnedAssetSection(path);
+                DrawUnskinnedAssetSection(assetPath);
             }
 
             GUI.backgroundColor = oldColor;
@@ -124,8 +126,8 @@ namespace Miniclip.ShapeShifter.Skinner
                 }
             }
         }
-
-        private static void DraAssetHeaderGUI(Object asset)
+        
+        private static void DrawAssetHeaderGUI(Object asset)
         {
             if (EditorGUILayout.InspectorTitlebar(false, targetObj: asset, expandable: false))
             {
@@ -351,6 +353,17 @@ namespace Miniclip.ShapeShifter.Skinner
             }
         }
 
+        private static void DrawExtractableAssetSection(string assetPath)
+        {
+            if (GUILayout.Button("Extract as single skin"))
+            {
+                string targetFolder =
+                    EditorUtility.OpenFolderPanel("Choose where to extract skin to...", Application.dataPath, "");
+                
+                SkinExtractor.ExtractAsSkin(assetPath, targetFolder);
+            }
+        }
+        
         internal static void GenerateAssetPreview(string key, string assetPath)
         {
             if (ShapeShifter.DirtyAssets.Contains(key) || !ShapeShifter.CachedPreviewPerAssetDict.ContainsKey(key))
