@@ -29,6 +29,8 @@ namespace Miniclip.ShapeShifter.Skinner
             string parentGuid = AssetDatabase.AssetPathToGUID(parentFolder);
             string parentFolderName = Path.GetFileName(parentFolder);
 
+            string guid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
+
             string source = assetPathToExtract;
             string assetName = Path.GetFileName(assetPathToExtract);
             string destination = Path.Combine(
@@ -47,8 +49,6 @@ namespace Miniclip.ShapeShifter.Skinner
             foreach (string gameName in gameNames)
             {
                 GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
-
-                string guid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
                 
                 AssetSkin extractedAssetSkin = gameSkin.GetAssetSkin(guid);
 

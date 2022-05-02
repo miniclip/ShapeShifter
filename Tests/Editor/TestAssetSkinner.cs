@@ -42,6 +42,7 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsTrue(assetCountInFolder == 3);
             
         }
+        
 
         [Test]
         public void TestGitIgnoreAfterSkinningOperations()
