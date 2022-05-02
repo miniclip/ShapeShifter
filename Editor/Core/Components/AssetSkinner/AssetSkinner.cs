@@ -107,20 +107,15 @@ namespace Miniclip.ShapeShifter.Skinner
             GUIUtility.ExitGUI();
         }
 
-        public static void SkinAssets(string[] assetPaths, bool saveFirst = true)
+        public static void SkinAssets(string[] assetPaths)
         {
-            if (saveFirst)
-            {
-                ShapeShifterUtils.SavePendingChanges();
-            }
-
             foreach (string assetPath in assetPaths)
             {
-                SkinAsset(assetPath, false);
+                SkinAsset(assetPath);
             }
         }
 
-        public static void SkinAsset(string assetPath, bool saveFirst = true)
+        public static void SkinAsset(string assetPath)
         {
             EditorUtility.DisplayProgressBar("Asset Skinner", $"Checking if {assetPath} is supported", 0);
 

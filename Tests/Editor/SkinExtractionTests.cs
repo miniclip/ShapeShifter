@@ -39,10 +39,12 @@ namespace Miniclip.ShapeShifter.Tests
 
             string newAssetPath = AssetDatabase.GUIDToAssetPath(guid);
 
+            Assert.IsTrue(newAssetPath != assetPathToExtract);
+
             Assert.IsTrue(AssetSkinner.IsSkinned(newAssetPath, TestUtils.game0.Name));
             Assert.IsTrue(AssetSkinner.IsSkinned(newAssetPath, TestUtils.game1.Name));
         }
-        
+
         [Test]
         public void ExtractAsSkin_WhenAssetExistsInOneGame_CreatesAssetSkinWith1Version()
         {
@@ -56,18 +58,18 @@ namespace Miniclip.ShapeShifter.Tests
             DirectoryInfo folderInfo = new DirectoryInfo(PathUtils.GetFullPath(assetPath));
 
             FileInfo fileToDelete = folderInfo.GetFiles().First(file => !file.Name.Contains(".meta"));
-            
+
             fileToDelete.Delete();
-            
+
             AssetDatabase.Refresh();
             AssetDatabase.SaveAssets();
-            
+
             AssetSwitcher.SwitchToGame(ShapeShifterConfiguration.Instance.GetGameSkinByName(TestUtils.game1.Name));
-            
+
             FileInfo fileToExtract = folderInfo.GetFiles().First(file => !file.Name.Contains(".meta"));
 
             Assert.IsTrue(fileToDelete.Name == fileToExtract.Name);
-            
+
             string assetPathToExtract = PathUtils.GetPathRelativeToAssetsFolder(fileToDelete.FullName);
 
             string guid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
@@ -82,6 +84,8 @@ namespace Miniclip.ShapeShifter.Tests
             SkinExtractor.ExtractAsSkin(assetPathToExtract, extractionDestinationPath);
 
             string newAssetPath = AssetDatabase.GUIDToAssetPath(guid);
+
+            Assert.IsTrue(newAssetPath != assetPathToExtract);
 
             Assert.IsTrue(!AssetSkinner.IsSkinned(newAssetPath, TestUtils.game0.Name));
             Assert.IsTrue(AssetSkinner.IsSkinned(newAssetPath, TestUtils.game1.Name));

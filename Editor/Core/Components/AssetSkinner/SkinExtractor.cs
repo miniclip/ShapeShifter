@@ -31,15 +31,14 @@ namespace Miniclip.ShapeShifter.Skinner
 
             string guid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
 
-            string source = assetPathToExtract;
             string assetName = Path.GetFileName(assetPathToExtract);
             string destination = Path.Combine(
                 PathUtils.GetPathRelativeToAssetsFolder(targetFolder),
                 assetName
             );
 
-            FileUtil.MoveFileOrDirectory(source, destination);
-            FileUtil.MoveFileOrDirectory(source + ".meta", destination + ".meta");
+            FileUtil.MoveFileOrDirectory(assetPathToExtract, destination);
+            FileUtil.MoveFileOrDirectory(assetPathToExtract + ".meta", destination + ".meta");
             AssetDatabase.Refresh();
 
             AssetSkinner.SkinAsset(destination);
