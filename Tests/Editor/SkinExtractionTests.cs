@@ -10,85 +10,107 @@ namespace Miniclip.ShapeShifter.Tests
 {
     public class SkinExtractionTests : TestBase
     {
+        private string skinnedFolderAssetPath;
+
+        private string assetPathToExtract;
+        private string assetPathToExtractGuid;
+        private string extractionDestinationPath;
+
+        public override void Setup()
+        {
+            base.Setup();
+
+            DefaultAsset folderAsset = TestUtils.GetAsset<DefaultAsset>(TestUtils.FolderAssetName);
+            skinnedFolderAssetPath = AssetDatabase.GetAssetPath(folderAsset);
+            AssetSkinner.SkinAsset(skinnedFolderAssetPath);
+            DirectoryInfo folderInfo = new DirectoryInfo(PathUtils.GetFullPath(skinnedFolderAssetPath));
+            FileInfo fileToExtract = folderInfo.GetFiles().First(file => !file.Name.Contains(".meta"));
+
+            assetPathToExtract = PathUtils.GetPathRelativeToAssetsFolder(fileToExtract.FullName);
+            assetPathToExtractGuid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
+            extractionDestinationPath = PathUtils.GetFullPath(TestUtils.TempFolderName);
+        }
+
         [Test]
         public void ExtractAsSkin_WhenAssetExistsInBothGames_CreatesAssetSkinWith2Versions()
         {
-            DefaultAsset folderAsset = TestUtils.GetAsset<DefaultAsset>(TestUtils.FolderAssetName);
+            bool success = SkinExtractor.ExtractAsSkin(assetPathToExtract, extractionDestinationPath);
 
-            string assetPath = AssetDatabase.GetAssetPath(folderAsset);
-            AssetSkinner.SkinAsset(assetPath);
+            string newAssetPath = AssetDatabase.GUIDToAssetPath(assetPathToExtractGuid);
 
-            AssetDatabase.Refresh();
-
-            DirectoryInfo folderInfo = new DirectoryInfo(PathUtils.GetFullPath(assetPath));
-
-            FileInfo fileToExtract = folderInfo.GetFiles().First(file => !file.Name.Contains(".meta"));
-
-            string assetPathToExtract = PathUtils.GetPathRelativeToAssetsFolder(fileToExtract.FullName);
-
-            string guid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
-
-            Assert.IsTrue(!AssetSkinner.IsSkinned(assetPathToExtract));
-            Assert.IsTrue(
-                AssetSkinner.TryGetParentSkinnedFolder(assetPathToExtract, out string skinnedParentFolderPath)
-            );
-
-            string extractionDestinationPath = PathUtils.GetFullPath(TestUtils.TempFolderName);
-
-            SkinExtractor.ExtractAsSkin(assetPathToExtract, extractionDestinationPath);
-
-            string newAssetPath = AssetDatabase.GUIDToAssetPath(guid);
-
-            Assert.IsTrue(newAssetPath != assetPathToExtract);
+            Assert.IsTrue(success);
 
             Assert.IsTrue(AssetSkinner.IsSkinned(newAssetPath, TestUtils.game0.Name));
             Assert.IsTrue(AssetSkinner.IsSkinned(newAssetPath, TestUtils.game1.Name));
+
+            Assert.IsTrue(!PathUtils.ArePathsEqual(PathUtils.GetFullPath(newAssetPath), assetPathToExtract));
+            Assert.IsTrue(
+                PathUtils.ArePathsEqual(
+                    PathUtils.GetFullPath(newAssetPath),
+                    Path.Combine(extractionDestinationPath, Path.GetFileName(assetPathToExtract))
+                )
+            );
         }
 
         [Test]
         public void ExtractAsSkin_WhenAssetExistsInOneGame_CreatesAssetSkinWith1Version()
         {
-            DefaultAsset folderAsset = TestUtils.GetAsset<DefaultAsset>(TestUtils.FolderAssetName);
-
-            string assetPath = AssetDatabase.GetAssetPath(folderAsset);
-            AssetSkinner.SkinAsset(assetPath);
-
+            FileUtils.SafeDelete(PathUtils.GetFullPath(assetPathToExtract));
             AssetDatabase.Refresh();
+            ShapeShifterUtils.SavePendingChanges();
 
-            DirectoryInfo folderInfo = new DirectoryInfo(PathUtils.GetFullPath(assetPath));
-
-            FileInfo fileToDelete = folderInfo.GetFiles().First(file => !file.Name.Contains(".meta"));
-
-            fileToDelete.Delete();
-
-            AssetDatabase.Refresh();
-            AssetDatabase.SaveAssets();
-
-            AssetSwitcher.SwitchToGame(ShapeShifterConfiguration.Instance.GetGameSkinByName(TestUtils.game1.Name));
-
-            FileInfo fileToExtract = folderInfo.GetFiles().First(file => !file.Name.Contains(".meta"));
-
-            Assert.IsTrue(fileToDelete.Name == fileToExtract.Name);
-
-            string assetPathToExtract = PathUtils.GetPathRelativeToAssetsFolder(fileToDelete.FullName);
-
-            string guid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
-
-            Assert.IsTrue(!AssetSkinner.IsSkinned(assetPathToExtract));
-            Assert.IsTrue(
-                AssetSkinner.TryGetParentSkinnedFolder(assetPathToExtract, out string skinnedParentFolderPath)
+            AssetSwitcher.SwitchToGame(
+                ShapeShifterConfiguration.Instance.GetGameSkinByName(TestUtils.game1.Name),
+                forceSwitch: true
             );
 
-            string extractionDestinationPath = PathUtils.GetFullPath(TestUtils.TempFolderName);
+            bool success = SkinExtractor.ExtractAsSkin(assetPathToExtract, extractionDestinationPath);
+            AssetDatabase.Refresh();
+            string newAssetPath = AssetDatabase.GUIDToAssetPath(assetPathToExtractGuid);
 
-            SkinExtractor.ExtractAsSkin(assetPathToExtract, extractionDestinationPath);
-
-            string newAssetPath = AssetDatabase.GUIDToAssetPath(guid);
-
-            Assert.IsTrue(newAssetPath != assetPathToExtract);
+            Assert.IsTrue(success);
 
             Assert.IsTrue(!AssetSkinner.IsSkinned(newAssetPath, TestUtils.game0.Name));
             Assert.IsTrue(AssetSkinner.IsSkinned(newAssetPath, TestUtils.game1.Name));
+
+            Assert.IsTrue(
+                !PathUtils.ArePathsEqual(
+                    PathUtils.GetFullPath(newAssetPath),
+                    assetPathToExtract
+                )
+            );
+        }
+
+        [Test]
+        public void ExtractAsSkin_WhenDestinationIsValid_ExtractedAssetIsMovedToDestination()
+        {
+            bool success = SkinExtractor.ExtractAsSkin(assetPathToExtract, extractionDestinationPath);
+
+            string newAssetPath = AssetDatabase.GUIDToAssetPath(assetPathToExtractGuid);
+
+            Assert.IsTrue(success);
+
+            Assert.IsTrue(
+                PathUtils.ArePathsEqual(
+                    PathUtils.GetFullPath(newAssetPath),
+                    Path.Combine(extractionDestinationPath, Path.GetFileName(assetPathToExtract))
+                )
+            );
+        }
+
+        [Test]
+        public void ExtractAsSkin_WhenTargetFolderIsTheCurrentFolder_ExtractionIsCanceled()
+        {
+            bool success = SkinExtractor.ExtractAsSkin(
+                assetPathToExtract,
+                PathUtils.GetFullPath(skinnedFolderAssetPath)
+            );
+
+            string newAssetPath = AssetDatabase.GUIDToAssetPath(assetPathToExtractGuid);
+
+            Assert.IsFalse(success);
+            Assert.IsFalse(AssetSkinner.IsSkinned(assetPathToExtract));
+            Assert.IsTrue(newAssetPath == assetPathToExtract);
         }
     }
 }

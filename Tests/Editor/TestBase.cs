@@ -5,13 +5,13 @@ namespace Miniclip.ShapeShifter.Tests
     public abstract class TestBase
     {
         [SetUp]
-        public void Setup()
+        public virtual void Setup()
         {
             TestUtils.Reset();
         }
         
         [TearDown]
-        public void Teardown()
+        public virtual void Teardown()
         {
             TestUtils.TearDown();
         }

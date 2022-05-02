@@ -7,27 +7,33 @@ namespace Miniclip.ShapeShifter.Skinner
 {
     internal static class SkinExtractor
     {
-        public static void ExtractAsSkin(string assetPathToExtract, string targetFolder)
+        public static bool ExtractAsSkin(string assetPathToExtract, string targetFolder)
         {
+            if (string.IsNullOrEmpty(targetFolder))
+            {
+                return false;
+            }
+            
             if (AssetSkinner.IsSkinned(assetPathToExtract))
             {
                 ShapeShifterLogger.LogWarning($"{assetPathToExtract} is already a skinned asset");
-                return;
+                return false;
             }
 
-            if (!AssetSkinner.TryGetParentSkinnedFolder(assetPathToExtract, out string parentFolder))
+            if (!AssetSkinner.TryGetParentSkinnedFolder(assetPathToExtract, out string skinnedParentFolder))
             {
                 ShapeShifterLogger.LogWarning($"{assetPathToExtract} is not inside a skinned folder. Therefore it cannot be extracted");
-                return;
+                return false;
             }
 
-            if (string.IsNullOrEmpty(targetFolder))
+            if (targetFolder.Contains(PathUtils.GetFullPath(skinnedParentFolder)))
             {
-                return;
+                ShapeShifterLogger.LogWarning($"Target destination is inside a skinned folder. Select an unskinned destination folder.");
+                return false;
             }
             
-            string parentGuid = AssetDatabase.AssetPathToGUID(parentFolder);
-            string parentFolderName = Path.GetFileName(parentFolder);
+            string parentGuid = AssetDatabase.AssetPathToGUID(skinnedParentFolder);
+            string parentFolderName = Path.GetFileName(skinnedParentFolder);
 
             string guid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
 
@@ -55,7 +61,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
                 if (folderAssetSkin == null)
                 {
-                    return;
+                    continue;
                 }
                 
                 string originalSkinPath = Path.Combine(
@@ -74,6 +80,8 @@ namespace Miniclip.ShapeShifter.Skinner
                     FileUtil.MoveFileOrDirectory(originalSkinPath + ".meta", newSkinPath + ".meta");
                 }
             }
+
+            return true;
         }
     }
 }
