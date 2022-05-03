@@ -9,33 +9,17 @@ namespace Miniclip.ShapeShifter.Skinner
     {
         public static bool ExtractAsSkin(string assetPathToExtract, string targetFolder)
         {
-            if (string.IsNullOrEmpty(targetFolder))
+            if (!IsExtractionValid(assetPathToExtract, targetFolder))
             {
-                return false;
-            }
-            
-            if (AssetSkinner.IsSkinned(assetPathToExtract))
-            {
-                ShapeShifterLogger.LogWarning($"{assetPathToExtract} is already a skinned asset");
                 return false;
             }
 
-            if (!AssetSkinner.TryGetParentSkinnedFolder(assetPathToExtract, out string skinnedParentFolder))
-            {
-                ShapeShifterLogger.LogWarning($"{assetPathToExtract} is not inside a skinned folder. Therefore it cannot be extracted");
-                return false;
-            }
-
-            if (targetFolder.Contains(PathUtils.GetFullPath(skinnedParentFolder)))
-            {
-                ShapeShifterLogger.LogWarning($"Target destination is inside a skinned folder. Select an unskinned destination folder.");
-                return false;
-            }
+            AssetSkinner.TryGetParentSkinnedFolder(assetPathToExtract, out string skinnedParentFolder);
             
             string parentGuid = AssetDatabase.AssetPathToGUID(skinnedParentFolder);
             string parentFolderName = Path.GetFileName(skinnedParentFolder);
 
-            string guid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
+            string assetPathToExtractGuid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
 
             string assetName = Path.GetFileName(assetPathToExtract);
             string destination = Path.Combine(
@@ -55,7 +39,7 @@ namespace Miniclip.ShapeShifter.Skinner
             {
                 GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
                 
-                AssetSkin extractedAssetSkin = gameSkin.GetAssetSkin(guid);
+                AssetSkin extractedAssetSkin = gameSkin.GetAssetSkin(assetPathToExtractGuid);
 
                 AssetSkin folderAssetSkin = gameSkin.GetAssetSkin(parentGuid);
 
@@ -79,6 +63,38 @@ namespace Miniclip.ShapeShifter.Skinner
                     FileUtil.MoveFileOrDirectory(originalSkinPath, newSkinPath);
                     FileUtil.MoveFileOrDirectory(originalSkinPath + ".meta", newSkinPath + ".meta");
                 }
+            }
+
+            return true;
+        }
+
+        private static bool IsExtractionValid(string assetPathToExtract, string targetFolder)
+        {
+            if (string.IsNullOrEmpty(targetFolder))
+            {
+                return false;
+            }
+
+            if (AssetSkinner.IsSkinned(assetPathToExtract))
+            {
+                ShapeShifterLogger.LogWarning($"{assetPathToExtract} is already a skinned asset");
+                return false;
+            }
+
+            if (!AssetSkinner.TryGetParentSkinnedFolder(assetPathToExtract, out string skinnedParentFolder))
+            {
+                ShapeShifterLogger.LogWarning(
+                    $"{assetPathToExtract} is not inside a skinned folder. Therefore it cannot be extracted"
+                );
+                return false;
+            }
+
+            if (targetFolder.Contains(PathUtils.GetFullPath(skinnedParentFolder)))
+            {
+                ShapeShifterLogger.LogWarning(
+                    $"Target destination is inside a skinned folder. Select an unskinned destination folder."
+                );
+                return false;
             }
 
             return true;
