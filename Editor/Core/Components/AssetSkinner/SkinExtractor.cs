@@ -5,65 +5,26 @@ using UnityEditor;
 
 namespace Miniclip.ShapeShifter.Skinner
 {
-    internal static class SkinExtractor
+    static class SkinExtractor
     {
-        public static bool ExtractAsSkin(string assetPathToExtract, string targetFolder)
+        public static bool ExtractAsSkin(string originalAssetPath, string targetFolder)
         {
-            if (!IsExtractionValid(assetPathToExtract, targetFolder))
+            if (!IsExtractionValid(originalAssetPath, targetFolder))
             {
                 return false;
             }
 
-            AssetSkinner.TryGetParentSkinnedFolder(assetPathToExtract, out string skinnedParentFolder);
-            
-            string parentGuid = AssetDatabase.AssetPathToGUID(skinnedParentFolder);
-            string parentFolderName = Path.GetFileName(skinnedParentFolder);
+            string newAssetPath = GetDestinationPath(originalAssetPath, targetFolder);
 
-            string assetPathToExtractGuid = AssetDatabase.AssetPathToGUID(assetPathToExtract);
-
-            string assetName = Path.GetFileName(assetPathToExtract);
-            string destination = Path.Combine(
-                PathUtils.GetPathRelativeToAssetsFolder(targetFolder),
-                assetName
-            );
-
-            FileUtil.MoveFileOrDirectory(assetPathToExtract, destination);
-            FileUtil.MoveFileOrDirectory(assetPathToExtract + ".meta", destination + ".meta");
+            MoveAsset(originalAssetPath, newAssetPath);
             AssetDatabase.Refresh();
 
-            AssetSkinner.SkinAsset(destination);
+            AssetSkinner.SkinAsset(newAssetPath);
 
-            List<string> gameNames = ShapeShifterConfiguration.Instance.GameNames;
-
-            foreach (string gameName in gameNames)
-            {
-                GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
-                
-                AssetSkin extractedAssetSkin = gameSkin.GetAssetSkin(assetPathToExtractGuid);
-
-                AssetSkin folderAssetSkin = gameSkin.GetAssetSkin(parentGuid);
-
-                if (folderAssetSkin == null)
-                {
-                    continue;
-                }
-                
-                string originalSkinPath = Path.Combine(
-                    folderAssetSkin.FolderPath,
-                    PathUtils.GetRelativeTo(assetPathToExtract, parentFolderName)
-                );
-
-                AssetSkinner.RemoveSkinFromGame(destination, gameName);
-
-                if (PathUtils.FileOrDirectoryExists(originalSkinPath))
-                {
-                    string newSkinPath = Path.Combine(extractedAssetSkin.FolderPath, assetName);
-                    string skinFolder = Path.GetDirectoryName(newSkinPath);
-                    FileUtils.TryCreateDirectory(skinFolder);
-                    FileUtil.MoveFileOrDirectory(originalSkinPath, newSkinPath);
-                    FileUtil.MoveFileOrDirectory(originalSkinPath + ".meta", newSkinPath + ".meta");
-                }
-            }
+            MoveSkinVersionsToNewLocation(
+                originalAssetPath,
+                newAssetPath
+            );
 
             return true;
         }
@@ -92,12 +53,68 @@ namespace Miniclip.ShapeShifter.Skinner
             if (targetFolder.Contains(PathUtils.GetFullPath(skinnedParentFolder)))
             {
                 ShapeShifterLogger.LogWarning(
-                    $"Target destination is inside a skinned folder. Select an unskinned destination folder."
+                    "Target destination is inside a skinned folder. Select an unskinned destination folder."
                 );
                 return false;
             }
 
             return true;
+        }
+
+        private static string GetDestinationPath(string assetPathToExtract, string targetFolder)
+        {
+            return Path.Combine(
+                PathUtils.GetPathRelativeToAssetsFolder(targetFolder),
+                Path.GetFileName(assetPathToExtract)
+            );
+        }
+
+        private static void MoveAsset(string source, string destination)
+        {
+            FileUtils.SafeMove(source, destination);
+            FileUtils.SafeMove(source + ".meta", destination + ".meta");
+        }
+
+        private static void MoveSkinVersionsToNewLocation(string originalAssetPath,
+            string newAssetPath)
+        {
+            List<string> gameNames = ShapeShifterConfiguration.Instance.GameNames;
+
+            AssetSkinner.TryGetParentSkinnedFolder(originalAssetPath, out string originalParentFolder);
+
+            string parentGuid = AssetDatabase.AssetPathToGUID(originalParentFolder);
+            string parentFolderName = Path.GetFileName(originalParentFolder);
+
+            foreach (string gameName in gameNames)
+            {
+                GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
+
+                AssetSkin folderAssetSkin = gameSkin.GetAssetSkin(parentGuid);
+
+                if (folderAssetSkin == null)
+                {
+                    continue;
+                }
+
+                string originalSkinPath = Path.Combine(
+                    folderAssetSkin.FolderPath,
+                    PathUtils.GetRelativeTo(originalAssetPath, parentFolderName)
+                );
+
+                AssetSkinner.RemoveSkinFromGame(newAssetPath, gameName);
+
+                if (PathUtils.FileOrDirectoryExists(originalSkinPath))
+                {
+                    string newSkinPath = Path.Combine(
+                        gameSkin.InternalSkinsFolderPath,
+                        AssetDatabase.AssetPathToGUID(newAssetPath),
+                        Path.GetFileName(originalAssetPath)
+                    );
+                    string skinFolder = Path.GetDirectoryName(newSkinPath);
+                    FileUtils.TryCreateDirectory(skinFolder);
+                    MoveAsset(originalSkinPath, newSkinPath);
+                }
+            }
         }
     }
 }

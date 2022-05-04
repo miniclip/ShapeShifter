@@ -67,6 +67,12 @@ namespace Miniclip.ShapeShifter.Utils
             FileUtil.CopyFileOrDirectory(source, destination);
         }
 
+        public static void SafeMove(string source, string destination)
+        {
+            ValidatePathSafety(source, destination);
+            FileUtil.MoveFileOrDirectory(source, destination);
+        }
+        
         public static void ValidatePathSafety(params string[] paths)
         {
             DirectoryInfo assetsDirectoryInfo = new DirectoryInfo(Application.dataPath);
