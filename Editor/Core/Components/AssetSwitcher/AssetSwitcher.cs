@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -7,13 +8,16 @@ using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Switcher
 {
     public static class AssetSwitcher
     {
-        public static void DeleteAssetInternalCopy(string guid)
+        public static event Action<string> OnGameSwitch;
+
+        public static event Action<string> OnGameSaved;
+
+        internal static void DeleteAssetInternalCopy(string guid)
         {
             string assetPathFromAssetDatabase = AssetDatabase.GUIDToAssetPath(guid);
             if (string.IsNullOrEmpty(assetPathFromAssetDatabase)
@@ -26,7 +30,7 @@ namespace Miniclip.ShapeShifter.Switcher
             FileUtils.SafeDelete(assetPathFromAssetDatabase + ".meta");
         }
 
-        public static void RefreshAsset(string guid)
+        internal static void RefreshAsset(string guid)
         {
             if (string.IsNullOrEmpty(guid))
             {
@@ -45,7 +49,7 @@ namespace Miniclip.ShapeShifter.Switcher
         internal static void OverwriteSelectedSkin(GameSkin selected, bool forceOverwrite = false)
         {
             string name = selected.Name;
-            
+
             if (ShapeShifter.ActiveGameSkin != selected)
             {
                 StringBuilder stringBuilder = new StringBuilder();
@@ -71,7 +75,8 @@ namespace Miniclip.ShapeShifter.Switcher
                 selected,
                 "Overwrite selected skin",
                 AssetSwitcherOperations.CopyFromUnityToSkins,
-                AssetSwitcherOperations.CopyFromOriginToSkinnedExternal
+                AssetSwitcherOperations.CopyFromOriginToSkinnedExternal,
+                () => OnGameSaved?.Invoke(selected.Name)
             );
 
             UnsavedAssetsManager.ClearUnsavedChanges();
@@ -138,7 +143,8 @@ namespace Miniclip.ShapeShifter.Switcher
                 gameToSwitchTo,
                 "Switch to game",
                 AssetSwitcherOperations.CopyFromSkinsToUnity,
-                AssetSwitcherOperations.CopyFromSkinnedExternalToOrigin
+                AssetSwitcherOperations.CopyFromSkinnedExternalToOrigin,
+                () => OnGameSwitch?.Invoke(gameToSwitchTo.Name)
             );
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
             UnsavedAssetsManager.ClearUnsavedChanges();

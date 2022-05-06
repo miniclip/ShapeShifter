@@ -38,7 +38,8 @@ namespace Miniclip.ShapeShifter.Switcher
         public static void PerformCopiesWithTracking(GameSkin selected,
             string description,
             Action<DirectoryInfo> internalAssetOperation,
-            Action<DirectoryInfo> externalAssetOperation)
+            Action<DirectoryInfo> externalAssetOperation,
+            Action operationsCompletedCallback)
         {
             ShapeShifterLogger.Log($"{description}: {selected.Name}");
 
@@ -75,6 +76,8 @@ namespace Miniclip.ShapeShifter.Switcher
                 );
 
                 AssetSwitcher.RefreshAllAssets();
+                
+                operationsCompletedCallback?.Invoke();
             }
             else
             {
