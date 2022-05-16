@@ -57,7 +57,7 @@ namespace Miniclip.ShapeShifter
 
             GameSkin gameSkin = new GameSkin(gameSkinName);
 
-            IOUtils.TryCreateDirectory(gameSkin.MainFolderPath);
+            FileUtils.TryCreateDirectory(gameSkin.MainFolderPath);
 
             EditorUtility.SetDirty(this);
         }

@@ -8,22 +8,9 @@ namespace Miniclip.ShapeShifter.Switcher
 {
     public static class AssetSwitcherGUI
     {
-        private static int highlightedGame;
-        private static GameSkin highlightedGameSkin;
-
-        private static bool showSwitcher = true;
-
         private static List<string> GameNames => ShapeShifterConfiguration.Instance.GameNames;
 
-        public static int HighlightedGame
-        {
-            get => highlightedGame;
-
-            set
-            {
-                highlightedGame = value;
-            }
-        }
+        private static int HighlightedGame { get; set; }
 
         internal static void OnGUI()
         {
@@ -68,30 +55,5 @@ namespace Miniclip.ShapeShifter.Switcher
 
             GUILayout.Box($"Active game: {ShapeShifter.ActiveGameName}", titleStyle);
         }
-
-        // internal static void OnOverwriteAllSkinsGUI()
-        // {
-        //     Color backgroundColor = GUI.backgroundColor;
-        //
-        //     GUI.backgroundColor = Color.red;
-        //
-        //     if (GUILayout.Button(
-        //             $"Overwrite all {ShapeShifterUtils.GetGameName(HighlightedGame)} skins",
-        //             StyleUtils.ButtonStyle
-        //         ))
-        //     {
-        //         if (EditorUtility.DisplayDialog(
-        //                 "ShapeShifter",
-        //                 $"This will overwrite you current {ShapeShifterUtils.GetGameName(HighlightedGame)} assets with the assets currently inside unity. Are you sure?",
-        //                 "Yes, overwrite it.",
-        //                 "Nevermind"
-        //             ))
-        //         {
-        //             AssetSwitcher.OverwriteSelectedSkin(HighlightedGame);
-        //         }
-        //     }
-        //
-        //     GUI.backgroundColor = backgroundColor;
-        // }
     }
 }

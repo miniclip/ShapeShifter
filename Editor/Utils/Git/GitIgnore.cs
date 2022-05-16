@@ -20,9 +20,16 @@ namespace Miniclip.ShapeShifter.Utils.Git
 
         internal static string GetIgnoredPathByGuid(string guid)
         {
-            return GitIgnoreWrapper.Instance().TryGetValue(guid, out List<string> ignoredPaths)
-                ? ignoredPaths.FirstOrDefault()?.TrimStart('/')
-                : null;
+            GitIgnoreWrapper gitIgnoreWrapper = GitIgnoreWrapper.Instance();
+            if (gitIgnoreWrapper.TryGetValue(guid, out List<string> ignoredPaths))
+            {
+                return ignoredPaths.FirstOrDefault()?.TrimStart('/');
+            }
+            else
+            {
+                return null;
+            }
+            
         }
 
         public static void Add(string key, string pathToIgnore)
@@ -43,9 +50,9 @@ namespace Miniclip.ShapeShifter.Utils.Git
 
             ignoredPaths.Add(sanitizedPathToAdd);
 
-            if (File.Exists(fullPathToIgnore + ".meta"))
+            if (File.Exists(fullPathToIgnore.TrimEnd(Path.DirectorySeparatorChar) + ".meta"))
             {
-                string metaPathRelativeToProjectFolder = sanitizedPathToAdd + ".meta";
+                string metaPathRelativeToProjectFolder = sanitizedPathToAdd.TrimEnd(Path.DirectorySeparatorChar) + ".meta";
                 ignoredPaths.Add(metaPathRelativeToProjectFolder);
             }
 
@@ -86,7 +93,7 @@ namespace Miniclip.ShapeShifter.Utils.Git
             private GitIgnoreWrapper()
             {
                 // EditorUtility.DisplayProgressBar("Git Ignore", "Fetching current git ignore contents", 0f);
-                List<string> ignoredContent = IOUtils.ReadAllLines(GitIgnorePath);
+                List<string> ignoredContent = FileUtils.ReadAllLines(GitIgnorePath);
 
                 string currentKey = string.Empty;
                 int i;

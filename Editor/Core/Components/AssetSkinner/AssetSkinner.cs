@@ -4,7 +4,6 @@ using System.Linq;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
-using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Skinner
 {
@@ -40,7 +39,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
                 if (Directory.Exists(assetFolder))
                 {
-                    Directory.Delete(assetFolder, true);
+                    FileUtils.SafeDelete(assetFolder);
                 }
 
                 EditorUtility.DisplayProgressBar("Asset Skinner", $"Staging changes", 0.95f);
@@ -120,22 +119,14 @@ namespace Miniclip.ShapeShifter.Skinner
                 }
 
                 EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Creating directory for asset", 0.3f);
-                IOUtils.TryCreateDirectory(assetFolder, true);
+                FileUtils.TryCreateDirectory(assetFolder, true);
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
 
                 EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Copying asset to skin directory", 0.3f);
-                if (AssetDatabase.IsValidFolder(assetPath))
-                {
-                    DirectoryInfo targetFolder = Directory.CreateDirectory(target);
-                    IOUtils.CopyFolder(new DirectoryInfo(origin), targetFolder);
-                    IOUtils.CopyFile(origin + ".meta", target + ".meta");
-                }
-                else
-                {
-                    IOUtils.CopyFile(origin, target);
-                    IOUtils.CopyFile(origin + ".meta", target + ".meta");
-                }
+
+                FileUtils.SafeCopy(origin, target);
+                FileUtils.SafeCopy(origin + ".meta", target + ".meta");
 
                 EditorUtility.DisplayProgressBar($"Skinning for {game}", $"Staging changes", 0.3f);
 
@@ -164,7 +155,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 guid
             );
 
-            return IOUtils.DoesFolderExistAndHaveFiles(assetFolder);
+            return FileUtils.DoesFolderExistAndHaveFiles(assetFolder);
         }
     }
 }

@@ -15,15 +15,6 @@ namespace Miniclip.ShapeShifter
     class ShapeShifterEditorWindow : EditorWindow
     {
         private bool showConfiguration;
-        private int selectedTab;
-
-        private enum TabOptions
-        {
-            AssetSkinner = 0,
-            ExternalSkinner = 1,
-            Configuration = 2,
-            Tools = 3
-        }
 
         [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, 'G')]
         public static void OpenShapeShifter()
@@ -68,43 +59,30 @@ namespace Miniclip.ShapeShifter
                 }
             }
 
-            AssetSwitcherGUI.OnGUI();
-
-            selectedTab = GUILayout.Toolbar(
-                selectedTab,
-                Enum.GetNames(typeof(TabOptions))
-            );
-            Debug.Log(selectedTab);
-
-            switch ((TabOptions) selectedTab)
-            {
-                case TabOptions.AssetSkinner:
-                    AssetSkinnerGUI.OnGUI();
-                    break;
-                case TabOptions.ExternalSkinner:
-                    ExternalAssetSkinnerGUI.OnGUI();
-                    break;
-                case TabOptions.Configuration:
-                    OnShowConfigurationGUI();
-                    break;
-                case TabOptions.Tools:
-                    OnShowUtilOperationsGUI();
-                    OnDangerousOperationsGUI();
-                    ShapeShifterLogger.OnGUI();
-                    break;
-            }
-
             using (new GUILayout.VerticalScope())
             {
+                OnShowConfigurationGUI();
                 OnShowComponentsGUI();
-            }
 
+                GUILayout.FlexibleSpace();
+
+                OnShowUtilOperationsGUI();
+                OnDangerousOperationsGUI();
+
+                GUILayout.FlexibleSpace();
+                
+                ShapeShifterLogger.OnGUI();
+            }
+            
             Repaint();
         }
 
         private void OnShowConfigurationGUI()
         {
-            if (ShapeShifterConfiguration.Instance.DefaultConfigurationEditor != null
+            showConfiguration = EditorGUILayout.Foldout(showConfiguration, "Configuration");
+
+            if (showConfiguration
+                && ShapeShifterConfiguration.Instance.DefaultConfigurationEditor != null
                 && ShapeShifterConfiguration.Instance.ExternalConfigurationEditor != null)
             {
                 ShapeShifterConfiguration.Instance.DefaultConfigurationEditor.OnInspectorGUI();
@@ -112,7 +90,12 @@ namespace Miniclip.ShapeShifter
             }
         }
 
-        private static void OnShowComponentsGUI() { }
+        private static void OnShowComponentsGUI()
+        {
+            AssetSwitcherGUI.OnGUI();
+            AssetSkinnerGUI.OnGUI();
+            ExternalAssetSkinnerGUI.OnGUI();
+        }
 
         private static void OnShowUtilOperationsGUI()
         {
@@ -130,6 +113,7 @@ namespace Miniclip.ShapeShifter
 
             PreMergeCheckGUI.OnGUI();
         }
+
 
         private static void OnDangerousOperationsGUI()
         {
@@ -157,9 +141,8 @@ namespace Miniclip.ShapeShifter
                 EditorUtility.DisplayProgressBar("ShapeShifter", "Deleting main skins folder", 1f);
                 if (Directory.Exists(ShapeShifter.SkinsFolder.FullName))
                 {
-                    ShapeShifter.SkinsFolder.Delete(true);
+                    FileUtils.SafeDelete(ShapeShifter.SkinsFolder.FullName);
                 }
-
                 EditorUtility.ClearProgressBar();
                 GUIUtility.ExitGUI();
             }
@@ -169,13 +152,10 @@ namespace Miniclip.ShapeShifter
 
         private static bool RemoveAllSkinsDisplayDialog()
         {
-            return EditorUtility.DisplayDialog(
-                "ShapeShifter",
-                $"You are about to remove shapeshifter's skin folders.\n Your project assets will remain "
-                + $"the same as the current game skin ({ShapeShifter.ActiveGameName}).\n You will loose the other game skins",
-                "Continue",
-                "Cancel"
-            );
+            return EditorUtility.DisplayDialog("ShapeShifter",
+                $"You are about to remove shapeshifter's skin folders.\n Your project assets will remain " +
+                $"the same as the current game skin ({ShapeShifter.ActiveGameName}).\n You will loose the other game skins",
+                "Continue", "Cancel");
         }
     }
 }

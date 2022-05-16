@@ -32,28 +32,24 @@ namespace Miniclip.ShapeShifter.Switcher
                         // assetSkin.Delete();
                     }
 
-                    string guidToAssetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
-                    string metaPath = guidToAssetPath + ".meta";
-                    
-                    if (GitUtils.IsTracked(guidToAssetPath) || GitUtils.IsTracked(metaPath))
+                    string assetDatabasePath = "";
+
+                    if (!string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath(assetSkin.Guid)))
                     {
-                        GitUtils.Untrack(assetSkin.Guid, guidToAssetPath, true);
+                        assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(assetSkin.Guid));
                     }
 
-                    string guid = assetSkin.Guid;
+                    string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(assetSkin.Guid));
 
-                    string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
-                    string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(guid));
-
-                    if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
+                    if (!PathUtils.ArePathsEqual(assetDatabasePath, assetGitIgnorePath))
                     {
-                        missingAssets.Add(guid);
+                        missingAssets.Add(assetSkin.Guid);
                         continue;
                     }
 
                     if (!PathUtils.FileOrDirectoryExists(assetDatabasePath))
                     {
-                        missingAssets.Add(guid);
+                        missingAssets.Add(assetSkin.Guid);
                     }
                 }
 
@@ -86,7 +82,7 @@ namespace Miniclip.ShapeShifter.Switcher
             string relativePath = ExternalAssetSkinner.GenerateRelativePathFromKey(directory.Name);
             string origin = Path.Combine(Application.dataPath, relativePath);
             string target = Path.Combine(directory.FullName, Path.GetFileName(origin));
-            IOUtils.CopyFile(origin, target);
+            FileUtils.SafeCopy(origin, target);
         }
 
         private static void CopyFromSkinnedExternalToOrigin(DirectoryInfo directory)
@@ -100,7 +96,7 @@ namespace Miniclip.ShapeShifter.Switcher
                 return;
 
             FileInfo origin = fileInfos[0];
-            origin.CopyTo(target, true);
+            FileUtils.SafeCopy(origin.FullName, target);
         }
 
         private static void CopyFromSkinsToUnity(DirectoryInfo directory)
@@ -119,11 +115,11 @@ namespace Miniclip.ShapeShifter.Switcher
                 {
                     if (fileInfo.Extension == ".meta")
                     {
-                        fileInfo.CopyTo(target + ".meta", true);
+                        FileUtils.SafeCopy(fileInfo.FullName, target + ".meta");
                     }
                     else
                     {
-                        fileInfo.CopyTo(target, true);
+                        FileUtils.SafeCopy(fileInfo.FullName, target);
                     }
                 }
             }
@@ -137,16 +133,15 @@ namespace Miniclip.ShapeShifter.Switcher
                     target
                 );
 
-                IOUtils.CopyFolder(directories[0], new DirectoryInfo(target));
+                FileUtils.SafeCopy(directories[0].FullName, target);
             }
         }
 
         private static void CopyFromUnityToSkins(DirectoryInfo skinDirectory)
         {
-            if (!IOUtils.DoesFolderExistAndHaveFiles(skinDirectory.FullName) && skinDirectory.Exists)
+            if (!FileUtils.DoesFolderExistAndHaveFiles(skinDirectory.FullName) && skinDirectory.Exists)
             {
-                //There shouldn't be an empty skin folder, most likely it was removed outside of ShapeShifter. E.g. discarding changes in a git client.
-                skinDirectory.Delete();
+                FileUtils.SafeDelete(skinDirectory.FullName);
                 return;
             }
 
@@ -174,7 +169,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
                 DirectoryInfo originInfo = new DirectoryInfo(origin);
                 DirectoryInfo targetInfo = new DirectoryInfo(target);
-                IOUtils.CopyFolder(originInfo, targetInfo);
+                FileUtils.SafeCopy(origin, target);
             }
             else
             {
@@ -183,9 +178,9 @@ namespace Miniclip.ShapeShifter.Switcher
                     return;
                 }
 
-                IOUtils.TryCreateDirectory(skinDirectory.FullName, true);
-                IOUtils.CopyFile(origin, target);
-                IOUtils.CopyFile(origin + ".meta", target + ".meta");
+                FileUtils.TryCreateDirectory(skinDirectory.FullName, true);
+                FileUtils.SafeCopy(origin, target);
+                FileUtils.SafeCopy(origin + ".meta", target + ".meta");
             }
 
             string game = skinDirectory.Parent.Parent.Name;
@@ -401,11 +396,11 @@ namespace Miniclip.ShapeShifter.Switcher
         {
             string guid = directory.Name;
 
-            string assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
-            string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(guid));
+            string assetPathFromAssetDatabase = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
+            string assetPathFromGitIgnore = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(guid));
 
             //prioritize path from gitignore as is the only one version controlled
-            string targetPath = assetGitIgnorePath;
+            string targetPath = assetPathFromGitIgnore;
 
             if (string.IsNullOrEmpty(targetPath))
             {
@@ -415,19 +410,19 @@ namespace Miniclip.ShapeShifter.Switcher
 
             string assetFolder = Path.GetDirectoryName(targetPath);
 
-            IOUtils.TryCreateDirectory(assetFolder);
+            FileUtils.TryCreateDirectory(assetFolder);
 
-            if (!string.Equals(assetDatabasePath, assetGitIgnorePath))
+            if (!string.Equals(assetPathFromAssetDatabase, assetPathFromGitIgnore))
             {
-                if (PathUtils.FileOrDirectoryExists(assetDatabasePath))
+                if (PathUtils.FileOrDirectoryExists(assetPathFromAssetDatabase))
                 {
                     //delete any file on AssetDatabasePath as is probably outdated and should not be there
-                    FileUtil.DeleteFileOrDirectory(assetDatabasePath);
-                    FileUtil.DeleteFileOrDirectory(assetDatabasePath + ".meta");
+                    FileUtils.SafeDelete(assetPathFromAssetDatabase);
+                    FileUtils.SafeDelete(assetPathFromAssetDatabase + ".meta");
                 }
             }
 
-            string searchPattern = Path.GetFileName(targetPath) + "*";
+            string searchPattern = Path.GetFileName(PathUtils.NormalizePath(targetPath)) + "*";
 
             FileInfo[] files = directory.GetFiles(searchPattern);
 
@@ -435,14 +430,14 @@ namespace Miniclip.ShapeShifter.Switcher
             {
                 if (fileInfo.Extension == ".meta")
                 {
-                    string metaFile = targetPath + ".meta";
+                    string metaFile = assetFolder + ".meta";
                     if (File.Exists(PathUtils.GetFullPath(metaFile)))
                     {
                         continue;
                     }
 
                     ShapeShifterLogger.Log($"Retrieving: {metaFile}");
-                    FileUtil.CopyFileOrDirectory(fileInfo.FullName, metaFile);
+                    FileUtils.SafeCopy(fileInfo.FullName, metaFile);
                 }
                 else
                 {
@@ -452,7 +447,7 @@ namespace Miniclip.ShapeShifter.Switcher
                     }
 
                     ShapeShifterLogger.Log($"Retrieving: {targetPath}");
-                    FileUtil.CopyFileOrDirectory(fileInfo.FullName, targetPath);
+                    FileUtils.SafeCopy(fileInfo.FullName, targetPath);
                 }
             }
 
@@ -465,7 +460,7 @@ namespace Miniclip.ShapeShifter.Switcher
                     targetPath
                 );
 
-                IOUtils.CopyFolder(directories[0], new DirectoryInfo(targetPath));
+                FileUtils.SafeCopy(directories[0].FullName, targetPath);
             }
         }
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using Miniclip.ShapeShifter.Extensions;
 using Miniclip.ShapeShifter.Utils.Git;
+using UnityEditor;
 using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Utils
@@ -131,6 +132,11 @@ namespace Miniclip.ShapeShifter.Utils
                 RemoveFromRepository(fullPath);
             }
 
+            if (AssetDatabase.IsValidFolder(path) && !path.EndsWith(Path.DirectorySeparatorChar.ToString()))
+            {
+                path += Path.DirectorySeparatorChar;
+            }
+            
             GitIgnore.Add(key, path);
         }
 

@@ -88,7 +88,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
                 if (Directory.Exists(assetFolder))
                 {
-                    Directory.Delete(assetFolder, true);
+                    FileUtils.SafeDelete(assetFolder);
                 }
 
                 GitUtils.Stage(assetFolder);
@@ -151,7 +151,7 @@ namespace Miniclip.ShapeShifter.Skinner
                     key
                 );
 
-                IOUtils.TryCreateDirectory(assetFolder);
+                FileUtils.TryCreateDirectory(assetFolder);
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
 
@@ -160,7 +160,7 @@ namespace Miniclip.ShapeShifter.Skinner
                     origin = overridesPerGame[gameName];
                 }
 
-                IOUtils.CopyFile(origin, target);
+                FileUtils.SafeCopy(origin, target);
 
                 GitUtils.Stage(target);
             }
