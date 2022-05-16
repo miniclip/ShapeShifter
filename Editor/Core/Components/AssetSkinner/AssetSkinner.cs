@@ -50,7 +50,7 @@ namespace Miniclip.ShapeShifter.Skinner
 
             EditorUtility.DisplayProgressBar("Asset Skinner", $"Tracking {assetPath}", 0.95f);
 
-            GitUtils.Track(guid);
+            GitUtils.Track(guid, assetPath);
             EditorUtility.ClearProgressBar();
         }
 
@@ -95,6 +95,7 @@ namespace Miniclip.ShapeShifter.Skinner
             if (saveFirst)
             {
                 EditorUtility.DisplayProgressBar("Asset Skinner", $"Saving pending changes", 0.2f);
+
                 // make sure any pending changes are saved before generating copies
                 ShapeShifterUtils.SavePendingChanges();
             }
@@ -142,7 +143,7 @@ namespace Miniclip.ShapeShifter.Skinner
             }
 
             EditorUtility.DisplayProgressBar($"Asset Skinner", $"Untracking {assetPath}", 0.5f);
-            GitUtils.Untrack(guid);
+            GitUtils.Untrack(guid, assetPath, true);
             EditorUtility.ClearProgressBar();
         }
 
@@ -163,39 +164,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 guid
             );
 
-            return Directory.Exists(assetFolder) && !IOUtils.IsFolderEmpty(assetFolder);
-        }
-
-        private static void OnDisable()
-        {
-            ShapeShifter.DirtyAssets.Clear();
-            ShapeShifter.CachedPreviewPerAssetDict.Clear();
-        }
-
-        private static IEnumerable<string> GetEligibleAssetPaths(Object[] assets)
-        {
-            IEnumerable<string> assetPaths =
-                assets.Select(AssetDatabase.GetAssetPath);
-            RemoveEmptyAssetPaths(ref assetPaths);
-            RemoveDuplicatedAssetPaths(ref assetPaths);
-            RemoveAlreadySkinnedAssets(ref assetPaths);
-            return assetPaths;
-        }
-
-        private static void RemoveEmptyAssetPaths(ref IEnumerable<string> assetPaths) =>
-            assetPaths = assetPaths.Where(assetPath => !string.IsNullOrEmpty(assetPath));
-
-        private static void RemoveDuplicatedAssetPaths(ref IEnumerable<string> assetPaths) =>
-            assetPaths = assetPaths.Distinct();
-
-        private static void RemoveAlreadySkinnedAssets(ref IEnumerable<string> assetPaths) =>
-            assetPaths = assetPaths.Where(assetPath => !IsSkinned(assetPath));
-
-        internal static void CreateGameSkinFolder(string gameName)
-        {
-            GameSkin gameSkin = new GameSkin(gameName);
-
-            IOUtils.TryCreateDirectory(gameSkin.MainFolderPath);
+            return IOUtils.DoesFolderExistAndHaveFiles(assetFolder);
         }
     }
 }

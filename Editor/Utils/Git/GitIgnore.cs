@@ -18,43 +18,48 @@ namespace Miniclip.ShapeShifter.Utils.Git
 
         internal static bool IsIgnored(string guid) => GitIgnoreWrapper.Instance().ContainsKey(guid);
 
-        internal static string GetIgnoredPathByGuid(string guid) =>
-            GitIgnoreWrapper.Instance().TryGetValue(guid, out List<string> ignoredPaths)
-                ? ignoredPaths.FirstOrDefault()
-                : null;
-
-        internal static void Add(string guid)
+        internal static string GetIgnoredPathByGuid(string guid)
         {
-            GitIgnoreWrapper gitIgnore = GitIgnoreWrapper.Instance();
+            return GitIgnoreWrapper.Instance().TryGetValue(guid, out List<string> ignoredPaths)
+                ? ignoredPaths.FirstOrDefault()?.TrimStart('/')
+                : null;
+        }
 
-            List<string> ignoredPaths = gitIgnore.ContainsKey(guid) ? gitIgnore[guid] : new List<string>();
-
-            ignoredPaths.Clear();
-
-            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-
-            if (string.IsNullOrEmpty(assetPath))
+        public static void Add(string key, string pathToIgnore)
+        {
+            if (string.IsNullOrEmpty(pathToIgnore))
             {
-                throw new Exception($"GUID {guid} not found in AssetDatabase");
+                throw new ArgumentNullException("Trying to add an empty path to git ignore");
             }
 
-            string pathRelativeToProjectFolder = PathUtils.GetPathRelativeToProjectFolder(assetPath);
-            string metaPathRelativeToProjectFolder = pathRelativeToProjectFolder + ".meta";
+            GitIgnoreWrapper gitIgnore = GitIgnoreWrapper.Instance();
 
-            ignoredPaths.Add(pathRelativeToProjectFolder);
-            ignoredPaths.Add(metaPathRelativeToProjectFolder);
-            gitIgnore[guid] = ignoredPaths;
+            List<string> ignoredPaths = gitIgnore.ContainsKey(key) ? gitIgnore[key] : new List<string>();
+            ignoredPaths.Clear();
 
+            string fullPathToIgnore = PathUtils.GetFullPath(pathToIgnore);
+
+            string sanitizedPathToAdd = "/" + PathUtils.GetPathRelativeToRepositoryFolder(fullPathToIgnore);
+
+            ignoredPaths.Add(sanitizedPathToAdd);
+
+            if (File.Exists(fullPathToIgnore + ".meta"))
+            {
+                string metaPathRelativeToProjectFolder = sanitizedPathToAdd + ".meta";
+                ignoredPaths.Add(metaPathRelativeToProjectFolder);
+            }
+
+            gitIgnore[key] = ignoredPaths;
             gitIgnore.WriteToFile();
         }
 
-        internal static void Remove(string guid)
+        internal static void Remove(string key)
         {
             GitIgnoreWrapper gitIgnore = GitIgnoreWrapper.Instance();
 
-            if (gitIgnore.ContainsKey(guid))
+            if (gitIgnore.ContainsKey(key))
             {
-                gitIgnore.Remove(guid);
+                gitIgnore.Remove(key);
             }
 
             gitIgnore.WriteToFile();

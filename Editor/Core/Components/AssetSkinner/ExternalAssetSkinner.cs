@@ -20,7 +20,6 @@ namespace Miniclip.ShapeShifter.Skinner
         internal static string GenerateRelativePathFromKey(string key) =>
             WebUtility.UrlDecode(key).Replace("{dot}", ".");
 
-        // since Path.GetRelativePath doesn't seem to be available
         private static string GetRelativeURIPath(string absolutePath, string relativeTo)
         {
             if (!relativeTo.EndsWith("/"))
@@ -62,8 +61,11 @@ namespace Miniclip.ShapeShifter.Skinner
 
         public static void RemoveAllExternalSkins()
         {
-            foreach (string path in ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths)
+            var listCopy = ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.ToArray();
+
+            for (var index = 0; index < listCopy.Length; index++)
             {
+                string path = listCopy[index];
                 RemoveExternalSkins(path);
             }
         }
@@ -84,13 +86,22 @@ namespace Miniclip.ShapeShifter.Skinner
                     key
                 );
 
-                Directory.Delete(assetFolder, true);
+                if (Directory.Exists(assetFolder))
+                {
+                    Directory.Delete(assetFolder, true);
+                }
+
+                GitUtils.Stage(assetFolder);
             }
+
+            GitUtils.Track(key, relativePath);
 
             ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Remove(relativePath);
 
             EditorUtility.SetDirty(ShapeShifterConfiguration.Instance);
             ShapeShifterUtils.SavePendingChanges();
+            
+            GitUtils.Stage(AssetDatabase.GetAssetPath(ShapeShifterConfiguration.Instance));
         }
 
         internal static void SkinExternalFile()
@@ -104,7 +115,7 @@ namespace Miniclip.ShapeShifter.Skinner
         private static void SkinExternalFile(string absoluteAssetPath,
             Dictionary<string, string> overridesPerGame = null)
         {
-            if (absoluteAssetPath == null)
+            if (string.IsNullOrEmpty(absoluteAssetPath))
             {
                 return;
             }
@@ -123,7 +134,7 @@ namespace Miniclip.ShapeShifter.Skinner
             }
 
             ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Add(relativeAssetPath);
-            EditorUtility.SetDirty(ShapeShifterConfiguration.Instance);
+            ShapeShifterConfiguration.Instance.SetDirty(true);
 
             // even though it's an "external" file, it still might be a Unity file (ex: ProjectSettings), so it's
             // still important to make sure any pending changes are saved before generating copies
@@ -132,29 +143,31 @@ namespace Miniclip.ShapeShifter.Skinner
             string origin = absoluteAssetPath;
             string key = GenerateKeyFromRelativePath(relativeAssetPath);
 
-            foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
+            foreach (string gameName in ShapeShifterConfiguration.Instance.GameNames)
             {
-                string assetFolder = Path.Combine(
-                    ShapeShifter.SkinsFolder.FullName,
-                    game,
-                    ShapeShifterConstants.EXTERNAL_ASSETS_FOLDER,
+                GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
+
+                string assetFolder = Path.Combine(gameSkin.ExternalSkinsFolderPath,
                     key
                 );
 
-                if (!Directory.Exists(assetFolder))
-                {
-                    Directory.CreateDirectory(assetFolder);
-                }
+                IOUtils.TryCreateDirectory(assetFolder);
 
                 string target = Path.Combine(assetFolder, Path.GetFileName(origin));
 
-                if (overridesPerGame != null && overridesPerGame.ContainsKey(game))
+                if (overridesPerGame != null && overridesPerGame.ContainsKey(gameName))
                 {
-                    origin = overridesPerGame[game];
+                    origin = overridesPerGame[gameName];
                 }
 
                 IOUtils.CopyFile(origin, target);
+
+                GitUtils.Stage(target);
             }
+
+            GitUtils.Untrack(key, origin, false);
+
+            GitUtils.Stage(AssetDatabase.GetAssetPath(ShapeShifterConfiguration.Instance));
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Miniclip.ShapeShifter.Utils
     internal static class ShapeShifterUtils
     {
         internal static string GenerateUniqueAssetSkinKey(string game, string guid) => game + ":" + guid;
-        
+
         internal static void SavePendingChanges()
         {
             AssetDatabase.SaveAssets();

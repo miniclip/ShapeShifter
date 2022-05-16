@@ -12,11 +12,13 @@ namespace Miniclip.ShapeShifter.Switcher
         private static GameSkin highlightedGameSkin;
 
         private static bool showSwitcher = true;
+
         private static List<string> GameNames => ShapeShifterConfiguration.Instance.GameNames;
 
         public static int HighlightedGame
         {
             get => highlightedGame;
+
             set
             {
                 highlightedGame = value;
@@ -25,13 +27,6 @@ namespace Miniclip.ShapeShifter.Switcher
 
         internal static void OnGUI()
         {
-            showSwitcher = EditorGUILayout.Foldout(showSwitcher, "Asset Switcher");
-
-            if (!showSwitcher || !ShapeShifterConfiguration.IsInitialized())
-            {
-                return;
-            }
-
             GUIStyle boxStyle = StyleUtils.BoxStyle;
             using (new GUILayout.VerticalScope(boxStyle))
             {

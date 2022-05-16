@@ -29,7 +29,11 @@ namespace Miniclip.ShapeShifter
 
         private bool isDirty;
 
-        public void SetDirty(bool isDirty = true) => Instance.isDirty = isDirty;
+        public void SetDirty(bool isDirty = true)
+        {
+            Instance.isDirty = isDirty;
+            EditorUtility.SetDirty(this);
+        }
 
         public void Save() => isDirty = false;
 

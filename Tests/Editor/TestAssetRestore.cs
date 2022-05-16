@@ -29,19 +29,19 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsTrue(File.Exists(fullAssetPath));
         }
-        
+
         [Test]
         public void TestRestoreFolder()
         {
             DefaultAsset folderAsset = TestUtils.GetAsset<DefaultAsset>(TestUtils.FolderAssetName);
-            
+
             Assert.IsNotNull(folderAsset, "Could not find test folder asset");
 
             string assetPath = AssetDatabase.GetAssetPath(folderAsset);
             string fullAssetPath = PathUtils.GetFullPath(assetPath);
-            
+
             AssetSkinner.SkinAsset(assetPath);
-            
+
             Assert.IsTrue(Directory.Exists(fullAssetPath));
 
             FileUtil.DeleteFileOrDirectory(fullAssetPath);

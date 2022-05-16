@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,14 +13,17 @@ namespace Miniclip.ShapeShifter
     {
         [SerializeField]
         private string externalSkinsFolderPath;
+
         public string ExternalSkinsFolderPath => externalSkinsFolderPath;
 
         [SerializeField]
         private string internalSkinsFolderPath;
+
         public string InternalSkinsFolderPath => internalSkinsFolderPath;
 
         [SerializeField]
         private string mainFolderPath;
+
         public string MainFolderPath => mainFolderPath;
 
         [SerializeField]
@@ -118,12 +122,9 @@ namespace Miniclip.ShapeShifter
 
         internal bool HasValidFolders() => HasInternalSkins() || HasExternalSkins();
 
-        internal bool HasExternalSkins() => DoesFolderExistAndHaveFiles(ExternalSkinsFolderPath);
+        internal bool HasExternalSkins() => IOUtils.DoesFolderExistAndHaveFiles(ExternalSkinsFolderPath);
 
-        internal bool HasInternalSkins() => DoesFolderExistAndHaveFiles(InternalSkinsFolderPath);
-
-        private bool DoesFolderExistAndHaveFiles(string path) =>
-            Directory.Exists(path) && Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories).Any();
+        internal bool HasInternalSkins() => IOUtils.DoesFolderExistAndHaveFiles(InternalSkinsFolderPath);
 
         internal void DeleteFolder()
         {

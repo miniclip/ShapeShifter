@@ -46,16 +46,6 @@ namespace Miniclip.ShapeShifter.Skinner
 
         internal static void OnGUI()
         {
-            showExternalSkinner = EditorGUILayout.Foldout(
-                showExternalSkinner,
-                "External Asset Skinner"
-            );
-
-            if (!showExternalSkinner)
-            {
-                return;
-            }
-
             GUIStyle boxStyle = StyleUtils.BoxStyle;
             GUIStyle buttonStyle = StyleUtils.ButtonStyle;
 

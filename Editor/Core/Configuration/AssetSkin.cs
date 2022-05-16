@@ -16,7 +16,7 @@ namespace Miniclip.ShapeShifter
 
         internal string FolderPath { get; set; }
 
-        public bool IsValid() => !IOUtils.IsFolderEmpty(FolderPath);
+        public bool IsValid() => IOUtils.DoesFolderExistAndHaveFiles(FolderPath);
 
         public void Rename(string newName)
         {
