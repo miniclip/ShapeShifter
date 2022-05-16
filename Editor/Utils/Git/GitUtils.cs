@@ -1,25 +1,48 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using Miniclip.ShapeShifter.Extensions;
 using Miniclip.ShapeShifter.Utils.Git;
-using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace Miniclip.ShapeShifter.Utils
 {
     public class GitUtils
     {
-        private static readonly string git_status_modified = "M";
-        private static readonly string git_status_added = "A";
-        private static readonly string git_status_deleted = "D";
-        private static readonly string git_status_renamed = "R";
-        private static readonly string git_status_updated = "U";
-        private static readonly string git_status_untracked = "??";
+        internal struct FileStatus
+        {
+            private static readonly string git_status_modified = "M";
+            private static readonly string git_status_added = "A";
+            private static readonly string git_status_deleted = "D";
+            private static readonly string git_status_renamed = "R";
+            private static readonly string git_status_updated = "U";
+            private static readonly string git_status_untracked = "??";
+
+            public bool hasStagedChanges;
+            public bool hasUnstagedChanges;
+            public string path;
+
+            public FileStatus(string line)
+            {
+                string status = line.Substring(0, 2);
+                path = line.Substring(3);
+
+                if (status == git_status_untracked)
+                {
+                    hasUnstagedChanges = true;
+                    hasStagedChanges = false;
+
+                    //git status surrounds untracked files path with "", need to remove them
+                    path = path.Trim('\"');
+                    return;
+                }
+
+                hasStagedChanges = !status.StartsWith(" ");
+                hasUnstagedChanges = !status.EndsWith(" ");
+            }
+        }
 
         private static string GitWorkingDirectory = string.Empty;
 
@@ -41,7 +64,7 @@ namespace Miniclip.ShapeShifter.Utils
 
         internal static bool CanStage(string assetPath)
         {
-            ChangedFileGitInfo[] unstagedFiles = GetUnstagedFiles();
+            FileStatus[] unstagedFiles = GetUnstagedFiles();
 
             return unstagedFiles.Any(
                 file => file.path.Contains(PathUtils.GetPathRelativeToRepositoryFolder(assetPath))
@@ -50,16 +73,16 @@ namespace Miniclip.ShapeShifter.Utils
 
         internal static bool CanUnstage(string assetPath)
         {
-            ChangedFileGitInfo[] stagedFiles = GetStagedFiles();
+            FileStatus[] stagedFiles = GetStagedFiles();
 
             return stagedFiles.Any(file => file.path.Contains(PathUtils.GetPathRelativeToRepositoryFolder(assetPath)));
         }
 
-        internal static void Stage(string assetPath)
+        internal static void Stage(string path)
         {
-            if (CanStage(assetPath))
+            if (CanStage(path))
             {
-                RunGitCommand($"add \"{PathUtils.GetFullPath(assetPath)}\"");
+                RunGitCommand($"add \"{PathUtils.GetFullPath(path)}\"");
             }
         }
 
@@ -82,30 +105,43 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
-        internal static void Track(string guid)
+        internal static void Track(string key, string path)
         {
-            GitIgnore.Remove(guid);
+            GitIgnore.Remove(key);
 
-            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-
-            if (string.IsNullOrEmpty(assetPath))
+            if (string.IsNullOrEmpty(path))
             {
-                throw new Exception($"GUID {guid} not found in AssetDatabase");
+                throw new ArgumentNullException("Trying to track empty path");
             }
 
-            Stage(assetPath);
-            Stage(assetPath + ".meta");
+            Stage(path);
+
+            if (HasMetaFile(path))
+            {
+                Stage(path + ".meta");
+            }
         }
 
-        internal static void Untrack(string guid)
+        internal static void Untrack(string key, string path, bool removeFromRepository)
         {
-            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-            string fullFilePath = PathUtils.GetFullPath(assetPath);
+            string fullPath = PathUtils.GetFullPath(path);
 
-            RemoveOrUnstage(fullFilePath);
-            RemoveOrUnstage(fullFilePath + ".meta");
+            if (removeFromRepository)
+            {
+                RemoveFromRepository(fullPath);
+            }
 
-            GitIgnore.Add(guid);
+            GitIgnore.Add(key, path);
+        }
+
+        private static void RemoveFromRepository(string fullPath)
+        {
+            RemoveOrUnstage(fullPath);
+
+            if (HasMetaFile(fullPath))
+            {
+                RemoveOrUnstage(fullPath + ".meta");
+            }
         }
 
         private static void RemoveOrUnstage(string fullFilePath)
@@ -120,20 +156,25 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
+        private static bool HasMetaFile(string path)
+        {
+            return File.Exists(PathUtils.GetFullPath(path));
+        }
+
         public static void DiscardChanges(string assetPath)
         {
             RunGitCommand($"checkout \"{PathUtils.GetFullPath(assetPath)}\"");
         }
 
-        internal static ChangedFileGitInfo[] GetAllChangedFilesGitInfo()
+        internal static FileStatus[] GetAllChangedFilesGitInfo()
         {
             string status = RunGitCommand("status --porcelain -u");
             string[] splitted = status.Split('\n');
 
-            return splitted.Select(line => new ChangedFileGitInfo(line)).ToArray();
+            return splitted.Select(line => new FileStatus(line)).ToArray();
         }
 
-        internal static ChangedFileGitInfo[] GetUnstagedFiles(ChangedFileGitInfo[] changedFiles = null)
+        internal static FileStatus[] GetUnstagedFiles(FileStatus[] changedFiles = null)
         {
             if (changedFiles == null)
             {
@@ -143,7 +184,7 @@ namespace Miniclip.ShapeShifter.Utils
             return changedFiles.Where(file => file.hasUnstagedChanges).ToArray();
         }
 
-        internal static ChangedFileGitInfo[] GetStagedFiles(ChangedFileGitInfo[] changedFiles = null)
+        internal static FileStatus[] GetStagedFiles(FileStatus[] changedFiles = null)
         {
             if (changedFiles == null)
             {
@@ -178,14 +219,17 @@ namespace Miniclip.ShapeShifter.Utils
             RunGitCommand($"checkout {branchToSwitchTo}", repository);
         }
 
-        public static bool IsConnectedToVPN() => true;
+        public static bool IsConnectedToVPN()
+        {
+            return true;
+        }
 
         //commit
         private static bool Ping(string url)
         {
             try
             {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                HttpWebRequest request = (HttpWebRequest) WebRequest.Create(url);
                 request.Timeout = 3000;
                 request.AllowAutoRedirect = false; // find out if this site is up and don't follow a redirector
                 request.Method = "HEAD";
@@ -249,37 +293,6 @@ namespace Miniclip.ShapeShifter.Utils
                 out output,
                 out errorOutput
             );
-        }
-
-        internal struct ChangedFileGitInfo
-        {
-            public string status;
-            public bool hasStagedChanges;
-            public bool hasUnstagedChanges;
-            public bool isTracked;
-            public bool isFullyStaged => hasStagedChanges && !hasUnstagedChanges;
-            public string path;
-
-            public ChangedFileGitInfo(string line)
-            {
-                status = line.Substring(0, 2);
-                path = line.Substring(3);
-
-                if (status == git_status_untracked)
-                {
-                    isTracked = false;
-                    hasUnstagedChanges = true;
-                    hasStagedChanges = false;
-
-                    //git status surrounds untracked files path with "", need to remove them
-                    path = path.Trim('\"');
-                    return;
-                }
-
-                isTracked = true;
-                hasStagedChanges = !status.StartsWith(" ");
-                hasUnstagedChanges = !status.EndsWith(" ");
-            }
         }
     }
 }

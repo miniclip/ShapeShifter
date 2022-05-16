@@ -57,13 +57,6 @@ namespace Miniclip.ShapeShifter.Skinner
 
         public static void OnGUI()
         {
-            showSkinner = EditorGUILayout.Foldout(showSkinner, "Asset Skinner");
-
-            if (!showSkinner)
-            {
-                return;
-            }
-
             GUIStyle boxStyle = StyleUtils.BoxStyle;
 
             using (new GUILayout.VerticalScope(boxStyle))

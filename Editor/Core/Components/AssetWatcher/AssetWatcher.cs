@@ -82,7 +82,7 @@ namespace Miniclip.ShapeShifter.Watcher
                 assetSkin.Stage();
             }
 
-            GitIgnore.Add(guid);
+            GitIgnore.Add(guid, assetPath);
         }
 
         private static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath)

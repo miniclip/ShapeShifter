@@ -17,6 +17,7 @@ namespace Miniclip.ShapeShifter.Switcher
     {
         internal static void RestoreMissingAssets()
         {
+            ShapeShifterUtils.DeleteDSStoreFiles();
             List<string> missingAssets = new List<string>();
             Stopwatch stopwatch = Stopwatch.StartNew();
             if (ShapeShifter.ActiveGameSkin.HasInternalSkins())
@@ -35,11 +36,11 @@ namespace Miniclip.ShapeShifter.Switcher
                     string metaPath = guidToAssetPath + ".meta";
                     if (GitUtils.IsTracked(guidToAssetPath) || GitUtils.IsTracked(metaPath))
                     {
-                        Debug.LogWarning(
-                            $"{guidToAssetPath} or its meta file are still being tracked by git, you probably did "
-                            + "a merge from a branch with unskinned version"
-                        );
-                        GitUtils.Untrack(assetSkin.Guid);
+                        // Debug.LogWarning(
+                        //     $"{guidToAssetPath} or its meta file are still being tracked by git, you probably did "
+                        //     + "a merge from a branch with unskinned version"
+                        // );
+                        GitUtils.Untrack(assetSkin.Guid, guidToAssetPath, true);
                     }
 
                     string guid = assetSkin.Guid;
@@ -96,7 +97,12 @@ namespace Miniclip.ShapeShifter.Switcher
             string relativePath = ExternalAssetSkinner.GenerateRelativePathFromKey(directory.Name);
             string target = Path.Combine(Application.dataPath, relativePath);
             string searchPattern = Path.GetFileName(target);
-            FileInfo origin = directory.GetFiles(searchPattern)[0];
+            FileInfo[] fileInfos = directory.GetFiles(searchPattern);
+
+            if (fileInfos.Length <= 0)
+                return;
+
+            FileInfo origin = fileInfos[0];
             origin.CopyTo(target, true);
         }
 
@@ -140,7 +146,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
         private static void CopyFromUnityToSkins(DirectoryInfo skinDirectory)
         {
-            if (IOUtils.IsFolderEmpty(skinDirectory))
+            if (!IOUtils.DoesFolderExistAndHaveFiles(skinDirectory.FullName) && skinDirectory.Exists)
             {
                 //There shouldn't be an empty skin folder, most likely it was removed outside of ShapeShifter. E.g. discarding changes in a git client.
                 skinDirectory.Delete();

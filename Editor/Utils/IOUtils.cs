@@ -38,10 +38,19 @@ namespace Miniclip.ShapeShifter.Utils
             FileUtil.ReplaceFile(source, destination);
         }
 
-        internal static bool IsFolderEmpty(string path) =>
-            Directory.Exists(path) && !Directory.EnumerateFileSystemEntries(path).Any();
+        public static bool DoesFolderExistAndHaveFiles(string path)
+        {
+            bool directoryExists = Directory.Exists(path);
 
-        internal static bool IsFolderEmpty(DirectoryInfo directoryInfo) => IsFolderEmpty(directoryInfo.FullName);
+            if (!directoryExists)
+                return false;
+
+            IEnumerable<string> enumerateFiles = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories);
+
+            bool directoryContainsFiles = enumerateFiles.Any();
+
+            return directoryContainsFiles;
+        }
 
         internal static List<string> ReadAllLines(string filepath)
         {

@@ -80,7 +80,7 @@ namespace Miniclip.ShapeShifter.Utils
 
             return path;
         }
-        
+
         internal static string GetPathRelativeToAssetsFolder(string path)
         {
             if (!IsInternalPath(path))
@@ -166,12 +166,12 @@ namespace Miniclip.ShapeShifter.Utils
                 return Path.Combine(ShapeShifter.SkinsFolder.Parent.FullName, path);
             }
 
-            return string.Empty;
+            return Path.GetFullPath(Path.Combine(Application.dataPath, path));
         }
 
         internal static int GetAssetCountInFolder(string path)
         {
-            path = PathUtils.GetFullPath(path);
+            path = GetFullPath(path);
             if (!IsDirectory(path))
             {
                 throw new ArgumentException($"Path {path} does not seem to be for a folder.");
