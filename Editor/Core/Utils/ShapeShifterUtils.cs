@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Miniclip.ShapeShifter.Saver;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Switcher;
 using UnityEditor;
 using UnityEngine;
@@ -60,9 +61,25 @@ namespace Miniclip.ShapeShifter.Utils
             }
         }
 
-        public static string GetAssetPath(this UnityEngine.Object obj)
+        internal static void CheckForDoubleSkinnedAssetsInGame(string gameName)
         {
-            return AssetDatabase.GetAssetPath(obj);
+            {
+                GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
+
+                List<AssetSkin> assetSkins = gameSkin.GetAssetSkins();
+
+                foreach (AssetSkin assetSkin in assetSkins)
+                {
+                    string assetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
+
+                    if (AssetSkinner.TryGetParentSkinnedFolder(assetPath, out string parentFolder, gameName))
+                    {
+                        ShapeShifterLogger.Log(
+                            $"{assetPath} is currently skinned while being inside an already skinned folder ({parentFolder})"
+                        );
+                    }
+                }
+            }
         }
     }
 }

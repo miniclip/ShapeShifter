@@ -50,7 +50,7 @@ namespace Miniclip.ShapeShifter.Saver
             }
             else
             {
-                if (TryGetParentSkinnedFolder(modifiedAssetPath, out string skinnedFolderPath))
+                if (AssetSkinner.TryGetParentSkinnedFolder(modifiedAssetPath, out string skinnedFolderPath))
                 {
                     setDirty = true;
                     finalModifiedPath = skinnedFolderPath;
@@ -84,7 +84,7 @@ namespace Miniclip.ShapeShifter.Saver
                 GitUtils.Stage(oldName + ".meta");
             }
 
-            if (TryGetParentSkinnedFolder(
+            if (AssetSkinner.TryGetParentSkinnedFolder(
                     newName,
                     out string skinnedParentFolderPath,
                     ShapeShifter.ActiveGame
@@ -104,6 +104,11 @@ namespace Miniclip.ShapeShifter.Saver
 
                 var assetSkin = gameSkin.GetAssetSkin(guid);
 
+                if (assetSkin == null)
+                {
+                    continue;
+                }
+
                 assetSkin.Rename(assetPath);
                 assetSkin.Stage();
             }
@@ -114,26 +119,6 @@ namespace Miniclip.ShapeShifter.Saver
             }
 
             GitIgnore.Add(guid, assetPath);
-        }
-
-        private static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath,
-            string gameName = null)
-        {
-            string[] parentFolders = assetPath.Split('/');
-
-            for (int index = parentFolders.Length - 1; index >= 0; index--)
-            {
-                string parentFolder = string.Join("/", parentFolders, 0, index);
-
-                if (AssetSkinner.IsSkinned(parentFolder, gameName))
-                {
-                    skinnedParentFolderPath = parentFolder;
-                    return true;
-                }
-            }
-
-            skinnedParentFolderPath = null;
-            return false;
         }
     }
 }

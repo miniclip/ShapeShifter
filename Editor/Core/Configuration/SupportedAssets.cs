@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEditor.Animations;
@@ -9,9 +10,9 @@ using Object = UnityEngine.Object;
 
 namespace Miniclip.ShapeShifter
 {
-    public static class SupportedTypes
+    public static class SupportedAssets
     {
-        private static readonly Type[] typesSupported =
+        private static readonly Type[] assetTypesSupported =
         {
             typeof(AnimationClip),
             typeof(AnimatorController),
@@ -21,7 +22,8 @@ namespace Miniclip.ShapeShifter
             typeof(ScriptableObject),
             typeof(Texture2D),
             typeof(TextAsset),
-            typeof(MonoScript)
+            typeof(MonoScript),
+            typeof(Shader)
         };
 
         private static readonly Type[] typesForbidden =
@@ -34,20 +36,27 @@ namespace Miniclip.ShapeShifter
             return IsSupported(AssetDatabase.LoadAssetAtPath<Object>(assetPath), out reason);
         }
 
-        public static bool IsSupported(Object asset, out string reason)
+        private static bool IsSupported(Object asset, out string reason)
         {
             Type assetType = asset.GetType();
 
-            string path = AssetDatabase.GetAssetPath(asset);
+            string assetPath = AssetDatabase.GetAssetPath(asset);
 
-            reason = "Asset type is supported by shapeshifter.";
+            reason = "Asset type is not supported by shapeshifter.";
 
-            if (PathUtils.IsPathRelativeToPackages(path))
+            if (PathUtils.IsPathRelativeToPackages(assetPath))
             {
-                reason = "Shapeshifter still can't handle skinning package contents";
+                reason = "Unable to skin package contents";
                 return false;
             }
 
+            if (!AssetSkinner.IsSkinned(assetPath)
+                && AssetSkinner.TryGetParentSkinnedFolder(assetPath, out string parentFolder))
+            {
+                reason = $"Already inside a skinned folder {parentFolder}";
+                return false;
+            }
+            
             if (assetType == typeof(DefaultAsset))
             {
                 if (AssetDatabase.IsValidFolder(AssetDatabase.GetAssetPath(asset)))
@@ -64,7 +73,7 @@ namespace Miniclip.ShapeShifter
                 return false;
             }
 
-            return typesSupported.Any(
+            return assetTypesSupported.Any(
                 typeSupported => assetType == typeSupported || assetType.IsSubclassOf(typeSupported)
             );
         }

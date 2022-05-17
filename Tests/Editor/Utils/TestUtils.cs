@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter.Tests
 {
-    class TestUtils
+    static class TestUtils
     {
         internal static string TempFolderName = "Assets/ShapeShifterTestAssets";
 
@@ -125,6 +125,11 @@ namespace Miniclip.ShapeShifter.Tests
             {
                 ShapeShifterConfiguration.Instance.AddGame(cachedGameName);
             }
+        }
+
+        public static string GetAssetPath(this Object obj)
+        {
+            return AssetDatabase.GetAssetPath(obj);
         }
     }
 }

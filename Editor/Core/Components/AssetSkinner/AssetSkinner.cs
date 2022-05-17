@@ -124,7 +124,7 @@ namespace Miniclip.ShapeShifter.Skinner
         {
             EditorUtility.DisplayProgressBar("Asset Skinner", $"Checking if {assetPath} is supported", 0);
 
-            if (!SupportedTypes.IsSupported(assetPath, out string reason))
+            if (!SupportedAssets.IsSupported(assetPath, out string reason))
             {
                 EditorUtility.ClearProgressBar();
                 return;
@@ -135,8 +135,6 @@ namespace Miniclip.ShapeShifter.Skinner
                 EditorUtility.DisplayProgressBar("Asset Skinner", "Saving pending changes", 0.2f);
                 ShapeShifterUtils.SavePendingChanges();
             }
-
-            string guid = AssetDatabase.AssetPathToGUID(assetPath);
 
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
             {
@@ -224,6 +222,26 @@ namespace Miniclip.ShapeShifter.Skinner
                 var assetPath = AssetDatabase.GUIDToAssetPath(assetSkin.Guid);
                 RemoveSkins(assetPath);
             }
+        }
+
+        internal static bool TryGetParentSkinnedFolder(string assetPath, out string skinnedParentFolderPath,
+            string gameName = null)
+        {
+            string[] parentFolders = assetPath.Split('/');
+
+            for (int index = parentFolders.Length - 1; index >= 0; index--)
+            {
+                string parentFolder = string.Join("/", parentFolders, 0, index);
+
+                if (AssetSkinner.IsSkinned(parentFolder, gameName))
+                {
+                    skinnedParentFolderPath = parentFolder;
+                    return true;
+                }
+            }
+
+            skinnedParentFolderPath = null;
+            return false;
         }
     }
 }

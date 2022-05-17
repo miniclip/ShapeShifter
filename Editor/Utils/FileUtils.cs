@@ -31,7 +31,15 @@ namespace Miniclip.ShapeShifter.Utils
 
         public static void TryCreateDirectory(string directoryPath, bool deleteIfExists = false)
         {
-            ValidatePathSafety(directoryPath);
+            try
+            {
+                ValidatePathSafety(directoryPath);
+            }
+            catch (Exception e)
+            {
+                ShapeShifterLogger.Log(e.Message);
+                return;
+            }
 
             if (Directory.Exists(directoryPath))
             {
