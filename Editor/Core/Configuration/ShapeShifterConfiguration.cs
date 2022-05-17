@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
@@ -13,29 +14,25 @@ namespace Miniclip.ShapeShifter
 
         [SerializeField]
         private List<string> gameNames = new List<string>();
-        public List<string> GameNames => gameNames;
 
-        public bool IsDirty => isDirty;
+        public List<string> GameNames => gameNames;
 
         [SerializeField]
         [HideInInspector]
         private List<string> skinnedExternalAssetPaths = new List<string>();
+
         public List<string> SkinnedExternalAssetPaths => skinnedExternalAssetPaths;
 
         internal static ShapeShifterConfiguration Instance { get; private set; }
 
         internal Editor DefaultConfigurationEditor { get; private set; }
+
         internal Editor ExternalConfigurationEditor { get; private set; }
 
-        private bool isDirty;
-
-        public void SetDirty(bool isDirty = true)
+        public void SetDirty()
         {
-            Instance.isDirty = isDirty;
             EditorUtility.SetDirty(this);
         }
-
-        public void Save() => isDirty = false;
 
         public void RenameGame(GameSkin gameSkinToRename, string newName)
         {
@@ -80,11 +77,33 @@ namespace Miniclip.ShapeShifter
 
         internal static bool IsInitialized() => Instance != null && Instance.GameNames.Count > 0;
 
-        internal static void Initialise()
+        internal static void Initialize()
+        {
+            LoadInstance();
+
+            AssignConfigurationEditor();
+            
+            ExternalAssetsPostProcessor.InitializeWatchers();
+        }
+
+        private static void AssignConfigurationEditor()
+        {
+            Instance.DefaultConfigurationEditor = Editor.CreateEditor(
+                Instance,
+                typeof(ShapeShifterConfigurationEditor)
+            );
+
+            Instance.ExternalConfigurationEditor = Editor.CreateEditor(
+                Instance,
+                typeof(ShapeShifterExternalConfigurationEditor)
+            );
+        }
+
+        private static void LoadInstance()
         {
             if (Instance == null)
             {
-                Instance = (ShapeShifterConfiguration)EditorGUIUtility.Load(
+                Instance = (ShapeShifterConfiguration) EditorGUIUtility.Load(
                     ShapeShifterConstants.CONFIGURATION_RESOURCE
                 );
             }
@@ -118,19 +137,8 @@ namespace Miniclip.ShapeShifter
                 );
 
                 EditorUtility.SetDirty(Instance);
-                AssetDatabase.SaveAssets();
                 AssetDatabase.Refresh();
             }
-
-            Instance.DefaultConfigurationEditor = Editor.CreateEditor(
-                Instance,
-                typeof(ShapeShifterConfigurationEditor)
-            );
-
-            Instance.ExternalConfigurationEditor = Editor.CreateEditor(
-                Instance,
-                typeof(ShapeShifterExternalConfigurationEditor)
-            );
 
             if (Instance.GameNames.Count == 0)
             {
@@ -144,9 +152,6 @@ namespace Miniclip.ShapeShifter
                 AssetSwitcher.SwitchToGame(new GameSkin(gameSkinName));
                 EditorUtility.SetDirty(Instance);
             }
-
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
         }
 
         public GameSkin GetGameSkinByName(string gameName)

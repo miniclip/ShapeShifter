@@ -1,15 +1,16 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Utils;
 
-namespace Miniclip.ShapeShifter.Watcher
+namespace Miniclip.ShapeShifter.Saver
 {
-    static class FileSystemWatcherManager
+    static class FileWatcher
     {
         private static readonly Dictionary<string, FileSystemWatcher> pathToFileSystemWatcherDict =
             new Dictionary<string, FileSystemWatcher>();
 
-        internal static void AddPathToWatchlist(string path, FileSystemEventHandler fileChangedCallback)
+        private static void AddPathToWatchlist(string path, FileSystemEventHandler fileChangedCallback)
         {
             if (pathToFileSystemWatcherDict.ContainsKey(path))
             {
@@ -23,7 +24,7 @@ namespace Miniclip.ShapeShifter.Watcher
             pathToFileSystemWatcherDict.Add(path, fileWatcher);
         }
 
-        internal static void RemovePathFromWatchlist(string path)
+        private static void RemovePathFromWatchlist(string path)
         {
             if (!pathToFileSystemWatcherDict.ContainsKey(path))
             {
@@ -44,6 +45,26 @@ namespace Miniclip.ShapeShifter.Watcher
                 string key = keyCollection[index];
                 RemovePathFromWatchlist(key);
             }
+        }
+
+        internal static void StartWatchingFolder(string pathToWatch)
+        {
+            AddPathToWatchlist(pathToWatch, OnFileChanged);
+        }
+
+        internal static void StopWatchingFolder(string pathToUnwatch)
+        {
+            RemovePathFromWatchlist(pathToUnwatch);
+        }
+
+        private static void OnFileChanged(object sender, FileSystemEventArgs args)
+        {
+            DirectoryInfo assetDirectory = new DirectoryInfo(Path.GetDirectoryName(args.FullPath));
+            string game = assetDirectory.Parent.Parent.Name;
+            string guid = assetDirectory.Name;
+            string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
+
+            ShapeShifter.DirtyAssets.Add(key);
         }
     }
 }

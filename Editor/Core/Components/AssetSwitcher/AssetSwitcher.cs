@@ -1,10 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Miniclip.ShapeShifter.Skinner;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
 using UnityEditor;
@@ -15,193 +13,39 @@ namespace Miniclip.ShapeShifter.Switcher
 {
     public static class AssetSwitcher
     {
-        internal static void RestoreMissingAssets()
+        public static void DeleteAssetInternalCopy(string guid)
         {
-            ShapeShifterUtils.DeleteDSStoreFiles();
-            List<string> missingAssets = new List<string>();
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            if (ShapeShifter.ActiveGameSkin.HasInternalSkins())
+            string assetPathFromAssetDatabase = AssetDatabase.GUIDToAssetPath(guid);
+            if (string.IsNullOrEmpty(assetPathFromAssetDatabase)
+                || !PathUtils.FileOrDirectoryExists(assetPathFromAssetDatabase))
             {
-                List<AssetSkin> assetSkins = ShapeShifter.ActiveGameSkin.GetAssetSkins();
-
-                foreach (AssetSkin assetSkin in assetSkins)
-                {
-                    if (!assetSkin.IsValid())
-                    {
-                        //Delete asset skin folder?
-                        // assetSkin.Delete();
-                    }
-
-                    string assetDatabasePath = "";
-
-                    if (!string.IsNullOrEmpty(AssetDatabase.GUIDToAssetPath(assetSkin.Guid)))
-                    {
-                        assetDatabasePath = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(assetSkin.Guid));
-                    }
-
-                    string assetGitIgnorePath = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(assetSkin.Guid));
-
-                    if (!PathUtils.ArePathsEqual(assetDatabasePath, assetGitIgnorePath))
-                    {
-                        missingAssets.Add(assetSkin.Guid);
-                        continue;
-                    }
-
-                    if (!PathUtils.FileOrDirectoryExists(assetDatabasePath))
-                    {
-                        missingAssets.Add(assetSkin.Guid);
-                    }
-                }
-
-                if (missingAssets.Count == 0)
-                {
-                    ShapeShifterLogger.Log("Nothing to sync from skins folder.");
-                }
-                else
-                {
-                    PerformCopiesWithTracking(
-                        ShapeShifter.ActiveGameSkin,
-                        "Add missing skins",
-                        CopyFromSkinsToUnity,
-                        CopyFromSkinnedExternalToOrigin
-                    );
-                    stopwatch.Stop();
-                    ShapeShifterLogger.Log(
-                        missingAssets.Count > 0
-                            ? $"Synced {missingAssets.Count} assets in {stopwatch.Elapsed.TotalSeconds} seconds"
-                            : "Nothing to retrieve."
-                    );
-                }
-
-                stopwatch.Stop();
-            }
-        }
-
-        private static void CopyFromOriginToSkinnedExternal(DirectoryInfo directory)
-        {
-            string relativePath = ExternalAssetSkinner.GenerateRelativePathFromKey(directory.Name);
-            string origin = Path.Combine(Application.dataPath, relativePath);
-            string target = Path.Combine(directory.FullName, Path.GetFileName(origin));
-            FileUtils.SafeCopy(origin, target);
-        }
-
-        private static void CopyFromSkinnedExternalToOrigin(DirectoryInfo directory)
-        {
-            string relativePath = ExternalAssetSkinner.GenerateRelativePathFromKey(directory.Name);
-            string target = Path.Combine(Application.dataPath, relativePath);
-            string searchPattern = Path.GetFileName(target);
-            FileInfo[] fileInfos = directory.GetFiles(searchPattern);
-
-            if (fileInfos.Length <= 0)
-                return;
-
-            FileInfo origin = fileInfos[0];
-            FileUtils.SafeCopy(origin.FullName, target);
-        }
-
-        // private static void CopyFromSkinsToUnity(DirectoryInfo directory)
-        // {
-        //     
-        //     string guid = directory.Name;
-        //
-        //     // Ensure it has the same name, so we don't end up copying .DS_Store
-        //     string target = AssetDatabase.GUIDToAssetPath(guid);
-        //
-        //     if (string.IsNullOrEmpty(target))
-        //     {
-        //         return;
-        //     }
-        //     
-        //     string searchPattern = Path.GetFileName(target) + "*";
-        //
-        //     FileInfo[] files = directory.GetFiles(searchPattern);
-        //
-        //     if (files.Length > 0)
-        //     {
-        //         foreach (FileInfo fileInfo in files)
-        //         {
-        //             if (fileInfo.Extension == ".meta")
-        //             {
-        //                 FileUtils.SafeCopy(fileInfo.FullName, target + ".meta");
-        //             }
-        //             else
-        //             {
-        //                 FileUtils.SafeCopy(fileInfo.FullName, target);
-        //             }
-        //         }
-        //     }
-        //
-        //     DirectoryInfo[] directories = directory.GetDirectories();
-        //     
-        //     if (directories.Length > 0)
-        //     {
-        //         target = Path.Combine(
-        //             Application.dataPath.Replace("/Assets", string.Empty),
-        //             target
-        //         );
-        //
-        //         FileUtils.SafeCopy(directories[0].FullName, target);
-        //     }
-        // }
-
-        private static void CopyFromUnityToSkins(DirectoryInfo skinDirectory)
-        {
-            if (!FileUtils.DoesFolderExistAndHaveFiles(skinDirectory.FullName) && skinDirectory.Exists)
-            {
-                FileUtils.SafeDelete(skinDirectory.FullName);
                 return;
             }
 
-            string guid = skinDirectory.Name;
-            string origin = AssetDatabase.GUIDToAssetPath(guid);
+            FileUtils.SafeDelete(assetPathFromAssetDatabase);
+            FileUtils.SafeDelete(assetPathFromAssetDatabase + ".meta");
+        }
 
-            string originFullPath = PathUtils.GetFullPath(origin);
-
-            if (string.IsNullOrEmpty(origin))
+        public static void RefreshAsset(string guid)
+        {
+            if (string.IsNullOrEmpty(guid))
             {
-                ShapeShifterLogger.LogError(
-                    $"Getting an empty path for guid {guid}. Can't push changes to skin folder."
-                );
                 return;
             }
 
-            string target = Path.Combine(skinDirectory.FullName, Path.GetFileName(origin));
+            GameSkin currentGameSkin = ShapeShifter.ActiveGameSkin;
 
-            if (AssetDatabase.IsValidFolder(origin))
-            {
-                if (!Directory.Exists(originFullPath))
-                {
-                    return;
-                }
+            AssetSkin assetSkin = currentGameSkin.GetAssetSkin(guid);
 
-                DirectoryInfo originInfo = new DirectoryInfo(origin);
-                DirectoryInfo targetInfo = new DirectoryInfo(target);
-                FileUtils.SafeCopy(origin, target);
-            }
-            else
-            {
-                if (!File.Exists(originFullPath))
-                {
-                    return;
-                }
+            AssetSwitcherOperations.CopyFromSkinsToUnity(new DirectoryInfo(assetSkin.FolderPath));
 
-                FileUtils.TryCreateDirectory(skinDirectory.FullName, true);
-                FileUtils.SafeCopy(origin, target);
-                FileUtils.SafeCopy(origin + ".meta", target + ".meta");
-            }
-
-            string game = skinDirectory.Parent.Parent.Name;
-            string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
-
-            ShapeShifter.DirtyAssets.Add(key);
+            RefreshAllAssets();
         }
 
         internal static void OverwriteSelectedSkin(GameSkin selected, bool forceOverwrite = false)
         {
-            ShapeShifterUtils.SavePendingChanges();
-
             string name = selected.Name;
-
+            
             if (ShapeShifter.ActiveGameSkin != selected)
             {
                 StringBuilder stringBuilder = new StringBuilder();
@@ -223,114 +67,24 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
             }
 
-            PerformCopiesWithTracking(
+            AssetSwitcherOperations.PerformCopiesWithTracking(
                 selected,
                 "Overwrite selected skin",
-                CopyFromUnityToSkins,
-                CopyFromOriginToSkinnedExternal
+                AssetSwitcherOperations.CopyFromUnityToSkins,
+                AssetSwitcherOperations.CopyFromOriginToSkinnedExternal
             );
 
-            ShapeShifterConfiguration.Instance.SetDirty(false);
+            UnsavedAssetsManager.ClearUnsavedChanges();
         }
 
-        private static void PerformCopiesWithTracking(GameSkin selected,
-            string description,
-            Action<DirectoryInfo> internalAssetOperation,
-            Action<DirectoryInfo> externalAssetOperation)
-        {
-            ShapeShifterLogger.Log($"{description}: {selected.Name}");
-
-            string gameFolderPath = selected.MainFolderPath;
-
-            if (Directory.Exists(gameFolderPath))
-            {
-                int totalDirectories = Directory.EnumerateDirectories(
-                        gameFolderPath,
-                        "*",
-                        SearchOption.AllDirectories
-                    )
-                    .Count();
-
-                float progress = 0.0f;
-                float progressBarStep = 1.0f / totalDirectories;
-
-                PerformOperationOnPath(
-                    gameFolderPath,
-                    ShapeShifterConstants.INTERNAL_ASSETS_FOLDER,
-                    internalAssetOperation,
-                    description,
-                    progressBarStep,
-                    ref progress
-                );
-
-                PerformOperationOnPath(
-                    gameFolderPath,
-                    ShapeShifterConstants.EXTERNAL_ASSETS_FOLDER,
-                    externalAssetOperation,
-                    description,
-                    progressBarStep,
-                    ref progress
-                );
-
-                RefreshAllAssets();
-            }
-            else
-            {
-                EditorUtility.DisplayDialog(
-                    "Shape Shifter",
-                    $"Could not {description.ToLower()}: {selected.Name}. Skins folder does not exist!",
-                    "Fine, I'll take a look."
-                );
-            }
-
-            EditorUtility.ClearProgressBar();
-        }
-
-        private static void PerformOperationOnPath(string gameFolderPath,
-            string assetFolder,
-            Action<DirectoryInfo> operation,
-            string description,
-            float progressBarStep,
-            ref float progress)
-        {
-            string assetFolderPath = Path.Combine(gameFolderPath, assetFolder);
-            if (Directory.Exists(assetFolderPath))
-            {
-                DirectoryInfo internalFolder = new DirectoryInfo(assetFolderPath);
-
-                DirectoryInfo[] infos = internalFolder.GetDirectories();
-                for (int index = 0; index < infos.Length; index++)
-                {
-                    DirectoryInfo directory = infos[index];
-
-                    operation(directory);
-
-                    progress += progressBarStep;
-                    EditorUtility.DisplayProgressBar("Shape Shifter", $"{description}...", progress);
-                }
-            }
-        }
-
-        [MenuItem("Window/Shape Shifter/Refresh All Assets", false, 72)]
-        private static void RefreshAllAssets()
+        internal static void RefreshAllAssets()
         {
             if (HasAnyPackageRelatedSkin() && !Application.isBatchMode)
             {
                 ForceUnityToLoseAndRegainFocus();
-
-                //try  EditorUtility.RequestScriptReload();
             }
 
             AssetDatabase.Refresh();
-        }
-
-        private static bool HasAnyPackageRelatedSkin()
-        {
-            bool isManifestSkinned = ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Any(
-                externalAssetPath => externalAssetPath.Contains("manifest.json")
-            );
-
-            return isManifestSkinned;
         }
 
         private static void ForceUnityToLoseAndRegainFocus()
@@ -353,7 +107,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
         internal static void SwitchToGame(GameSkin gameToSwitchTo, bool forceSwitch = false)
         {
-            if (ShapeShifterConfiguration.Instance.IsDirty && !forceSwitch)
+            if (UnsavedAssetsManager.HasUnsavedChanges() && !forceSwitch)
             {
                 int choice = EditorUtility.DisplayDialogComplex(
                     "Shape Shifter",
@@ -378,101 +132,41 @@ namespace Miniclip.ShapeShifter.Switcher
                 }
             }
 
-            PerformCopiesWithTracking(
+            RemoveSkinnedAssetsFromProject();
+            ExternalAssetsPostProcessor.StopWatchers();
+            AssetSwitcherOperations.PerformCopiesWithTracking(
                 gameToSwitchTo,
                 "Switch to game",
-                CopyFromSkinsToUnity,
-                CopyFromSkinnedExternalToOrigin
+                AssetSwitcherOperations.CopyFromSkinsToUnity,
+                AssetSwitcherOperations.CopyFromSkinnedExternalToOrigin
             );
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
-            ShapeShifterConfiguration.Instance.SetDirty(false);
-
-            //TODO: ACPT-2843 make the code below optionable
-            /*GameSkin gameSkin = ShapeShifter.ActiveGameSkin;
-            
-            foreach (AssetSkin assetSkin in gameSkin.GetAssetSkins())
-            {
-                string guid = assetSkin.Guid;
-            
-                AssetDatabase.ImportAsset(AssetDatabase.GUIDToAssetPath(guid), ImportAssetOptions.ForceUpdate);
-            }*/
+            UnsavedAssetsManager.ClearUnsavedChanges();
+            ExternalAssetsPostProcessor.InitializeWatchers();
         }
 
-        private static void CopyFromSkinsToUnity(DirectoryInfo directory)
+        private static void RemoveSkinnedAssetsFromProject()
         {
-            string guid = directory.Name;
+            var currentGitIgnore = GitIgnore.GitIgnoreWrapper.Instance();
 
-            string assetPathFromAssetDatabase = PathUtils.GetFullPath(AssetDatabase.GUIDToAssetPath(guid));
-            string assetPathFromGitIgnore = PathUtils.GetFullPath(GitIgnore.GetIgnoredPathByGuid(guid));
-
-            //prioritize path from gitignore as is the only one version controlled
-            string targetPath = assetPathFromGitIgnore;
-
-            if (string.IsNullOrEmpty(targetPath))
+            foreach (string skinnedGuid in currentGitIgnore.Keys)
             {
-                ShapeShifterLogger.LogError($"Can't find Asset Path for guid: {guid}");
-                return;
-            }
-
-            string assetFolder = Path.GetDirectoryName(targetPath);
-
-            FileUtils.TryCreateDirectory(assetFolder);
-
-            if (!string.Equals(assetPathFromAssetDatabase, assetPathFromGitIgnore))
-            {
-                if (PathUtils.FileOrDirectoryExists(assetPathFromAssetDatabase))
-                {
-                    //delete any file on AssetDatabasePath as is probably outdated and should not be there
-                    FileUtils.SafeDelete(assetPathFromAssetDatabase);
-                    FileUtils.SafeDelete(assetPathFromAssetDatabase + ".meta");
-                }
-            }
-
-            string searchPattern = Path.GetFileName(PathUtils.NormalizePath(targetPath)) + "*";
-
-            FileInfo[] files = directory.GetFiles(searchPattern);
-
-            foreach (FileInfo fileInfo in files)
-            {
-                if (fileInfo.Extension == ".meta")
-                {
-                    string metaFile = PathUtils.NormalizePath(targetPath) + ".meta";
-
-                    ShapeShifterLogger.Log($"Retrieving: {metaFile}");
-                    FileUtils.SafeCopy(fileInfo.FullName, metaFile);
-                }
-                else
-                {
-                    ShapeShifterLogger.Log($"Retrieving: {targetPath}");
-                    FileUtils.SafeCopy(fileInfo.FullName, targetPath);
-                }
-            }
-
-            DirectoryInfo[] directories = directory.GetDirectories();
-
-            if (directories.Length > 0)
-            {
-                targetPath = Path.Combine(
-                    Application.dataPath.Replace("/Assets", string.Empty),
-                    targetPath
-                );
-
-                FileUtils.SafeCopy(directories[0].FullName, targetPath);
+                DeleteAssetInternalCopy(skinnedGuid);
             }
         }
 
-        public static void RefreshAsset(string guid)
+        internal static void RestoreActiveGame()
         {
-            if (string.IsNullOrEmpty(guid))
-                return;
+            SwitchToGame(ShapeShifter.ActiveGameSkin);
+        }
 
-            GameSkin currentGameSkin = ShapeShifter.ActiveGameSkin;
+        private static bool HasAnyPackageRelatedSkin()
+        {
+            bool isManifestSkinned = ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Any(
+                externalAssetPath => externalAssetPath.Contains("manifest.json")
+            );
 
-            AssetSkin assetSkin = currentGameSkin.GetAssetSkin(guid);
-
-            CopyFromSkinsToUnity(new DirectoryInfo(assetSkin.FolderPath));
-
-            RefreshAllAssets();
+            return isManifestSkinned;
         }
     }
 }

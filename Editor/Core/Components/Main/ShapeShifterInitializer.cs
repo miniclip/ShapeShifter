@@ -14,8 +14,8 @@ public class ShapeShifterInitializer
 
         EditorApplication.delayCall += OnDelayedCall;
         EditorApplication.quitting += EditorApplicationOnQuitting;
-        WindowFocusUtility.OnUnityEditorFocus -= OnEditorFocus;
-        WindowFocusUtility.OnUnityEditorFocus += OnEditorFocus;
+        WindowFocusUtility.OnUnityEditorFocusEvent -= OnEditorFocus;
+        WindowFocusUtility.OnUnityEditorFocusEvent += OnEditorFocus;
     }
 
     private static void OnEditorFocus(bool isFocused)
@@ -55,14 +55,13 @@ public class ShapeShifterInitializer
         {
             await Task.Delay(1000);
         }
-
-        ShapeShifterLogger.Log("Setting up");
-
-        ShapeShifterConfiguration.Initialise();
+        
+        ShapeShifterConfiguration.Initialize();
 
         if (restoreMissingAssets)
         {
-            // AssetSwitcher.RestoreMissingAssets();
+            //TODO: Revisit after save improvements.
+            //AssetSwitcher.RestoreMissingAssets();
         }
     }
 
@@ -70,6 +69,6 @@ public class ShapeShifterInitializer
     {
         EditorApplication.delayCall -= OnDelayedCall;
         EditorApplication.quitting -= EditorApplicationOnQuitting;
-        WindowFocusUtility.OnUnityEditorFocus -= OnEditorFocus;
+        WindowFocusUtility.OnUnityEditorFocusEvent -= OnEditorFocus;
     }
 }

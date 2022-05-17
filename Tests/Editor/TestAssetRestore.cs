@@ -25,7 +25,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsFalse(File.Exists(fullAssetPath));
 
-            AssetSwitcher.RestoreMissingAssets();
+            AssetSwitcher.RestoreActiveGame();
 
             Assert.IsTrue(File.Exists(fullAssetPath));
         }
@@ -48,7 +48,7 @@ namespace Miniclip.ShapeShifter.Tests
 
             Assert.IsFalse(Directory.Exists(fullAssetPath));
 
-            AssetSwitcher.RestoreMissingAssets();
+            AssetSwitcher.RestoreActiveGame();
 
             Assert.IsTrue(Directory.Exists(fullAssetPath), "Folder should have been restored");
         }

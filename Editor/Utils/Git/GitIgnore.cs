@@ -29,7 +29,6 @@ namespace Miniclip.ShapeShifter.Utils.Git
             {
                 return null;
             }
-            
         }
 
         public static void Add(string key, string pathToIgnore)
@@ -90,14 +89,15 @@ namespace Miniclip.ShapeShifter.Utils.Git
         {
             public static GitIgnoreWrapper Instance() => new GitIgnoreWrapper();
 
+            private List<string> nonShapeshifterLinesFromGitIgnore = new List<string>();
+
             private GitIgnoreWrapper()
             {
-                // EditorUtility.DisplayProgressBar("Git Ignore", "Fetching current git ignore contents", 0f);
                 List<string> ignoredContent = FileUtils.ReadAllLines(GitIgnorePath);
 
                 string currentKey = string.Empty;
                 int i;
-                Add(NON_SHAPE_SHIFTER_LINES_KEY, new List<string>());
+
                 for (i = 0; i < ignoredContent.Count; i++)
                 {
                     string line = ignoredContent[i];
@@ -107,7 +107,7 @@ namespace Miniclip.ShapeShifter.Utils.Git
                         break;
                     }
 
-                    this[NON_SHAPE_SHIFTER_LINES_KEY].Add(line);
+                    nonShapeshifterLinesFromGitIgnore.Add(line);
                 }
 
                 for (; i < ignoredContent.Count; i++)
@@ -129,7 +129,6 @@ namespace Miniclip.ShapeShifter.Utils.Git
 
                     this[currentKey].Add(line);
                 }
-                // EditorUtility.ClearProgressBar();
             }
 
             internal void WriteToFile()
@@ -142,10 +141,8 @@ namespace Miniclip.ShapeShifter.Utils.Git
             {
                 List<string> list = new List<string>();
 
-                list.AddRange(this[NON_SHAPE_SHIFTER_LINES_KEY]);
-
-                Remove(NON_SHAPE_SHIFTER_LINES_KEY);
-
+                list.AddRange(nonShapeshifterLinesFromGitIgnore);
+                
                 foreach (KeyValuePair<string, List<string>> keyValuePair in this)
                 {
                     list.Add(GenerateAssetIgnoreIdentifierFromGuid(keyValuePair.Key));

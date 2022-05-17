@@ -127,7 +127,8 @@ namespace Miniclip.ShapeShifter.Utils
         {
             string fullPath = PathUtils.GetFullPath(path);
 
-            if (removeFromRepository)
+            bool isIgnored = GitIgnore.IsIgnored(key);
+            if (removeFromRepository && !isIgnored)
             {
                 RemoveFromRepository(fullPath);
             }
@@ -154,7 +155,7 @@ namespace Miniclip.ShapeShifter.Utils
         {
             if (IsTracked(fullFilePath))
             {
-                RunGitCommand($"rm -r --cached {fullFilePath}");
+                RunGitCommand($"rm -r --cached \"{fullFilePath}\"");
             }
             else if (CanUnstage(fullFilePath))
             {

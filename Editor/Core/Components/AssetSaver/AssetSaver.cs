@@ -1,53 +1,137 @@
+using System;
+using System.IO;
 using JetBrains.Annotations;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
-using UnityEditor.Experimental.SceneManagement;
-using UnityEngine;
+using UnityEditor;
 
 namespace Miniclip.ShapeShifter.Saver
 {
     public class AssetSaver : UnityEditor.AssetModificationProcessor
     {
-        private static bool CanSave => ShapeShifterConfiguration.Instance.IsDirty;
-
-        private static bool isSaving;
-
         [UsedImplicitly]
         public static void OnWillSaveAssets(string[] files)
         {
-            return;
-            if (Application.isBatchMode)
-            {
-                return;
-            }
-
             if (!ShapeShifterConfiguration.IsInitialized())
             {
                 return;
             }
 
-            PrefabStage stage = PrefabStageUtility.GetCurrentPrefabStage();
-            if (stage != null)
+            if (!Settings.IsAutoSaveEnabled)
             {
-                //Skipping saving as we're in prefab mode. Due To the auto save, this method is called every frame
-                //The solution is to only save the changes after leaving the prefab mode.
                 return;
             }
 
-            SaveToActiveGameSkin();
+            SaveToActiveGameSkin(forceSave: false);
         }
 
-        public static void SaveToActiveGameSkin()
+        public static void SaveToActiveGameSkin(bool forceSave)
         {
-            if (isSaving || (!ShapeShifter.ActiveGameSkin.HasExternalSkins() && !CanSave))
+            if (forceSave || UnsavedAssetsManager.HasUnsavedChanges())
             {
+                AssetSwitcher.OverwriteSelectedSkin(ShapeShifter.ActiveGameSkin);
+            }
+        }
+
+        public static void SaveModificationForGame(ModifiedAssetInfo modifiedAssetInfo, string game)
+        {
+            switch (modifiedAssetInfo.skinType)
+            {
+                case SkinType.Internal:
+                    SaveInternalAssetForGame(modifiedAssetInfo.assetPath, game);
+                    return;
+                case SkinType.External:
+                    SaveExternalAssetForGame(modifiedAssetInfo.assetPath, game);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static void SaveExternalAssetForGame(string assetPath, string game)
+        {
+            GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
+            string relativePath = ExternalAssetSkinner.ConvertToRelativePath(assetPath);
+            string skinnedVersionFolder = Path.Combine(
+                gameSkin.ExternalSkinsFolderPath,
+                ExternalAssetSkinner.GenerateKeyFromRelativePath(relativePath));
+            
+            AssetSwitcherOperations.CopyFromOriginToSkinnedExternal(new DirectoryInfo(skinnedVersionFolder));
+            
+            UnsavedAssetsManager.RemoveByPath(assetPath);
+        }
+
+        private static void SaveInternalAssetForGame(string assetPath, string game)
+        {
+            GameSkin currentGameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
+
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+
+            AssetSkin assetSkin = currentGameSkin.GetAssetSkin(guid);
+
+            if (assetSkin == null)
+            {
+                ShapeShifterLogger.LogWarning(
+                    $"Something went wrong. Asset ({assetPath} | {guid}) not found in skins folder"
+                );
                 return;
             }
 
-            ShapeShifterLogger.Log($"Pushing changes to {ShapeShifter.ActiveGameName} skin folder");
-            isSaving = true;
-            AssetSwitcher.OverwriteSelectedSkin(ShapeShifter.ActiveGameSkin);
-            isSaving = false;
+            assetSkin.CopyFromUnityToSkinFolder();
+
+            UnsavedAssetsManager.RemoveByPath(assetPath);
+        }
+
+        public static void DiscardModificationForGame(ModifiedAssetInfo modifiedAssetInfo, string game)
+        {
+            switch (modifiedAssetInfo.skinType)
+            {
+                case SkinType.Internal:
+                    DiscardInternalModificationForGame(modifiedAssetInfo.assetPath, game);
+                    break;
+                case SkinType.External:
+                    DiscardExternalModificationForGame(modifiedAssetInfo.assetPath, game);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private static void DiscardExternalModificationForGame(string assetPath, string game)
+        {
+            GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
+            string relativePath = ExternalAssetSkinner.ConvertToRelativePath(assetPath);
+            string skinnedVersionFolder = Path.Combine(
+                gameSkin.ExternalSkinsFolderPath,
+                ExternalAssetSkinner.GenerateKeyFromRelativePath(relativePath));
+            
+            AssetSwitcherOperations.CopyFromSkinnedExternalToOrigin(new DirectoryInfo(skinnedVersionFolder));
+            
+            UnsavedAssetsManager.RemoveByPath(assetPath);
+        }
+
+        private static void DiscardInternalModificationForGame(string assetPath, string game)
+        {
+            GameSkin currentGameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(game);
+
+            string guid = AssetDatabase.AssetPathToGUID(assetPath);
+
+            AssetSkin assetSkin = currentGameSkin.GetAssetSkin(guid);
+
+            if (assetSkin == null)
+            {
+                ShapeShifterLogger.LogWarning(
+                    $"Something went wrong. Asset ({assetPath} | {guid}) not found in skins folder"
+                );
+                return;
+            }
+
+            assetSkin.CopyFromSkinFolderToUnity();
+
+            AssetDatabase.Refresh();
+
+            UnsavedAssetsManager.RemoveByPath(assetPath);
         }
     }
 }

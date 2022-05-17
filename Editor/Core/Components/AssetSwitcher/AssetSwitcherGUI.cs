@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Miniclip.ShapeShifter.Saver;
+using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using UnityEditor;
 using UnityEngine;
@@ -26,9 +27,6 @@ namespace Miniclip.ShapeShifter.Switcher
 
         private static void OnSwitchToGUI()
         {
-            if (!ShapeShifterConfiguration.IsInitialized())
-                return;
-
             GUILayout.Space(10.0f);
 
             EditorGUILayout.PrefixLabel("Switch To:");
@@ -36,7 +34,8 @@ namespace Miniclip.ShapeShifter.Switcher
             {
                 HighlightedGame = EditorGUILayout.Popup(
                     HighlightedGame,
-                    GameNames.ToArray(), StyleUtils.ButtonStyle
+                    GameNames.ToArray(),
+                    StyleUtils.ButtonStyle
                 );
 
                 if (GUILayout.Button("Switch!", StyleUtils.ButtonStyle))
@@ -58,10 +57,27 @@ namespace Miniclip.ShapeShifter.Switcher
             };
 
             GUILayout.Box($"Active game: {ShapeShifter.ActiveGameName}", titleStyle);
-            
-            if (GUILayout.Button($"Force Save To {ShapeShifter.ActiveGameName}", StyleUtils.ButtonStyle))
+
+            GUIContent forceSaveGUIContent = new GUIContent(
+                $"Force Save To {ShapeShifter.ActiveGameName}",
+                Icons.GetIconTexture(Icons.saveIcon),
+                $"Save your project assets into {ShapeShifter.ActiveGameName} folder"
+            );
+            if (GUILayout.Button(forceSaveGUIContent, StyleUtils.ButtonStyle))
             {
-                AssetSaver.SaveToActiveGameSkin();
+                AssetSaver.SaveToActiveGameSkin(forceSave: true);
+            }
+
+            GUILayout.Space(5.0f);
+
+            GUIContent refreshGUIContent = new GUIContent(
+                $"Refresh {ShapeShifter.ActiveGameName}",
+                Icons.GetIconTexture(Icons.refreshIcon),
+                $"This will replace your project assets with the current version in {ShapeShifter.ActiveGameName} folder"
+            );
+            if (GUILayout.Button(refreshGUIContent))
+            {
+                AssetSwitcher.RestoreActiveGame();
             }
         }
     }

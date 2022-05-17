@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Utils;
 using NUnit.Framework;
@@ -68,7 +69,7 @@ namespace Miniclip.ShapeShifter.Tests
                 ShapeShifterConfiguration.Instance.AddGame(testGameName);
             }
 
-            ShapeShifterConfiguration.Instance.Save();
+            UnsavedAssetsManager.ClearUnsavedChanges();
         }
 
         private static void CopyAllTestResourcesFromPackagesToAssetsFolder()

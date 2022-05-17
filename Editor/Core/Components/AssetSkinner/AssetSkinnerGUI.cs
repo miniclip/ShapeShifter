@@ -4,7 +4,6 @@ using System.Linq;
 using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
-using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,43 +13,6 @@ namespace Miniclip.ShapeShifter.Skinner
     public class AssetSkinnerGUI
     {
         private static Vector2 scrollPosition;
-
-        private static readonly string defaultIcon = "WelcomeScreen.AssetStoreLogo";
-        private static readonly string errorIcon = "console.erroricon";
-
-        private static readonly Dictionary<string, string> iconPerExtension = new Dictionary<string, string>
-        {
-            {
-                ".anim", "AnimationClip Icon"
-            },
-            {
-                ".asset", "ScriptableObject Icon"
-            },
-            {
-                ".controller", "AnimatorController Icon"
-            },
-            {
-                ".cs", "cs Script Icon"
-            },
-            {
-                ".gradle", "TextAsset Icon"
-            },
-            {
-                ".json", "TextAsset Icon"
-            },
-            {
-                ".prefab", "Prefab Icon"
-            },
-            {
-                ".txt", "TextAsset Icon"
-            },
-            {
-                ".unity", "SceneAsset Icon"
-            },
-            {
-                ".xml", "TextAsset Icon"
-            },
-        };
 
         private static readonly Dictionary<object, bool> foldoutDictionary = new Dictionary<object, bool>();
 
@@ -183,7 +145,12 @@ namespace Miniclip.ShapeShifter.Skinner
                 buttonWidth -= 20; // to account for a possible scrollbar or some extra padding 
 
                 bool clicked = false;
-                EditorGUILayout.PrefixLabel(game);
+
+                GUIStyle style = StyleUtils.LabelStyle.GetCopy();
+                style.alignment = TextAnchor.MiddleCenter;
+                style.fontStyle = ShapeShifter.ActiveGameName == game ? FontStyle.Bold : FontStyle.Normal;
+                EditorGUILayout.LabelField(game, style);
+
                 if (ShapeShifter.CachedPreviewPerAssetDict.TryGetValue(key, out Texture2D previewImage))
                 {
                     clicked = GUILayout.Button(
@@ -291,6 +258,31 @@ namespace Miniclip.ShapeShifter.Skinner
             {
                 foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
                 {
+                    if (!AssetSkinner.IsSkinned(assetPath, game))
+                    {
+                        using (new GUILayout.VerticalScope(boxStyle))
+                        {
+                            float assetSectionWidth = EditorGUIUtility.currentViewWidth
+                                                      / ShapeShifterConfiguration.Instance.GameNames.Count
+                                                      - 20;
+                            EditorGUILayout.PrefixLabel(game);
+                            GUILayout.Box(
+                                "Not Skinned",
+                                GUILayout.Width(assetSectionWidth),
+                                GUILayout.MaxHeight(assetSectionWidth)
+                            );
+
+                            EditorGUILayout.Separator();
+
+                            if (GUILayout.Button($"Copy from {ShapeShifter.ActiveGameName}"))
+                            {
+                                AssetSkinner.SkinAssetForGame(assetPath, game);
+                            }
+                        }
+
+                        continue;
+                    }
+
                     string guid = AssetDatabase.AssetPathToGUID(assetPath);
                     string skinnedPath = Path.Combine(
                         ShapeShifter.SkinsFolder.FullName,
@@ -302,7 +294,10 @@ namespace Miniclip.ShapeShifter.Skinner
 
                     string key = ShapeShifterUtils.GenerateUniqueAssetSkinKey(game, guid);
                     GenerateAssetPreview(key, skinnedPath);
+                    EditorGUILayout.BeginVertical();
                     DrawAssetPreview(key, game, skinnedPath, guid);
+                    DrawAssetSkinActions(game, assetPath);
+                    EditorGUILayout.EndVertical();
                 }
             }
 
@@ -315,11 +310,41 @@ namespace Miniclip.ShapeShifter.Skinner
             }
         }
 
+        private static void DrawAssetSkinActions(string game, string assetPath)
+        {
+            using (new GUILayout.HorizontalScope())
+            {
+                OnRemoveSkinFromGameGUI(game, assetPath);
+            }
+        }
+
+        private static void OnRemoveSkinFromGameGUI(string game, string assetPath)
+        {
+            if (GUILayout.Button(Icons.GetIconTexture(Icons.trashIcon)))
+            {
+                AssetSkinner.RemoveSkinFromGame(assetPath, game);
+            }
+        }
+
         private static void DrawUnskinnedAssetSection(string assetPath)
         {
-            GUI.backgroundColor = Color.green;
+            EditorGUILayout.BeginHorizontal();
+            GUI.backgroundColor = Color.red;
+            if (GUILayout.Button($"Exclude from {ShapeShifter.ActiveGameName}"))
+            {
+                AssetSkinner.ExcludeFromGame(assetPath, ShapeShifter.ActiveGameName);
+            }
 
-            if (GUILayout.Button("Skin it!"))
+            GUI.backgroundColor = Color.green;
+            if (GUILayout.Button($"Skin To {ShapeShifter.ActiveGameName} Only"))
+            {
+                AssetSkinner.SkinExclusivelyForGame(assetPath, ShapeShifter.ActiveGame);
+            }
+
+            EditorGUILayout.EndHorizontal();
+
+            GUI.backgroundColor = Color.green;
+            if (GUILayout.Button("Skin For All Games"))
             {
                 AssetSkinner.SkinAsset(assetPath);
                 GUIUtility.ExitGUI();
@@ -332,14 +357,14 @@ namespace Miniclip.ShapeShifter.Skinner
             {
                 ShapeShifter.DirtyAssets.Remove(key);
 
-                Texture2D texturePreview = EditorGUIUtility.FindTexture(errorIcon);
+                Texture2D texturePreview = Icons.GetIconTexture(Icons.errorIcon);
                 if (Directory.Exists(assetPath))
                 {
                     texturePreview = EditorGUIUtility.FindTexture("Folder Icon");
                 }
                 else if (!File.Exists(assetPath))
                 {
-                    texturePreview = EditorGUIUtility.FindTexture(errorIcon);
+                    texturePreview = EditorGUIUtility.FindTexture(Icons.errorIcon);
                 }
                 else
                 {
@@ -350,15 +375,15 @@ namespace Miniclip.ShapeShifter.Skinner
                         texturePreview = new Texture2D(0, 0);
                         texturePreview.LoadImage(File.ReadAllBytes(assetPath));
                         string skinFolder = Directory.GetParent(assetPath).FullName;
-                        AssetWatcher.StartWatchingFolder(skinFolder);
+                        FileWatcher.StartWatchingFolder(skinFolder);
                     }
                     else
                     {
-                        string icon = defaultIcon;
+                        string icon = Icons.defaultIcon;
 
-                        if (iconPerExtension.ContainsKey(extension))
+                        if (Icons.iconPerExtension.ContainsKey(extension))
                         {
-                            icon = iconPerExtension[extension];
+                            icon = Icons.iconPerExtension[extension];
                         }
 
                         texturePreview = (Texture2D) EditorGUIUtility.IconContent(icon).image;

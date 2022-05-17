@@ -1,10 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Saver;
 using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Switcher;
-using Miniclip.ShapeShifter.Tests;
 using Miniclip.ShapeShifter.Utils;
 using NUnit.Framework;
 using UnityEditor;
@@ -25,7 +23,7 @@ namespace Miniclip.ShapeShifter.Tests
             Assert.IsNotNull(testAsset, "Text asset not found");
             Assert.IsNotEmpty(assetPath, "Text asset path is empty");
             Assert.IsTrue(!AssetSkinner.IsSkinned(assetPath));
-            Assert.IsTrue(!ShapeShifterConfiguration.Instance.IsDirty);
+            Assert.IsTrue(!UnsavedAssetsManager.HasUnsavedChanges(), "Should not be detecting unsaved changes");
 
             AssetSkinner.SkinAsset(assetPath);
 
@@ -34,7 +32,12 @@ namespace Miniclip.ShapeShifter.Tests
             File.WriteAllText(assetFullPath, "new content");
 
             AssetDatabase.Refresh();
-            Assert.IsTrue(ShapeShifterConfiguration.Instance.IsDirty);
+            
+            var modifiedAssets = UnsavedAssetsManager.GetCurrentModifiedAssetsFromEditorPrefs();
+            
+            Assert.IsTrue(modifiedAssets.ContainsAssetPath(assetPath), "AssetPath should be in the modified assets list");
+            
+            Assert.IsTrue(UnsavedAssetsManager.HasUnsavedChanges(), "Should be detecting unsaved changes");
 
             ShapeShifterUtils.SavePendingChanges();
             string skinnedFileFullPath = Path.Combine(
@@ -92,6 +95,10 @@ namespace Miniclip.ShapeShifter.Tests
                 "Skinned folder should still have the original file amount"
             );
 
+            var modifiedAssets = UnsavedAssetsManager.GetCurrentModifiedAssetsFromEditorPrefs();
+            
+            Assert.IsTrue(modifiedAssets.ContainsAssetPath(assetPath), "AssetPath should be in the modified assets list");
+            
             ShapeShifterUtils.SavePendingChanges();
 
             Assert.IsTrue(
@@ -135,6 +142,11 @@ namespace Miniclip.ShapeShifter.Tests
             textureImporter.textureType = TextureImporterType.Default;
             Assert.IsTrue(textureImporter.textureType == TextureImporterType.Default);
             textureImporter.SaveAndReimport();
+            
+            var modifiedAssets = UnsavedAssetsManager.GetCurrentModifiedAssetsFromEditorPrefs();
+            
+            Assert.IsTrue(modifiedAssets.ContainsAssetPath(assetPath), "AssetPath should be in the modified assets list");
+            
             ShapeShifterUtils.SavePendingChanges();
 
             AssetSwitcher.SwitchToGame(TestUtils.game1, true);

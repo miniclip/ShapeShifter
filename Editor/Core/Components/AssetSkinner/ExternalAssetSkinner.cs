@@ -120,7 +120,7 @@ namespace Miniclip.ShapeShifter.Skinner
                 return;
             }
 
-            string relativeAssetPath = GetRelativeURIPath(absoluteAssetPath, Application.dataPath);
+            string relativeAssetPath = ConvertToRelativePath(absoluteAssetPath);
 
             if (ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Contains(relativeAssetPath))
             {
@@ -134,7 +134,7 @@ namespace Miniclip.ShapeShifter.Skinner
             }
 
             ShapeShifterConfiguration.Instance.SkinnedExternalAssetPaths.Add(relativeAssetPath);
-            ShapeShifterConfiguration.Instance.SetDirty(true);
+            ShapeShifterConfiguration.Instance.SetDirty();
 
             // even though it's an "external" file, it still might be a Unity file (ex: ProjectSettings), so it's
             // still important to make sure any pending changes are saved before generating copies
@@ -168,6 +168,12 @@ namespace Miniclip.ShapeShifter.Skinner
             GitUtils.Untrack(key, origin, false);
 
             GitUtils.Stage(AssetDatabase.GetAssetPath(ShapeShifterConfiguration.Instance));
+        }
+
+        internal static string ConvertToRelativePath(string absoluteAssetPath)
+        {
+            string relativeAssetPath = GetRelativeURIPath(absoluteAssetPath, Application.dataPath);
+            return relativeAssetPath;
         }
     }
 }

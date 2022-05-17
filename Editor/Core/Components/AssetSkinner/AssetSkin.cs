@@ -1,22 +1,39 @@
 using System.IO;
 using System.Linq;
+using Miniclip.ShapeShifter.Skinner;
+using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
+using UnityEditor;
+using UnityEngine.WSA;
 
 namespace Miniclip.ShapeShifter
 {
     public class AssetSkin
     {
-        public AssetSkin(string guid, string folderPath)
-        {
-            Guid = guid;
-            FolderPath = folderPath;
-        }
+        internal string FolderPath { get; set; }
+
+        internal string Game { get; set; }
 
         internal string Guid { get; set; }
 
-        internal string FolderPath { get; set; }
+        public AssetSkin(string guid, string game)
+        {
+            Guid = guid;
 
-        public bool IsValid() => FileUtils.DoesFolderExistAndHaveFiles(FolderPath);
+            Game = game;
+
+            FolderPath = Path.Combine(
+                ShapeShifter.SkinsFolder.FullName,
+                game,
+                ShapeShifterConstants.INTERNAL_ASSETS_FOLDER,
+                guid
+            );
+        }
+
+        public bool IsValid()
+        {
+            return FileUtils.DoesFolderExistAndHaveFiles(FolderPath);
+        }
 
         public void Rename(string newName)
         {
@@ -76,6 +93,40 @@ namespace Miniclip.ShapeShifter
         public void Stage()
         {
             GitUtils.Stage(FolderPath);
+        }
+
+        public void Delete()
+        {
+            FileUtils.SafeDelete(FolderPath);
+            Stage();
+        }
+
+        public void CopyFromUnityToSkinFolder()
+        {
+            
+            AssetSwitcherOperations.CopyFromUnityToSkins(new DirectoryInfo(FolderPath));
+
+            return;
+            
+            string origin = AssetDatabase.GUIDToAssetPath(Guid);
+
+            FileUtils.TryCreateDirectory(FolderPath, true);
+
+            if (string.IsNullOrEmpty(origin) || !PathUtils.FileOrDirectoryExists(origin))
+            {
+                //nothing else to do as the skin folder was already deleted
+                return;
+            }
+            
+            string target = Path.Combine(FolderPath, Path.GetFileName(origin));
+
+            FileUtils.SafeCopy(origin, target);
+            FileUtils.SafeCopy(origin + ".meta", target + ".meta");
+        }
+
+        public void CopyFromSkinFolderToUnity()
+        {
+            AssetSwitcherOperations.CopyFromSkinsToUnity(new DirectoryInfo(FolderPath));
         }
     }
 }

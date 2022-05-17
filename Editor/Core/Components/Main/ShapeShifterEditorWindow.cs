@@ -6,7 +6,6 @@ using Miniclip.ShapeShifter.Skinner;
 using Miniclip.ShapeShifter.Switcher;
 using Miniclip.ShapeShifter.Utils;
 using Miniclip.ShapeShifter.Utils.Git;
-using Miniclip.ShapeShifter.Watcher;
 using UnityEditor;
 using UnityEngine;
 
@@ -19,16 +18,57 @@ namespace Miniclip.ShapeShifter
             AssetSkinner = 0,
             ExternalSkinner = 1,
             Configuration = 2,
-            Tools = 3
+            Tools = 3,
+            Settings = 4,
         }
 
-        private bool showConfiguration;
         private int selectedTabOption;
+
+        private bool showConfiguration;
         private string[] tabOptionsNames;
 
         private void OnEnable()
         {
             tabOptionsNames = Enum.GetNames(typeof(TabOptions));
+        }
+
+        private void OnSelectionChange()
+        {
+            ShapeShifter.DirtyAssets.Clear();
+            ShapeShifter.CachedPreviewPerAssetDict.Clear();
+            FileWatcher.RemoveAllPathsFromWatchlist();
+        }
+
+        private void OnGUI()
+        {
+            if (!ShapeShifterConfiguration.IsInitialized())
+            {
+                using (new GUILayout.VerticalScope())
+                {
+                    GUILayout.Label("Shapeshifter configuration needs to be initialized.");
+
+                    if (GUILayout.Button("Initialize"))
+                    {
+                        ShapeShifterConfiguration.Initialize();
+                    }
+
+                    Repaint();
+                    return;
+                }
+            }
+            
+            AssetSwitcherGUI.OnGUI();
+            EditorGUILayout.Separator();
+
+            GUILayout.Space(15);
+
+            OnSelectedTabGUI();
+
+            GUILayout.FlexibleSpace();
+
+            AssetSaverGUI.OnGUI();
+
+            Repaint();
         }
 
         [MenuItem("Window/Shape Shifter/Open ShapeShifter Window", false, 'G')]
@@ -48,41 +88,7 @@ namespace Miniclip.ShapeShifter
                 inspectorWindowType
             );
         }
-
-        private void OnSelectionChange()
-        {
-            ShapeShifter.DirtyAssets.Clear();
-            ShapeShifter.CachedPreviewPerAssetDict.Clear();
-            AssetWatcher.ClearAllWatchedPaths();
-        }
-
-        private void OnGUI()
-        {
-            if (!ShapeShifterConfiguration.IsInitialized())
-            {
-                using (new GUILayout.VerticalScope())
-                {
-                    GUILayout.Label("Shapeshifter configuration needs to be initialized.");
-
-                    if (GUILayout.Button("Initialize"))
-                    {
-                        ShapeShifterConfiguration.Initialise();
-                    }
-
-                    Repaint();
-                    return;
-                }
-            }
-
-            AssetSwitcherGUI.OnGUI();
-            
-            GUILayout.Space(15);
-            
-            OnSelectedTabGUI();
-
-            Repaint();
-        }
-
+        
         private void OnSelectedTabGUI()
         {
             selectedTabOption = GUILayout.Toolbar(selectedTabOption, tabOptionsNames);
@@ -103,6 +109,11 @@ namespace Miniclip.ShapeShifter
                     OnDangerousOperationsGUI();
                     ShapeShifterLogger.OnGUI();
                     break;
+                case TabOptions.Settings:
+                    Settings.OnGUI();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -115,15 +126,10 @@ namespace Miniclip.ShapeShifter
                 ShapeShifterConfiguration.Instance.ExternalConfigurationEditor.OnInspectorGUI();
             }
         }
-        
+
         private static void OnShowUtilOperationsGUI()
         {
             GUILayout.Space(10);
-
-            if (GUILayout.Button("Restore Missing Assets"))
-            {
-                AssetSwitcher.RestoreMissingAssets();
-            }
 
             PreMergeCheckGUI.OnGUI();
         }
@@ -168,7 +174,7 @@ namespace Miniclip.ShapeShifter
         {
             return EditorUtility.DisplayDialog(
                 "ShapeShifter",
-                $"You are about to remove shapeshifter's skin folders.\n Your project assets will remain "
+                "You are about to remove shapeshifter's skin folders.\n Your project assets will remain "
                 + $"the same as the current game skin ({ShapeShifter.ActiveGameName}).\n You will loose the other game skins",
                 "Continue",
                 "Cancel"

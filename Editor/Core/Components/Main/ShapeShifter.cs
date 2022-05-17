@@ -27,6 +27,7 @@ namespace Miniclip.ShapeShifter
         }
 
         private static List<string> GameNames => config.GameNames;
+
         internal static HashSet<string> DirtyAssets { get; set; } = new HashSet<string>();
 
         internal static Dictionary<string, Texture2D> CachedPreviewPerAssetDict = new Dictionary<string, Texture2D>();
@@ -37,39 +38,53 @@ namespace Miniclip.ShapeShifter
 
         public static string ActiveGame
         {
-            get
-            {
-                if (!ShapeShifterEditorPrefs.HasKey(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY))
-                {
-                    ShapeShifterLogger.LogWarning(
-                        "Could not find any active game on EditorPrefs, defaulting to game 0"
-                    );
-                    ActiveGame = GameNames.FirstOrDefault();
-                }
+            get => GetActiveGame();
 
-                string activeGame =
-                    ShapeShifterEditorPrefs.GetString(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY);
-
-                if (!GameNames.Contains(activeGame))
-                {
-                    ShapeShifterLogger.LogWarning("Current active game doesn't exist, defaulting to game 0.");
-                    SetDefaultGameSkin();
-                }
-
-                return activeGame;
-            }
             set
             {
                 if (!GameNames.Contains(value))
                 {
                     SetDefaultGameSkin();
                 }
+
                 ShapeShifterLogger.Log(
                     $"Setting active game on EditorPrefs: {value}"
                 );
-                ShapeShifterEditorPrefs.SetString(ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY, value);
+                Persistence.SetString(
+                    ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY,
+                    value,
+                    PersistenceType.MachinePersistent
+                );
                 ActiveGameSkin = new GameSkin(value);
             }
+        }
+
+        private static string GetActiveGame()
+        {
+            if (!Persistence.HasKey(
+                    ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY,
+                    PersistenceType.MachinePersistent
+                ))
+            {
+                ShapeShifterLogger.LogWarning(
+                    "Could not find any active game on EditorPrefs, defaulting to game 0"
+                );
+                ActiveGame = GameNames.FirstOrDefault();
+            }
+
+            string activeGame =
+                Persistence.GetString(
+                    ShapeShifterConstants.ACTIVE_GAME_PLAYER_PREFS_KEY,
+                    PersistenceType.MachinePersistent
+                );
+
+            if (!GameNames.Contains(activeGame))
+            {
+                ShapeShifterLogger.LogWarning("Current active game doesn't exist, defaulting to game 0.");
+                SetDefaultGameSkin();
+            }
+
+            return activeGame;
         }
 
         private static void SetDefaultGameSkin()
@@ -92,6 +107,7 @@ namespace Miniclip.ShapeShifter
 
                 return activeGameSkin;
             }
+
             private set => activeGameSkin = value;
         }
 
