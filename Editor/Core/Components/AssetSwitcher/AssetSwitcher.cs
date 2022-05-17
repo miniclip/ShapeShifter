@@ -101,10 +101,17 @@ namespace Miniclip.ShapeShifter.Switcher
 
         private static void CopyFromSkinsToUnity(DirectoryInfo directory)
         {
+            
             string guid = directory.Name;
 
             // Ensure it has the same name, so we don't end up copying .DS_Store
             string target = AssetDatabase.GUIDToAssetPath(guid);
+
+            if (string.IsNullOrEmpty(target))
+            {
+                return;
+            }
+            
             string searchPattern = Path.GetFileName(target) + "*";
 
             FileInfo[] files = directory.GetFiles(searchPattern);
@@ -125,7 +132,7 @@ namespace Miniclip.ShapeShifter.Switcher
             }
 
             DirectoryInfo[] directories = directory.GetDirectories();
-
+            
             if (directories.Length > 0)
             {
                 target = Path.Combine(
@@ -287,13 +294,15 @@ namespace Miniclip.ShapeShifter.Switcher
             ref float progress)
         {
             string assetFolderPath = Path.Combine(gameFolderPath, assetFolder);
-
             if (Directory.Exists(assetFolderPath))
             {
                 DirectoryInfo internalFolder = new DirectoryInfo(assetFolderPath);
 
-                foreach (DirectoryInfo directory in internalFolder.GetDirectories())
+                DirectoryInfo[] infos = internalFolder.GetDirectories();
+                for (int index = 0; index < infos.Length; index++)
                 {
+                    DirectoryInfo directory = infos[index];
+
                     operation(directory);
 
                     progress += progressBarStep;
@@ -305,10 +314,7 @@ namespace Miniclip.ShapeShifter.Switcher
         [MenuItem("Window/Shape Shifter/Refresh All Assets", false, 72)]
         private static void RefreshAllAssets()
         {
-#if UNITY_2020
-            Debug.LogWarning("// TODO: Replace this in Unity 2020 with PackageManager.Client.Resolve");
-#endif
-            if (HasAnyPackageRelatedSkin())
+            if (HasAnyPackageRelatedSkin() && !Application.isBatchMode)
             {
                 ForceUnityToLoseAndRegainFocus();
 
@@ -344,7 +350,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
             process.Start();
         }
-        
+
         internal static void SwitchToGame(GameSkin gameToSwitchTo, bool forceSwitch = false)
         {
             if (ShapeShifterConfiguration.Instance.IsDirty && !forceSwitch)
@@ -375,7 +381,7 @@ namespace Miniclip.ShapeShifter.Switcher
             PerformCopiesWithTracking(
                 gameToSwitchTo,
                 "Switch to game",
-                CopyFromSkinsToUnity,
+                CopyIfMissingInternal,
                 CopyFromSkinnedExternalToOrigin
             );
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;

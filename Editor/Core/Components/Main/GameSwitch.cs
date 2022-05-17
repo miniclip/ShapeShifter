@@ -15,7 +15,16 @@ namespace Miniclip.ShapeShifter
         [UsedImplicitly]
         public static void Switch()
         {
-            SwitchInternal(Environment.GetCommandLineArgs());
+            try
+            {
+                SwitchInternal(Environment.GetCommandLineArgs());
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+                EditorApplication.Exit(1);
+                throw;
+            }
         }
 
         private static async Task SwitchInternal(string[] commandLineArgs)
@@ -54,7 +63,7 @@ namespace Miniclip.ShapeShifter
             GameSkin gameSkin = ShapeShifterConfiguration.Instance.GetGameSkinByName(gameName);
 
             AssetSwitcher.SwitchToGame(gameSkin, true);
-            
+            EditorApplication.Exit(0);
         }
     }
 }
