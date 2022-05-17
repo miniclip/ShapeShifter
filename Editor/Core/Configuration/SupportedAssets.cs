@@ -31,12 +31,12 @@ namespace Miniclip.ShapeShifter
             
         };
 
-        public static bool IsSupported(string assetPath, out string reason)
+        public static bool IsAssetTypeSkinnable(string assetPath, out string reason)
         {
-            return IsSupported(AssetDatabase.LoadAssetAtPath<Object>(assetPath), out reason);
+              return IsAssetTypeSkinnable(AssetDatabase.LoadAssetAtPath<Object>(assetPath), out reason);
         }
 
-        private static bool IsSupported(Object asset, out string reason)
+        private static bool IsAssetTypeSkinnable(Object asset, out string reason)
         {
             Type assetType = asset.GetType();
 
@@ -47,13 +47,6 @@ namespace Miniclip.ShapeShifter
             if (PathUtils.IsPathRelativeToPackages(assetPath))
             {
                 reason = "Unable to skin package contents";
-                return false;
-            }
-
-            if (!AssetSkinner.IsSkinned(assetPath)
-                && AssetSkinner.TryGetParentSkinnedFolder(assetPath, out string parentFolder))
-            {
-                reason = $"Already inside a skinned folder {parentFolder}";
                 return false;
             }
             
@@ -84,7 +77,7 @@ namespace Miniclip.ShapeShifter
 
             foreach (Object asset in assets)
             {
-                var isSupported = IsSupported(asset, out string reason);
+                bool isSupported = IsAssetTypeSkinnable(asset, out string reason);
 
                 assetsSupportInfo.Add((asset, isSupported, reason));
             }

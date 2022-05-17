@@ -70,6 +70,7 @@ namespace Miniclip.ShapeShifter.Tests
             }
 
             UnsavedAssetsManager.ClearUnsavedChanges();
+            Settings.IsAutoSaveEnabled = true;
         }
 
         private static void CopyAllTestResourcesFromPackagesToAssetsFolder()

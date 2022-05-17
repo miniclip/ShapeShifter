@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1]
+### Added
+- Able to subscribe for game switch events
+- Tool to extract files from inside skinned folders and convert them into separate skinned files
+
 ## [0.6.0]
 ### Added
 - Prevent skinning assets already inside skinned folder
@@ -25,11 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed issue where skinning operation would fail if project path contained space characters
 - Fixed issue when skinning where original asset was not being removed from repo
-
-## [0.4.2]
-### Fixed
-- Fixed issue where project in batchmode would timeout while performing game switch operation
-
 
 ## [0.4.3]
 ### Removed

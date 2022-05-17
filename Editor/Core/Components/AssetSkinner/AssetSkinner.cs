@@ -107,33 +107,22 @@ namespace Miniclip.ShapeShifter.Skinner
             GUIUtility.ExitGUI();
         }
 
-        public static void SkinAssets(string[] assetPaths, bool saveFirst = true)
+        public static void SkinAssets(string[] assetPaths)
         {
-            if (saveFirst)
-            {
-                ShapeShifterUtils.SavePendingChanges();
-            }
-
             foreach (string assetPath in assetPaths)
             {
-                SkinAsset(assetPath, false);
+                SkinAsset(assetPath);
             }
         }
 
-        public static void SkinAsset(string assetPath, bool saveFirst = true)
+        public static void SkinAsset(string assetPath)
         {
             EditorUtility.DisplayProgressBar("Asset Skinner", $"Checking if {assetPath} is supported", 0);
 
-            if (!SupportedAssets.IsSupported(assetPath, out string reason))
+            if (!SupportedAssets.IsAssetTypeSkinnable(assetPath, out string reason))
             {
                 EditorUtility.ClearProgressBar();
                 return;
-            }
-
-            if (saveFirst)
-            {
-                EditorUtility.DisplayProgressBar("Asset Skinner", "Saving pending changes", 0.2f);
-                ShapeShifterUtils.SavePendingChanges();
             }
 
             foreach (string game in ShapeShifterConfiguration.Instance.GameNames)
@@ -233,7 +222,7 @@ namespace Miniclip.ShapeShifter.Skinner
             {
                 string parentFolder = string.Join("/", parentFolders, 0, index);
 
-                if (AssetSkinner.IsSkinned(parentFolder, gameName))
+                if (IsSkinned(parentFolder, gameName))
                 {
                     skinnedParentFolderPath = parentFolder;
                     return true;
