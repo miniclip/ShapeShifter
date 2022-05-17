@@ -344,7 +344,7 @@ namespace Miniclip.ShapeShifter.Switcher
 
             process.Start();
         }
-
+        
         internal static void SwitchToGame(GameSkin gameToSwitchTo, bool forceSwitch = false)
         {
             if (ShapeShifterConfiguration.Instance.IsDirty && !forceSwitch)

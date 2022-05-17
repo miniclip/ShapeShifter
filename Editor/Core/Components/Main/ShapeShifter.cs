@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Miniclip.ShapeShifter
 {
-    static class ShapeShifter
+    public static class ShapeShifter
     {
         private static DirectoryInfo skinsFolder;
 

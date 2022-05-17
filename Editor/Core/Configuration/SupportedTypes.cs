@@ -21,11 +21,12 @@ namespace Miniclip.ShapeShifter
             typeof(ScriptableObject),
             typeof(Texture2D),
             typeof(TextAsset),
+            typeof(MonoScript)
         };
 
         private static readonly Type[] typesForbidden =
         {
-            typeof(MonoScript),
+            
         };
 
         public static bool IsSupported(string assetPath, out string reason)
