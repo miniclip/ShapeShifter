@@ -62,7 +62,7 @@ namespace Miniclip.ShapeShifter.Switcher
                     PerformCopiesWithTracking(
                         ShapeShifter.ActiveGameSkin,
                         "Add missing skins",
-                        CopyIfMissingInternal,
+                        CopyFromSkinsToUnity,
                         CopyFromSkinnedExternalToOrigin
                     );
                     stopwatch.Stop();
@@ -99,50 +99,50 @@ namespace Miniclip.ShapeShifter.Switcher
             FileUtils.SafeCopy(origin.FullName, target);
         }
 
-        private static void CopyFromSkinsToUnity(DirectoryInfo directory)
-        {
-            
-            string guid = directory.Name;
-
-            // Ensure it has the same name, so we don't end up copying .DS_Store
-            string target = AssetDatabase.GUIDToAssetPath(guid);
-
-            if (string.IsNullOrEmpty(target))
-            {
-                return;
-            }
-            
-            string searchPattern = Path.GetFileName(target) + "*";
-
-            FileInfo[] files = directory.GetFiles(searchPattern);
-
-            if (files.Length > 0)
-            {
-                foreach (FileInfo fileInfo in files)
-                {
-                    if (fileInfo.Extension == ".meta")
-                    {
-                        FileUtils.SafeCopy(fileInfo.FullName, target + ".meta");
-                    }
-                    else
-                    {
-                        FileUtils.SafeCopy(fileInfo.FullName, target);
-                    }
-                }
-            }
-
-            DirectoryInfo[] directories = directory.GetDirectories();
-            
-            if (directories.Length > 0)
-            {
-                target = Path.Combine(
-                    Application.dataPath.Replace("/Assets", string.Empty),
-                    target
-                );
-
-                FileUtils.SafeCopy(directories[0].FullName, target);
-            }
-        }
+        // private static void CopyFromSkinsToUnity(DirectoryInfo directory)
+        // {
+        //     
+        //     string guid = directory.Name;
+        //
+        //     // Ensure it has the same name, so we don't end up copying .DS_Store
+        //     string target = AssetDatabase.GUIDToAssetPath(guid);
+        //
+        //     if (string.IsNullOrEmpty(target))
+        //     {
+        //         return;
+        //     }
+        //     
+        //     string searchPattern = Path.GetFileName(target) + "*";
+        //
+        //     FileInfo[] files = directory.GetFiles(searchPattern);
+        //
+        //     if (files.Length > 0)
+        //     {
+        //         foreach (FileInfo fileInfo in files)
+        //         {
+        //             if (fileInfo.Extension == ".meta")
+        //             {
+        //                 FileUtils.SafeCopy(fileInfo.FullName, target + ".meta");
+        //             }
+        //             else
+        //             {
+        //                 FileUtils.SafeCopy(fileInfo.FullName, target);
+        //             }
+        //         }
+        //     }
+        //
+        //     DirectoryInfo[] directories = directory.GetDirectories();
+        //     
+        //     if (directories.Length > 0)
+        //     {
+        //         target = Path.Combine(
+        //             Application.dataPath.Replace("/Assets", string.Empty),
+        //             target
+        //         );
+        //
+        //         FileUtils.SafeCopy(directories[0].FullName, target);
+        //     }
+        // }
 
         private static void CopyFromUnityToSkins(DirectoryInfo skinDirectory)
         {
@@ -381,7 +381,7 @@ namespace Miniclip.ShapeShifter.Switcher
             PerformCopiesWithTracking(
                 gameToSwitchTo,
                 "Switch to game",
-                CopyIfMissingInternal,
+                CopyFromSkinsToUnity,
                 CopyFromSkinnedExternalToOrigin
             );
             ShapeShifter.ActiveGame = gameToSwitchTo.Name;
@@ -398,7 +398,7 @@ namespace Miniclip.ShapeShifter.Switcher
             }*/
         }
 
-        private static void CopyIfMissingInternal(DirectoryInfo directory)
+        private static void CopyFromSkinsToUnity(DirectoryInfo directory)
         {
             string guid = directory.Name;
 
@@ -436,22 +436,13 @@ namespace Miniclip.ShapeShifter.Switcher
             {
                 if (fileInfo.Extension == ".meta")
                 {
-                    string metaFile = assetFolder + ".meta";
-                    if (File.Exists(PathUtils.GetFullPath(metaFile)))
-                    {
-                        continue;
-                    }
+                    string metaFile = PathUtils.NormalizePath(targetPath) + ".meta";
 
                     ShapeShifterLogger.Log($"Retrieving: {metaFile}");
                     FileUtils.SafeCopy(fileInfo.FullName, metaFile);
                 }
                 else
                 {
-                    if (File.Exists(PathUtils.GetFullPath(targetPath)))
-                    {
-                        continue;
-                    }
-
                     ShapeShifterLogger.Log($"Retrieving: {targetPath}");
                     FileUtils.SafeCopy(fileInfo.FullName, targetPath);
                 }

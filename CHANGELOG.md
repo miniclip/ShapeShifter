@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3]
+### Removed
+- Auto save feature as it was causing devs to not be able to revert changes, save is now a manual operation.
+
 ## [0.4.2]
 ### Fixed
 - Fixed issue where project in batchmode would timeout while performing game switch operation

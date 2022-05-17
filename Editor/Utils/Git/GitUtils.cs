@@ -164,7 +164,13 @@ namespace Miniclip.ShapeShifter.Utils
 
         private static bool HasMetaFile(string path)
         {
-            return File.Exists(PathUtils.GetFullPath(path));
+            if (!path.EndsWith(".meta"))
+            {
+                path += ".meta";
+            }
+
+            string fullPath = PathUtils.GetFullPath(path);
+            return File.Exists(fullPath);
         }
 
         public static void DiscardChanges(string assetPath)
