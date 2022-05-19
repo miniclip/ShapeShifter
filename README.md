@@ -16,3 +16,23 @@
   </a>
 </p>
 
+Placeholder: what it is, what it's for, sample gif(s) with usage, short demo/explanation/chart of how it works.
+
+## Installation
+
+Placeholder: how to integrate it with a project, where to get it from.
+
+## Usage
+
+Placeholder: how to use it.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+Placeholder: link to CONTRIBUTING.md for more details
+
+## Acknowledgments
+
+Placeholder: authors, contributors, inspirations, developers of external dependencies
+
