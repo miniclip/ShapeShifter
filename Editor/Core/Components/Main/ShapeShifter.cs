@@ -17,7 +17,7 @@ namespace Miniclip.ShapeShifter
                 if (skinsFolder == null)
                 {
                     skinsFolder = new DirectoryInfo(
-                        Application.dataPath + $"/../../{ShapeShifterConstants.SKINS_MAIN_FOLDER}/"
+                        Application.dataPath + $"/../{ShapeShifterConstants.SKINS_MAIN_FOLDER}/"
                     );
                     FileUtils.TryCreateDirectory(SkinsFolder.FullName);
                 }
