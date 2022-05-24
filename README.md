@@ -40,6 +40,20 @@ It supports the following asset types:
 - This is an experimental package with no official release yet. Take into account that it might bring unexpected problems into your project. Make sure to have a backup.
 - Latest version is dependent of your project being inside a git repository (You can find more info about this on the "How it work" Section)
 
+
+## Installation
+
+
+
+Placeholder: how to integrate it with a project, where to get it from.
+
+## How it works
+
+- Brief explanation of what happens behind the scenes
+- Explain why we currently use git as a vital part of shapeshifter
+
+## Usage
+
 ### Demo #1
 
 - [ ] Add steps explanation
@@ -48,21 +62,6 @@ It supports the following asset types:
 ![Step 2](/Documentation~/02-ReplaceVersionB.gif)
 ![Step 3](/Documentation~/03-SwitchSprites.gif)
 ![Step 4](/Documentation~/04-SwitchInsideScene.gif)
-
-## Installation
-
-
-
-Placeholder: how to integrate it with a project, where to get it from.
-
-
-
-## Usage
-
-
-
-Here's an example
-
 
 
 
