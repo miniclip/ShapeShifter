@@ -38,7 +38,7 @@ It supports the following asset types:
 ### Must Read
 
 - This is an experimental package with no official release yet. Take into account that it might bring unexpected problems into your project. Make sure to have a backup.
-- Latest version is dependent of your project being inside a git repository (You can find more info about this on the "How it work" Section)
+- Latest version is dependent of your project being inside a git repository (You can find more info about this on the "How it works" Section)
 
 
 ## Installation
