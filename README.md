@@ -11,6 +11,7 @@
 <img alt="GitHub last commit" src ="https://img.shields.io/github/last-commit/miniclip/shapeshifter" />
 </p>
 <p align="center">
+<a href="https://www.codacy.com/gh/miniclip/ShapeShifter/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=miniclip/ShapeShifter&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/2ecd3052e8204654ab5a4e2fc5d5329a"/></a>
 <a href="https://github.com/miniclip/shapeshifter/blob/master/LICENSE.md" target="_blank">
 <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg" />
 </a>
