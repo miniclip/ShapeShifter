@@ -12,16 +12,16 @@ namespace Miniclip.ShapeShifter.Tests
 {
     static class TestUtils
     {
-        internal static string TempFolderName = "Assets/ShapeShifterTestAssets";
+        internal static readonly string TempFolderName = "Assets/ShapeShifterTestAssets";
 
-        internal static string SpriteAssetName = "shapeshifter.test.sprite";
-        internal static string TextFileAssetName = "shapeshifter.test.textfile";
-        internal static string FolderAssetName = "shapeshifter.test.folder";
+        internal static readonly string SpriteAssetName = "shapeshifter.test.sprite";
+        internal static readonly string TextFileAssetName = "shapeshifter.test.textfile";
+        internal static readonly string FolderAssetName = "shapeshifter.test.folder";
 
-        internal static GameSkin game0 = new GameSkin("Test0");
-        internal static GameSkin game1 = new GameSkin("Test1");
+        internal static readonly GameSkin game0 = new GameSkin("Test0");
+        internal static readonly GameSkin game1 = new GameSkin("Test1");
         
-        internal static string[] TestGameNames =
+        internal static readonly string[] TestGameNames =
         {
             "Test0", "Test1",
         };
