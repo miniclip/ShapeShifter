@@ -35,28 +35,11 @@ It supports the following asset types:
 - Texture2D
 - TextAsset
 
-### Must Read
+### Caution!
 
-- This is an experimental package with no official release yet. Take into account that it might bring unexpected problems into your project. Make sure to have a backup.
-- Latest version is dependent of your project being inside a git repository (You can find more info about this on the "How it works" Section)
+- This is an experimental package with no official release yet. Take into account that it might bring unexpected problems into your project. **Please make sure to backup your work before integrating ShapeShifter.**
 
-
-## Installation
-
-
-
-Placeholder: how to integrate it with a project, where to get it from.
-
-## How it works
-
-- Brief explanation of what happens behind the scenes
-- Explain why we currently use git as a vital part of shapeshifter
-
-## Usage
-
-### Demo #1
-
-- [ ] Add steps explanation
+## Preview
 
 ![Step 1](/Documentation~/01-SkinSprite.gif)
 ![Step 2](/Documentation~/02-ReplaceVersionB.gif)
@@ -64,22 +47,6 @@ Placeholder: how to integrate it with a project, where to get it from.
 ![Step 4](/Documentation~/04-SwitchInsideScene.gif)
 
 
-
 ## Contributing
 
-
-
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-
-
-Placeholder: link to CONTRIBUTING.md for more details
-
-TODO: Add features wishlist.
-
-
-## Acknowledgments
-
-
-
-Placeholder: authors, contributors, inspirations, developers of external dependencies
