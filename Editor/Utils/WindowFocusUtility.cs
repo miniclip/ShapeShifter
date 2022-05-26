@@ -12,14 +12,20 @@ public class WindowFocusUtility
 
     static WindowFocusUtility()
     {
-        if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+        if (EditorApplication.isPlayingOrWillChangePlaymode) 
+        {
+            return;
+        }
+
         EditorApplication.update += Update;
     }
 
     private static void Update()
     {
-        if (appFocused == IsApplicationActive)
+        if (appFocused == IsApplicationActive) 
+        {
             return;
+        }
 
         appFocused = IsApplicationActive;
         OnUnityEditorFocusEvent?.Invoke(appFocused);
