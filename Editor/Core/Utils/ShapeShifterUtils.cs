@@ -54,8 +54,10 @@ namespace Miniclip.ShapeShifter.Utils
                 nameAttempt++;
                 string newName = $"{gameName} {nameAttempt}";
 
-                if (gameNames.Contains(newName))
+                if (gameNames.Contains(newName)) 
+                {
                     continue;
+                }
 
                 return newName;
             }

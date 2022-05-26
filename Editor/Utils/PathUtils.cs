@@ -210,8 +210,10 @@ namespace Miniclip.ShapeShifter.Utils
         {
             assetPath = NormalizePath(GetFullPath(assetPath));
 
-            if (string.IsNullOrEmpty(assetPath))
+            if (string.IsNullOrEmpty(assetPath)) 
+            {
                 return false;
+            }
 
             if (!File.Exists(assetPath) && !Directory.Exists(assetPath))
             {

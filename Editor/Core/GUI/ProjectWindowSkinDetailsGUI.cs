@@ -39,12 +39,15 @@ namespace Miniclip.ShapeShifter
 
             string assetPath = AssetDatabase.GUIDToAssetPath(guid);
 
-            if (!AssetSkinner.IsSkinned(assetPath)
-                && !AssetSkinner.TryGetParentSkinnedFolder(assetPath, out string _))
+            if (!AssetSkinner.IsSkinned(assetPath) && !AssetSkinner.TryGetParentSkinnedFolder(assetPath, out string _)) 
+            {
                 return;
+            }
 
             if (cachedOverlayIcon == null)
+            {
                 return;
+            }
 
             float iconSize = rect.height;
 

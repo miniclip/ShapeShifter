@@ -9,8 +9,10 @@ public class ShapeShifterInitializer
 {
     static ShapeShifterInitializer()
     {
-        if (EditorApplication.isPlayingOrWillChangePlaymode)
+        if (EditorApplication.isPlayingOrWillChangePlaymode) 
+        {
             return;
+        }
 
         EditorApplication.delayCall += OnDelayedCall;
         EditorApplication.quitting += EditorApplicationOnQuitting;
@@ -25,11 +27,15 @@ public class ShapeShifterInitializer
 
     private static async void RestoreAssetsAfterCompiling(bool isFocused)
     {
-        if (!isFocused)
+        if (!isFocused) 
+        {
             return;
+        }
 
-        if (!ShapeShifterConfiguration.IsInitialized())
+        if (!ShapeShifterConfiguration.IsInitialized()) 
+        {
             return;
+        }
 
         await Task.Delay(1000);
 
