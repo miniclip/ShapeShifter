@@ -21,9 +21,11 @@
 
 ShapeShifter is a novel approach to skinning and switching between different games inside the same Unity project.
 
-By switching your skinned assets with alternate versions while maintaining its original GUID, this tool allows for multiple versions of the same assets to coexist without ever losing references.
+By switching your skinned assets with alternate versions while maintaining its original GUID, this tool allows for
+multiple versions of the same assets to coexist without ever losing references.
 
 It supports the following asset types:
+
 - AnimationClip
 - AnimatorController
 - Folders
@@ -38,26 +40,36 @@ It supports the following asset types:
 
 ### Caution!
 
-- This is an experimental package with no official release yet. Take into account that it might bring unexpected problems into your project. **Please make sure to backup your work before integrating ShapeShifter.**
+- This is an experimental package with no official release yet. Take into account that it might bring unexpected
+  problems into your project. **Please make sure to backup your work before integrating ShapeShifter.**
 
 ## Preview
+
+Here you can see some examples of what ShapeShifter is able to do:
 
 <details>
   <summary>Skinning a sprite</summary>
 
-![Step 1](/Documentation~/Sprite-01-SkinSprite.gif)
-![Step 2](/Documentation~/Sprite-02-ReplaceVersionB.gif)
-![Step 3](/Documentation~/Sprite-03-SwitchSprites.gif)
-![Step 4](/Documentation~/Sprite-04-SwitchInsideScene.gif)
+![Step 1](/Documentation~/Examples/Sprite-01-SkinSprite.gif)
+![Step 2](/Documentation~/Examples/Sprite-02-ReplaceVersionB.gif)
+![Step 3](/Documentation~/Examples/Sprite-03-SwitchSprites.gif)
+![Step 4](/Documentation~/Examples/Sprite-04-SwitchInsideScene.gif)
 
 </details>
+
+<br>
 
 <details>
   <summary>Skinning a prefab</summary>
 
+- With ShapeShifter you'll be able to experiment different designs while using the same prefab and maintaining all its
+  references all the time.
+- Notice that each game version will replace, not only the sprite from the previous example, but the whole prefab layout
+  as well.
+
+![Step 1](/Documentation~/Examples/Prefab-SkinAndChangePrefab.gif)
+
 </details>
-
-
 
 ## Contributing
 
