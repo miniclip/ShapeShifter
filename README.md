@@ -50,6 +50,12 @@ Here you can see some examples of what ShapeShifter is able to do:
 <details>
   <summary>Skinning a sprite</summary>
 
+- After skinning a sprite, you'll be able to change the texture for each configured game version. 
+- After that, you can
+  simply do a Game Switch operation and ShapeShifter will take care of replacing all skinned assets with the target game
+  version you've selected.
+- You can see the Game Switch changes happen in real time, even on a scene currently using that sprite!
+
 ![Step 1](/Documentation~/Examples/Sprite-01-SkinSprite.gif)
 ![Step 2](/Documentation~/Examples/Sprite-02-ReplaceVersionB.gif)
 ![Step 3](/Documentation~/Examples/Sprite-03-SwitchSprites.gif)
