@@ -42,10 +42,21 @@ It supports the following asset types:
 
 ## Preview
 
-![Step 1](/Documentation~/01-SkinSprite.gif)
-![Step 2](/Documentation~/02-ReplaceVersionB.gif)
-![Step 3](/Documentation~/03-SwitchSprites.gif)
-![Step 4](/Documentation~/04-SwitchInsideScene.gif)
+<details>
+  <summary>Skinning a sprite</summary>
+
+![Step 1](/Documentation~/Sprite-01-SkinSprite.gif)
+![Step 2](/Documentation~/Sprite-02-ReplaceVersionB.gif)
+![Step 3](/Documentation~/Sprite-03-SwitchSprites.gif)
+![Step 4](/Documentation~/Sprite-04-SwitchInsideScene.gif)
+
+</details>
+
+<details>
+  <summary>Skinning a prefab</summary>
+
+</details>
+
 
 
 ## Contributing
